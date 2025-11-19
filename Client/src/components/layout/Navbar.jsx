@@ -15,25 +15,28 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+    <nav className="bg-linear-to-r from-blue-600 via-blue-700 to-indigo-700 shadow-xl sticky top-0 z-40 backdrop-blur-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-white">🛍️ Grocery Manager</span>
+            <div className="shrink-0 flex items-center">
+              <Link to="/" className="flex items-center gap-3 group">
+                <span className="text-3xl transform group-hover:scale-110 transition-transform duration-200">🛍️</span>
+                <span className="text-2xl font-bold text-white bg-clip-text">Grocery Manager</span>
+              </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div className="hidden sm:ml-8 sm:flex sm:space-x-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     isActive(item.path)
-                      ? 'border-white text-white'
-                      : 'border-transparent text-blue-100 hover:border-blue-300 hover:text-white'
+                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                      : 'text-blue-100 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <span className="mr-2">{item.icon}</span>
+                  <span className="mr-2 text-lg">{item.icon}</span>
                   {item.name}
                 </Link>
               ))}
@@ -44,7 +47,7 @@ const Navbar = () => {
           <div className="flex items-center sm:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all"
             >
               <span className="sr-only">Open main menu</span>
               {!isOpen ? (
@@ -63,20 +66,20 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
+        <div className="sm:hidden bg-blue-800/50 backdrop-blur-lg">
+          <div className="pt-2 pb-3 space-y-1 px-2">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all ${
                   isActive(item.path)
-                    ? 'bg-blue-800 border-white text-white'
-                    : 'border-transparent text-blue-100 hover:bg-blue-700 hover:border-blue-300 hover:text-white'
+                    ? 'bg-white/20 text-white shadow-lg'
+                    : 'text-blue-100 hover:bg-white/10 hover:text-white'
                 }`}
                 onClick={() => setIsOpen(false)}
               >
-                <span className="mr-2">{item.icon}</span>
+                <span className="mr-3 text-xl">{item.icon}</span>
                 {item.name}
               </Link>
             ))}

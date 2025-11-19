@@ -118,7 +118,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link 
             to="/inventory" 
-            className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
+            className="p-6 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg text-white hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
           >
             <div className="text-3xl mb-2">📦</div>
             <h3 className="text-lg font-semibold">Manage Inventory</h3>
@@ -127,7 +127,7 @@ const Dashboard = () => {
           
           <Link 
             to="/shopping-list" 
-            className="p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-lg text-white hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
+            className="p-6 bg-linear-to-br from-green-500 to-green-600 rounded-lg text-white hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
           >
             <div className="text-3xl mb-2">🛒</div>
             <h3 className="text-lg font-semibold">Shopping List</h3>
@@ -136,7 +136,7 @@ const Dashboard = () => {
           
           <Link 
             to="/reports" 
-            className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg text-white hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
+            className="p-6 bg-linear-to-br from-purple-500 to-purple-600 rounded-lg text-white hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
           >
             <div className="text-3xl mb-2">📈</div>
             <h3 className="text-lg font-semibold">View Reports</h3>
