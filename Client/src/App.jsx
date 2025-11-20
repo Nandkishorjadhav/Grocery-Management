@@ -6,11 +6,15 @@ import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
-import './App.css';
 
 function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <GroceryProvider>
         <Layout>
           <Routes>
