@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
+import HelpButton from '../common/HelpButton';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +39,7 @@ const Navbar = () => {
           </div>
           
           <div className="navbar-actions">
+            <HelpButton />
             <ThemeToggle />
             
             <button onClick={() => setIsOpen(!isOpen)} className="mobile-menu-btn">

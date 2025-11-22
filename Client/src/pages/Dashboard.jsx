@@ -10,6 +10,8 @@ const Dashboard = () => {
   const expiringSoonItems = getExpiringSoonItems();
   const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const pendingShoppingItems = shoppingList.filter(item => !item.purchased).length;
+  
+  const showOnboarding = inventory.length === 0 && shoppingList.length === 0;
 
   const stats = [
     { label: 'Total Items', value: inventory.length, icon: '📦', color: 'blue' },
@@ -24,6 +26,16 @@ const Dashboard = () => {
         <h1 className="page-title gradient-text">Dashboard</h1>
         <p className="page-subtitle">Welcome back! Here's what's happening with your grocery inventory.</p>
       </div>
+      
+      {showOnboarding && (
+        <div className="message message-info mb-6">
+          <span className="text-2xl">👋</span>
+          <div>
+            <strong>Welcome to GroceryHub!</strong>
+            <p className="mt-1">Get started by adding items to your inventory or creating a shopping list. Use the buttons below to begin!</p>
+          </div>
+        </div>
+      )}
       
       {/* Stats Grid */}
       <div className="stats-grid">

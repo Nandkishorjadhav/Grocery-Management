@@ -96,13 +96,10 @@ const Reports = () => {
                         <span className="font-semibold">{category}</span>
                         <span className="badge badge-primary">{data.count} items</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div className="progress-bar">
                         <div 
-                          className="h-2 rounded-full"
-                          style={{
-                            width: `${(data.value / stats.totalValue) * 100}%`,
-                            background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)'
-                          }}
+                          className="progress-fill"
+                          style={{ width: `${(data.value / stats.totalValue) * 100}%` }}
                         ></div>
                       </div>
                       <div className="flex justify-between mt-1 text-sm text-gray-600">
