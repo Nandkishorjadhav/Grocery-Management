@@ -4,14 +4,10 @@ import Footer from './Footer';
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="layout-wrapper">
       <Navbar />
-      <main className="grow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="fade-in">
-            {children}
-          </div>
-        </div>
+      <main className="main-content fade-in">
+        {children}
       </main>
       <Footer />
     </div>

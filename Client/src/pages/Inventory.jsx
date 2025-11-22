@@ -18,46 +18,65 @@ const Inventory = () => {
     name: '',
     category: '',
     quantity: '',
-    unit: '',
+    unit: 'pcs',
     price: '',
-    expiryDate: '',
     minStock: '',
+    expiryDate: '',
   });
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      category: '',
-      quantity: '',
-      unit: '',
-      price: '',
-      expiryDate: '',
-      minStock: '',
-    });
-    setEditingItem(null);
-  };
 
   const handleOpenModal = (item = null) => {
     if (item) {
-      setFormData(item);
       setEditingItem(item);
+      setFormData({
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        unit: item.unit,
+        price: item.price,
+        minStock: item.minStock,
+        expiryDate: item.expiryDate,
+      });
     } else {
-      resetForm();
+      setEditingItem(null);
+      setFormData({
+        name: '',
+        category: '',
+        quantity: '',
+        unit: 'pcs',
+        price: '',
+        minStock: '',
+        expiryDate: '',
+      });
     }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    resetForm();
+    setEditingItem(null);
+    setFormData({
+      name: '',
+      category: '',
+      quantity: '',
+      unit: 'pcs',
+      price: '',
+      minStock: '',
+      expiryDate: '',
+    });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    const itemData = {
+      ...formData,
+      quantity: Number(formData.quantity),
+      price: Number(formData.price),
+      minStock: Number(formData.minStock),
+    };
+
     if (editingItem) {
-      updateInventoryItem(editingItem.id, formData);
+      updateInventoryItem(editingItem.id, itemData);
     } else {
-      addInventoryItem(formData);
+      addInventoryItem(itemData);
     }
     handleCloseModal();
   };
@@ -68,8 +87,15 @@ const Inventory = () => {
     }
   };
 
-  // Filter and sort items
-  const filteredItems = inventory
+  const getStatus = (item) => {
+    const lowStock = item.quantity <= item.minStock;
+    const daysUntilExpiry = item.expiryDate ? 
+      Math.ceil((new Date(item.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+    const expiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 7;
+    return { lowStock, expiringSoon };
+  };
+
+  const filteredInventory = inventory
     .filter(item => 
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (filterCategory === '' || item.category === filterCategory)
@@ -82,41 +108,44 @@ const Inventory = () => {
       return 0;
     });
 
-  const unitOptions = [
-    { value: 'kg', label: 'Kilogram (kg)' },
-    { value: 'g', label: 'Gram (g)' },
-    { value: 'L', label: 'Liter (L)' },
-    { value: 'mL', label: 'Milliliter (mL)' },
-    { value: 'pcs', label: 'Pieces (pcs)' },
-    { value: 'box', label: 'Box' },
-    { value: 'pack', label: 'Pack' },
-  ];
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-        <Button onClick={() => handleOpenModal()}>
-          + Add Item
+    <div className="fade-in">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title gradient-text">Inventory Management</h1>
+          <p className="page-subtitle">Manage your grocery items and track stock levels</p>
+        </div>
+        <Button 
+          onClick={() => handleOpenModal()} 
+          icon="➕"
+          variant="primary"
+        >
+          Add Item
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card className="filter-card">
+        <div className="filter-grid">
           <Input
-            placeholder="Search items..."
+            label="Search Items"
+            type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name..."
+            icon="🔍"
           />
           <Select
-            placeholder="Filter by category"
+            label="Filter by Category"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            options={categories.map(cat => ({ value: cat, label: cat }))}
+            options={[
+              { value: '', label: 'All Categories' },
+              ...categories.map(cat => ({ value: cat, label: cat }))
+            ]}
+            icon="📂"
           />
           <Select
-            placeholder="Sort by"
+            label="Sort by"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             options={[
@@ -125,159 +154,169 @@ const Inventory = () => {
               { value: 'price', label: 'Price' },
               { value: 'expiryDate', label: 'Expiry Date' },
             ]}
+            icon="🔄"
           />
         </div>
       </Card>
 
-      {/* Inventory Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <Card title={`Inventory Items (${filteredInventory.length})`} hover={false}>
+        <div className="table-container">
+          <table>
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredItems.map(item => {
-                const isLowStock = item.quantity <= item.minStock;
-                const daysUntilExpiry = item.expiryDate ? 
-                  Math.ceil((new Date(item.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry >= 0;
-
-                return (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
+            <tbody>
+              {filteredInventory.length > 0 ? (
+                filteredInventory.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <div className="table-item-name">{item.name}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    <td>
+                      <span className="badge badge-primary">
                         {item.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td>
                       {item.quantity} {item.unit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${item.price}
+                    <td>
+                      ${item.price.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td>
                       {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {isLowStock && (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 mr-1">
+                    <td>
+                      {getStatus(item).lowStock && (
+                        <span className="badge badge-warning">
                           Low Stock
                         </span>
                       )}
-                      {isExpiringSoon && (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                      {getStatus(item).expiringSoon && (
+                        <span className="badge badge-danger">
                           Expiring Soon
                         </span>
                       )}
-                      {!isLowStock && !isExpiringSoon && (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      {!getStatus(item).lowStock && !getStatus(item).expiringSoon && (
+                        <span className="badge badge-success">
                           Good
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)} className="mr-2">
-                        Edit
+                    <td className="table-actions">
+                      <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
+                        ✏️ Edit
                       </Button>
                       <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                        Delete
+                        🗑️ Delete
                       </Button>
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              ) : null}
             </tbody>
           </table>
-          {filteredItems.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No items found. Add your first inventory item!
-            </div>
-          )}
         </div>
+        {filteredInventory.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-state-icon">📦</div>
+            <p className="empty-state-text">No items found. Add your first inventory item!</p>
+          </div>
+        )}
       </Card>
 
-      {/* Add/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingItem ? 'Edit Item' : 'Add New Item'}
+        title={editingItem ? 'Edit Inventory Item' : 'Add New Inventory Item'}
+        size="lg"
         footer={
           <>
-            <Button variant="secondary" onClick={handleCloseModal}>
+            <Button variant="ghost" onClick={handleCloseModal}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              {editingItem ? 'Update' : 'Add'}
+            <Button variant="primary" onClick={handleSubmit}>
+              {editingItem ? 'Update Item' : 'Add Item'}
             </Button>
           </>
         }
       >
-        <form onSubmit={handleSubmit}>
-          <Input
-            label="Item Name"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <Select
-            label="Category"
-            required
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            options={categories.map(cat => ({ value: cat, label: cat }))}
-          />
-          <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="filter-grid">
+            <Input
+              label="Item Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Enter item name"
+              required
+            />
+            <Select
+              label="Category"
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              options={categories.map(cat => ({ value: cat, label: cat }))}
+              required
+            />
+          </div>
+
+          <div className="filter-grid">
             <Input
               label="Quantity"
               type="number"
-              required
               value={formData.quantity}
               onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+              placeholder="0"
+              required
             />
             <Select
               label="Unit"
-              required
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              options={unitOptions}
+              options={[
+                { value: 'pcs', label: 'Pieces' },
+                { value: 'kg', label: 'Kilograms' },
+                { value: 'g', label: 'Grams' },
+                { value: 'l', label: 'Liters' },
+                { value: 'ml', label: 'Milliliters' },
+              ]}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="filter-grid">
             <Input
               label="Price"
               type="number"
               step="0.01"
-              required
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              placeholder="0.00"
+              required
             />
             <Input
-              label="Min Stock"
+              label="Minimum Stock Level"
               type="number"
-              required
               value={formData.minStock}
               onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
+              placeholder="0"
+              required
             />
           </div>
+
           <Input
             label="Expiry Date"
             type="date"
             value={formData.expiryDate}
             onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
           />
-        </form>
+        </div>
       </Modal>
     </div>
   );

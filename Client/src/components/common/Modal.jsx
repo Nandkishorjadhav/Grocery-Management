@@ -14,41 +14,36 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
 
   if (!isOpen) return null;
 
-  const sizes = {
-    sm: 'sm:max-w-md',
-    md: 'sm:max-w-lg',
-    lg: 'sm:max-w-2xl',
-    xl: 'sm:max-w-4xl',
-  };
+  const sizeClass = `modal-${size}`;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div className="modal-overlay fade-in">
+      <div className="modal-container">
         {/* Background overlay */}
         <div 
-          className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75 backdrop-blur-sm"
+          className="modal-backdrop"
           onClick={onClose}
           aria-hidden="true"
         ></div>
 
         {/* Center modal */}
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <span className="modal-spacer" aria-hidden="true">&#8203;</span>
 
         {/* Modal panel */}
-        <div className={`inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle ${sizes[size]} sm:w-full animate-slideUp`}>
+        <div className={`modal-content ${sizeClass} slide-up`}>
           {/* Header */}
-          <div className="bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="modal-header">
+            <div className="modal-header-content">
               {title && (
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="modal-title">
                   {title}
                 </h3>
               )}
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-white"
+                className="modal-close"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="modal-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -56,13 +51,13 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
           </div>
 
           {/* Body */}
-          <div className="bg-white px-6 py-6">
+          <div className="modal-body">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-3 border-t border-gray-200">
+            <div className="modal-footer">
               {footer}
             </div>
           )}
