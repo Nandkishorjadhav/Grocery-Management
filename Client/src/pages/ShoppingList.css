@@ -1,0 +1,131 @@
+.shopping-list-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.shopping-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .shopping-item {
+  background: linear-gradient(135deg, #1a1f35 0%, #252b42 100%);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .shopping-item:hover {
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.shopping-item.purchased {
+  opacity: 0.6;
+  background: #f8fafc;
+}
+
+[data-theme="dark"] .shopping-item.purchased {
+  opacity: 0.5;
+  background: #1f2937;
+}
+
+.shopping-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.shopping-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.shopping-item-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .shopping-item-name {
+  color: var(--text-primary);
+}
+
+.shopping-item-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .shopping-item-details {
+  color: var(--text-tertiary);
+}
+
+.shopping-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .shopping-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .shopping-item-actions {
+    width: 100%;
+  }
+  
+  .shopping-item-actions .btn {
+    flex: 1;
+  }
+}
+
+/* Reports/Charts Container */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .chart-card {
+  background: linear-gradient(135deg, #1a1f35 0%, #252b42 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .chart-card:hover {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}

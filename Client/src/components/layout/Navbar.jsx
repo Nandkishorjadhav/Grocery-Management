@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
 import ProfileButton from '../common/ProfileButton';
 import { useGrocery } from '../../context/GroceryContext';
+import './Navbar.css';
 
 const Navbar = ({ onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +27,15 @@ const Navbar = ({ onSearch }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    // Clear search when navigating to different pages
+    setSearchQuery('');
+    setShowSuggestions(false);
+    if (onSearch) {
+      onSearch('');
+    }
+  }, [location.pathname]);
 
   const handleSearch = (e) => {
     const query = e.target.value;
@@ -51,6 +61,9 @@ const Navbar = ({ onSearch }) => {
   const handleSuggestionClick = (productId) => {
     setShowSuggestions(false);
     setSearchQuery('');
+    if (onSearch) {
+      onSearch('');
+    }
     navigate(`/product/${productId}`);
   };
 
@@ -85,6 +98,19 @@ const Navbar = ({ onSearch }) => {
             <span className="brand-title">GroceryHub</span>
           </Link>
 
+          <div className="navbar-desktop">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+              >
+                <span className="nav-icon">{item.icon}</span>
+                {item.name}
+              </Link>
+            ))}
+          </div>
+
           <div className="navbar-search" ref={searchRef}>
             <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -118,19 +144,6 @@ const Navbar = ({ onSearch }) => {
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="navbar-desktop">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {item.name}
-              </Link>
-            ))}
           </div>
           
           <div className="navbar-actions">
