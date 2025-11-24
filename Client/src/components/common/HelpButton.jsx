@@ -8,27 +8,33 @@ const HelpButton = () => {
   const tips = [
     {
       title: '🎯 Quick Search',
-      description: 'Use the search box in Inventory to quickly find items by name.'
+      description: 'Use the search box in Inventory to quickly find items by name.',
+      shortcut: 'Type to search instantly'
     },
     {
       title: '📊 Smart Alerts',
-      description: 'Dashboard shows low stock and expiring items automatically to help you plan ahead.'
+      description: 'Dashboard shows low stock and expiring items automatically to help you plan ahead.',
+      shortcut: null
     },
     {
       title: '✅ Shopping List',
-      description: 'Check off items as you shop to track your progress. Items show with estimated costs.'
+      description: 'Check off items as you shop to track your progress. Items show with estimated costs.',
+      shortcut: 'Click checkboxes to mark purchased'
     },
     {
       title: '📈 Reports',
-      description: 'View detailed analytics about your inventory value and spending patterns.'
+      description: 'View detailed analytics about your inventory value and spending patterns.',
+      shortcut: null
     },
     {
       title: '🌓 Dark Mode',
-      description: 'Toggle between light and dark themes using the moon/sun icon in the navbar.'
+      description: 'Toggle between light and dark themes using the moon/sun icon in the navbar.',
+      shortcut: 'Click theme toggle'
     },
     {
       title: '📱 Mobile Friendly',
-      description: 'Access GroceryHub on any device - it works great on phones and tablets!'
+      description: 'Access GroceryHub on any device - it works great on phones and tablets!',
+      shortcut: null
     }
   ];
 
@@ -60,40 +66,53 @@ const HelpButton = () => {
           </Button>
         }
       >
-        <div className="flex flex-col gap-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
-            <h3 className="font-bold text-lg mb-3">Quick Tips</h3>
-            <div className="flex flex-col gap-3">
+            <h3 style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.75rem' }}>Quick Tips</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {tips.map((tip, index) => (
-                <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="font-semibold mb-1">{tip.title}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{tip.description}</div>
+                <div key={index} className="info-card">
+                  <div className="info-card-title">{tip.title}</div>
+                  <div className="info-card-text">
+                    {tip.description}
+                    {tip.shortcut && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.8 }}>
+                        💡 {tip.shortcut}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="divider"></div>
 
           <div>
-            <h3 className="font-bold text-lg mb-3">Keyboard Shortcuts</h3>
-            <div className="flex flex-col gap-2">
+            <h3 style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.75rem' }}>Keyboard Shortcuts</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {shortcuts.map((shortcut, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">{shortcut.action}</span>
-                  <kbd className="px-2 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-mono">
-                    {shortcut.key}
-                  </kbd>
+                <div key={index} style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '0.75rem',
+                  background: 'var(--card-bg, #ffffff)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color, #e5e7eb)'
+                }}>
+                  <span style={{ fontSize: '0.875rem' }}>{shortcut.action}</span>
+                  <kbd>{shortcut.key}</kbd>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">💡</span>
-              <div>
-                <div className="font-semibold mb-1">Pro Tip</div>
-                <div className="text-sm">Set minimum stock levels for items you use frequently. You'll get automatic alerts when it's time to restock!</div>
-              </div>
+          <div className="tips-banner">
+            <span className="tips-banner-icon">💡</span>
+            <div className="tips-banner-content">
+              <div className="tips-banner-title">Pro Tip</div>
+              <div className="tips-banner-text">Set minimum stock levels for items you use frequently. You'll get automatic alerts when it's time to restock!</div>
             </div>
           </div>
         </div>

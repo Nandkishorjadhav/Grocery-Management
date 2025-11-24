@@ -3,14 +3,25 @@ import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
 import HelpButton from '../common/HelpButton';
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
 
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
+
   const navItems = [
-    { path: '/', name: 'Dashboard', icon: '📊' },
+    { path: '/', name: 'Home', icon: '🏠' },
+    { path: '/dashboard', name: 'Dashboard', icon: '📊' },
+    { path: '/products', name: 'Products', icon: '🏷️' },
     { path: '/inventory', name: 'Inventory', icon: '📦' },
     { path: '/shopping-list', name: 'Shopping List', icon: '🛒' },
     { path: '/reports', name: 'Reports', icon: '📈' },
@@ -24,6 +35,19 @@ const Navbar = () => {
             <span className="brand-icon">🛒</span>
             <span className="brand-title">GroceryHub</span>
           </Link>
+
+          <div className="navbar-search">
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search for products..."
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+          </div>
 
           <div className="navbar-desktop">
             {navItems.map((item) => (

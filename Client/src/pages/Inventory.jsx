@@ -5,6 +5,7 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Select from '../components/common/Select';
 import Modal from '../components/common/Modal';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const Inventory = () => {
   const { inventory, categories, addInventoryItem, updateInventoryItem, deleteInventoryItem, addCategory } = useGrocery();
@@ -13,6 +14,7 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -75,15 +77,23 @@ const Inventory = () => {
 
     if (editingItem) {
       updateInventoryItem(editingItem.id, itemData);
+      setSuccessMessage(`✅ ${formData.name} updated successfully!`);
     } else {
       addInventoryItem(itemData);
+      setSuccessMessage(`✅ ${formData.name} added to inventory!`);
     }
     handleCloseModal();
+    
+    // Auto-hide success message after 3 seconds
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   const handleDelete = (id) => {
+    const item = inventory.find(i => i.id === id);
     if (window.confirm('Are you sure you want to delete this item?')) {
       deleteInventoryItem(id);
+      setSuccessMessage(`🗑️ ${item?.name || 'Item'} removed from inventory`);
+      setTimeout(() => setSuccessMessage(''), 3000);
     }
   };
 
@@ -110,11 +120,16 @@ const Inventory = () => {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title gradient-text">Inventory Management</h1>
-          <p className="page-subtitle">Manage your grocery items and track stock levels</p>
+      <Breadcrumb />
+      
+      {successMessage && (
+        <div className="success-message">
+          <span>{successMessage}</span>
         </div>
+      )}
+      
+      <div className="page-header">
+        <h1 className="page-title gradient-text">Inventory</h1>
         <Button 
           onClick={() => handleOpenModal()} 
           icon="➕"
@@ -127,39 +142,33 @@ const Inventory = () => {
       <Card className="filter-card">
         <div className="filter-grid">
           <Input
-            label="Search Items"
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by name..."
-            icon="🔍"
+            placeholder="🔍 Search items..."
           />
           <Select
-            label="Filter by Category"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
             options={[
-              { value: '', label: 'All Categories' },
+              { value: '', label: '📂 All Categories' },
               ...categories.map(cat => ({ value: cat, label: cat }))
             ]}
-            icon="📂"
           />
           <Select
-            label="Sort by"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             options={[
-              { value: 'name', label: 'Name' },
-              { value: 'quantity', label: 'Quantity' },
-              { value: 'price', label: 'Price' },
-              { value: 'expiryDate', label: 'Expiry Date' },
+              { value: 'name', label: '🔄 Sort: Name' },
+              { value: 'quantity', label: '🔄 Sort: Quantity' },
+              { value: 'price', label: '🔄 Sort: Price' },
+              { value: 'expiryDate', label: '🔄 Sort: Expiry' },
             ]}
-            icon="🔄"
           />
         </div>
       </Card>
 
-      <Card title={`Inventory Items (${filteredInventory.length})`} hover={false}>
+      <Card title={`Items: ${filteredInventory.length}`} hover={false}>
         <div className="table-container">
           <table>
             <thead>
@@ -213,10 +222,10 @@ const Inventory = () => {
                     </td>
                     <td className="table-actions">
                       <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
-                        ✏️ Edit
+                        ✏️
                       </Button>
                       <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                        🗑️ Delete
+                        🗑️
                       </Button>
                     </td>
                   </tr>

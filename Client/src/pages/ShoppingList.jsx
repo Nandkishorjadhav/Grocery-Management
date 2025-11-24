@@ -4,6 +4,7 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const ShoppingList = () => {
   const { shoppingList, addShoppingItem, updateShoppingItem, deleteShoppingItem, togglePurchased } = useGrocery();
@@ -72,6 +73,8 @@ const ShoppingList = () => {
 
   return (
     <div className="fade-in">
+      <Breadcrumb />
+      
       <div className="page-header">
         <div>
           <h1 className="page-title gradient-text">Shopping List</h1>

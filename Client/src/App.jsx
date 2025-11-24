@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GroceryProvider } from './context/GroceryContext';
 import Layout from './components/layout/Layout';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 
 function App() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <Router
       future={{
@@ -16,9 +20,11 @@ function App() {
       }}
     >
       <GroceryProvider>
-        <Layout>
+        <Layout onSearch={setSearchQuery}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Home searchQuery={searchQuery} />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/reports" element={<Reports />} />

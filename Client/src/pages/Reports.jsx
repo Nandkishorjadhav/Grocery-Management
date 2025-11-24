@@ -1,9 +1,38 @@
 import React, { useMemo } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import Card from '../components/common/Card';
+import Button from '../components/common/Button';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const Reports = () => {
   const { inventory, shoppingList } = useGrocery();
+
+  const exportToCSV = () => {
+    const headers = ['Name', 'Category', 'Quantity', 'Unit', 'Price', 'Total Value', 'Expiry Date', 'Status'];
+    const rows = inventory.map(item => [
+      item.name,
+      item.category,
+      item.quantity,
+      item.unit,
+      item.price,
+      (item.price * item.quantity).toFixed(2),
+      item.expiryDate || 'N/A',
+      item.quantity <= item.minStock ? 'Low Stock' : 'Good'
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `grocery-inventory-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   const stats = useMemo(() => {
     const totalValue = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -43,10 +72,22 @@ const Reports = () => {
 
   return (
     <div className="fade-in">
+      <Breadcrumb />
+      
       <div className="page-header">
         <div>
           <h1 className="page-title gradient-text">Reports & Analytics</h1>
           <p className="page-subtitle">Insights into your grocery inventory and spending</p>
+        </div>
+        <div className="tooltip">
+          <Button 
+            onClick={exportToCSV}
+            icon="📥"
+            variant="outline"
+          >
+            Export CSV
+          </Button>
+          <span className="tooltip-text">Download inventory as CSV file</span>
         </div>
       </div>
 
@@ -119,21 +160,39 @@ const Reports = () => {
 
         {/* Top Expensive Items */}
         <Card title="💎 Most Valuable Items" hover={true}>
-          <div className="flex flex-col gap-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {stats.topExpensive.length > 0 ? (
               stats.topExpensive.map((item, index) => (
-                <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                <div key={item.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem',
+                  background: 'var(--card-bg, #f9fafb)',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{
+                    flexShrink: 0,
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    fontWeight: 700
+                  }}>
                     {index + 1}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600 }}>{item.name}</div>
+                    <div style={{ fontSize: '0.875rem', opacity: 0.7 }}>
                       {item.quantity} {item.unit} × ${item.price.toFixed(2)}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-green-600 dark:text-green-400">
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 700, color: '#10b981' }}>
                       ${(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
@@ -149,31 +208,37 @@ const Reports = () => {
 
         {/* Shopping List Summary */}
         <Card title="🛒 Shopping List Summary" hover={true}>
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="info-card">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Items</p>
-                <p className="text-2xl font-bold">{shoppingList.length}</p>
+                <p style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.25rem' }}>Total Items</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700 }}>{shoppingList.length}</p>
               </div>
-              <div className="text-4xl">🛒</div>
+              <div style={{ fontSize: '2.5rem' }}>🛒</div>
             </div>
-            <div className="flex justify-between items-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-700 rounded-lg">
+            <div className="info-card" style={{
+              background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+              borderColor: '#10b981'
+            }}>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Estimated Cost</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                <p style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.25rem' }}>Estimated Cost</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>
                   ${stats.shoppingEstimate.toFixed(2)}
                 </p>
               </div>
-              <div className="text-4xl">💵</div>
+              <div style={{ fontSize: '2.5rem' }}>💵</div>
             </div>
-            <div className="flex justify-between items-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-lg">
+            <div className="info-card" style={{
+              background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
+              borderColor: '#a855f7'
+            }}>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pending</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <p style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.25rem' }}>Pending</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#a855f7' }}>
                   {shoppingList.filter(item => !item.purchased).length}
                 </p>
               </div>
-              <div className="text-4xl">⏳</div>
+              <div style={{ fontSize: '2.5rem' }}>⏳</div>
             </div>
           </div>
         </Card>
