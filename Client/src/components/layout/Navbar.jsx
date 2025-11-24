@@ -1,29 +1,78 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
-import HelpButton from '../common/HelpButton';
+import ProfileButton from '../common/ProfileButton';
+import { useGrocery } from '../../context/GroceryContext';
 
 const Navbar = ({ onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const location = useLocation();
+  const navigate = useNavigate();
+  const searchRef = useRef(null);
+  const { inventory } = useGrocery();
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+    
+    if (query.trim()) {
+      const filtered = inventory.filter(item =>
+        item.name.toLowerCase().includes(query.toLowerCase()) ||
+        item.category.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 6);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+
     if (onSearch) {
       onSearch(query);
     }
   };
 
+  const handleSuggestionClick = (productId) => {
+    setShowSuggestions(false);
+    setSearchQuery('');
+    navigate(`/product/${productId}`);
+  };
+
+  const getProductImage = (category) => {
+    const images = {
+      'Fruits': '🍎',
+      'Vegetables': '🥬',
+      'Dairy': '🥛',
+      'Bakery': '🍞',
+      'Meat': '🍗',
+      'Snacks': '🍿',
+      'Beverages': '🧃',
+      'Grains': '🌾'
+    };
+    return images[category] || '🛒';
+  };
+
   const navItems = [
     { path: '/', name: 'Home', icon: '🏠' },
-    { path: '/dashboard', name: 'Dashboard', icon: '📊' },
     { path: '/products', name: 'Products', icon: '🏷️' },
     { path: '/inventory', name: 'Inventory', icon: '📦' },
-    { path: '/shopping-list', name: 'Shopping List', icon: '🛒' },
+    { path: '/cart', name: 'Cart', icon: '🛒' },
     { path: '/reports', name: 'Reports', icon: '📈' },
   ];
 
@@ -31,22 +80,44 @@ const Navbar = ({ onSearch }) => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-content">
-          <Link to="/" className="navbar-brand">
+          <Link to="/dashboard" className="navbar-brand">
             <span className="brand-icon">🛒</span>
             <span className="brand-title">GroceryHub</span>
           </Link>
 
-          <div className="navbar-search">
+          <div className="navbar-search" ref={searchRef}>
             <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
               className="search-input"
-              placeholder="Search for products..."
+              placeholder="Search for products, categories..."
               value={searchQuery}
               onChange={handleSearch}
+              onFocus={() => searchQuery && setShowSuggestions(true)}
             />
+            
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="search-suggestions">
+                {suggestions.map((product) => (
+                  <div
+                    key={product.id}
+                    className="suggestion-item"
+                    onClick={() => handleSuggestionClick(product.id)}
+                  >
+                    <span className="suggestion-icon">{getProductImage(product.category)}</span>
+                    <div className="suggestion-content">
+                      <div className="suggestion-name">{product.name}</div>
+                      <div className="suggestion-meta">
+                        <span className="suggestion-category">{product.category}</span>
+                        <span className="suggestion-price">₹{product.price}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="navbar-desktop">
@@ -63,7 +134,7 @@ const Navbar = ({ onSearch }) => {
           </div>
           
           <div className="navbar-actions">
-            <HelpButton />
+            <ProfileButton />
             <ThemeToggle />
             
             <button onClick={() => setIsOpen(!isOpen)} className="mobile-menu-btn">

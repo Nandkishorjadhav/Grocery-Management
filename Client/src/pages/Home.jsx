@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 const Home = ({ searchQuery = '' }) => {
   const { inventory } = useGrocery();
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
@@ -18,11 +20,16 @@ const Home = ({ searchQuery = '' }) => {
       );
     }
 
+    // Apply category filter first
+    if (selectedCategory !== 'all') {
+      products = products.filter(item => item.category === selectedCategory);
+    }
+
     // Apply category filter
     switch (selectedFilter) {
       case 'popular':
         // Sort by quantity (assuming higher quantity = more popular)
-        products = products.sort((a, b) => b.quantity - a.quantity).slice(0, 8);
+        products = products.sort((a, b) => b.quantity - a.quantity);
         break;
       case 'special':
         // Show items with low stock or expiring soon
@@ -41,11 +48,12 @@ const Home = ({ searchQuery = '' }) => {
         products = products.filter(item => item.quantity >= item.minStock * 2);
         break;
       default:
+        // Show all products
         break;
     }
 
     setFilteredProducts(products);
-  }, [inventory, searchQuery, selectedFilter]);
+  }, [inventory, searchQuery, selectedFilter, selectedCategory]);
 
   const categories = [...new Set(inventory.map(item => item.category))];
 
@@ -78,14 +86,6 @@ const Home = ({ searchQuery = '' }) => {
 
   return (
     <div className="home-page">
-      {/* Hero Banner */}
-      <div className="hero-banner">
-        <div className="hero-content">
-          <h1 className="hero-title">Fresh Groceries Delivered to Your Door</h1>
-          <p className="hero-subtitle">Order from our wide selection of products</p>
-        </div>
-      </div>
-
       {/* Filter Buttons */}
       <div className="filter-section">
         <div className="filter-buttons">
@@ -111,7 +111,47 @@ const Home = ({ searchQuery = '' }) => {
             {selectedFilter === 'special' && "Today's Special Deals"}
             {selectedFilter === 'bestsellers' && 'Best Selling Products'}
           </h2>
-          <span className="product-count">{filteredProducts.length} items</span>
+          <div className="header-right">
+            <span className="product-count">{filteredProducts.length} items</span>
+            <div className="category-dropdown-wrapper">
+              <button 
+                className="category-dropdown-btn"
+                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+              >
+                <span>📁 Shop by Category</span>
+                <span className={`dropdown-arrow ${showCategoryDropdown ? 'open' : ''}`}>▼</span>
+              </button>
+              {showCategoryDropdown && (
+                <div className="category-dropdown">
+                  <div 
+                    className={`category-option ${selectedCategory === 'all' ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setShowCategoryDropdown(false);
+                    }}
+                  >
+                    🛒 All Categories
+                  </div>
+                  {categories.map(category => (
+                    <div
+                      key={category}
+                      className={`category-option ${selectedCategory === category ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      <span>{getProductImage(category)}</span>
+                      <span>{category}</span>
+                      <span className="category-item-count">
+                        {inventory.filter(item => item.category === category).length}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {filteredProducts.length === 0 ? (
@@ -123,7 +163,11 @@ const Home = ({ searchQuery = '' }) => {
         ) : (
           <div className="products-grid">
             {filteredProducts.map(item => (
-              <div key={item.id} className="home-product-card">
+              <Link
+                key={item.id}
+                to={`/product/${item.id}`}
+                className="home-product-card"
+              >
                 <div className="product-image-wrapper">
                   <div className="product-image">
                     {getProductImage(item.category)}
@@ -156,26 +200,10 @@ const Home = ({ searchQuery = '' }) => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
-      </div>
-
-      {/* Category Section */}
-      <div className="category-section">
-        <h2 className="section-title">Shop by Category</h2>
-        <div className="category-grid">
-          {categories.map(category => (
-            <div key={category} className="category-card">
-              <div className="category-icon">{getProductImage(category)}</div>
-              <h3 className="category-name">{category}</h3>
-              <span className="category-count">
-                {inventory.filter(item => item.category === category).length} items
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

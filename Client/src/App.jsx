@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GroceryProvider } from './context/GroceryContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import ProductDetail from './pages/ProductDetail';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
@@ -23,10 +24,11 @@ function App() {
         <Layout onSearch={setSearchQuery}>
           <Routes>
             <Route path="/" element={<Home searchQuery={searchQuery} />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/inventory" element={<Inventory />} />
-            <Route path="/shopping-list" element={<ShoppingList />} />
+            <Route path="/cart" element={<ShoppingList />} />
             <Route path="/reports" element={<Reports />} />
           </Routes>
         </Layout>

@@ -204,52 +204,64 @@ const ShoppingList = () => {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleSubmit}>
-              {editingItem ? 'Update' : 'Add'}
+              {editingItem ? '✓ Update Item' : '➕ Add Item'}
             </Button>
           </>
         }
       >
-        <div className="flex flex-col gap-4">
-          <Input
-            label="Item Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter item name"
-            required
-          />
-
-          <div className="filter-grid">
+        <div className="shopping-form">
+          <div className="form-group">
             <Input
-              label="Quantity"
-              type="number"
-              value={formData.quantity}
-              onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-              placeholder="0"
+              label="Item Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Fresh Apples, Whole Wheat Bread"
               required
-            />
-            <Input
-              label="Unit"
-              value={formData.unit}
-              onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              placeholder="pcs, kg, etc."
             />
           </div>
 
-          <Input
-            label="Estimated Price (optional)"
-            type="number"
-            step="0.01"
-            value={formData.estimatedPrice}
-            onChange={(e) => setFormData({ ...formData, estimatedPrice: e.target.value })}
-            placeholder="0.00"
-          />
+          <div className="form-row">
+            <div className="form-group">
+              <Input
+                label="Quantity"
+                type="number"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                placeholder="0"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <Input
+                label="Unit"
+                value={formData.unit}
+                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                placeholder="pcs, kg, L"
+              />
+            </div>
+          </div>
 
-          <Input
-            label="Notes (optional)"
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            placeholder="Add any notes..."
-          />
+          <div className="form-group">
+            <Input
+              label="Estimated Price (₹)"
+              type="number"
+              step="0.01"
+              value={formData.estimatedPrice}
+              onChange={(e) => setFormData({ ...formData, estimatedPrice: e.target.value })}
+              placeholder="0.00"
+            />
+            <p className="form-hint">💡 Optional: Helps you estimate your total shopping cost</p>
+          </div>
+
+          <div className="form-group">
+            <Input
+              label="Notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Brand preference, specific variety, etc."
+            />
+            <p className="form-hint">📝 Optional: Add any special instructions</p>
+          </div>
         </div>
       </Modal>
     </div>
