@@ -1,4 +1,5 @@
 import React from 'react';
+import './Card.css';
 
 const Card = ({ children, title, subtitle, className = '', headerAction, hover = false }) => {
   return (

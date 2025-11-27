@@ -1,35 +1,36 @@
 .theme-toggle {
   background: transparent;
-  border: 2px solid var(--border-color, #e5e7eb);
-  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
   padding: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary, #6b7280);
+  color: white;
+  width: 44px;
+  height: 44px;
 }
 
 .theme-toggle:hover {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
+  border-color: white;
+  background: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
 }
 
 [data-theme="dark"] .theme-toggle {
-  border-color: rgba(102, 126, 234, 0.3);
-  color: var(--neon-blue);
+  border-color: rgba(255, 152, 0, 0.5);
+  color: #ff9800;
 }
 
 [data-theme="dark"] .theme-toggle:hover {
-  border-color: var(--neon-blue);
-  background: rgba(0, 212, 255, 0.1);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.15);
 }
 
 .theme-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   transition: transform 0.3s ease;
 }

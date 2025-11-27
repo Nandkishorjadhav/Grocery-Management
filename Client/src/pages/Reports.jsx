@@ -3,6 +3,7 @@ import { useGrocery } from '../context/GroceryContext';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Breadcrumb from '../components/common/Breadcrumb';
+import './Reports.css';
 
 const Reports = () => {
   const { inventory, shoppingList } = useGrocery();

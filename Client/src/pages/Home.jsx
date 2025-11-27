@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import { Link } from 'react-router-dom';
+import './Home.css';
 
 const Home = ({ searchQuery = '' }) => {
   const { inventory } = useGrocery();

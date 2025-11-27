@@ -3,6 +3,7 @@ import { useGrocery } from '../context/GroceryContext';
 import Card from '../components/common/Card';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { Link } from 'react-router-dom';
+import './Products.css';
 
 const Products = () => {
   const { inventory } = useGrocery();

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import './Modal.css';
 
 const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
   useEffect(() => {

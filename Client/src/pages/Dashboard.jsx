@@ -6,6 +6,7 @@ import Input from '../components/common/Input';
 import Select from '../components/common/Select';
 import Modal from '../components/common/Modal';
 import { Link } from 'react-router-dom';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const { inventory, shoppingList, getLowStockItems, getExpiringSoonItems, addInventoryItem, categories } = useGrocery();

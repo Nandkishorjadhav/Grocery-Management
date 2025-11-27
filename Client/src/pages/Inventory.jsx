@@ -6,6 +6,7 @@ import Input from '../components/common/Input';
 import Select from '../components/common/Select';
 import Modal from '../components/common/Modal';
 import Breadcrumb from '../components/common/Breadcrumb';
+import './Inventory.css';
 
 const Inventory = () => {
   const { inventory, categories, addInventoryItem, updateInventoryItem, deleteInventoryItem, addCategory } = useGrocery();

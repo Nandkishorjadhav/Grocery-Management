@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
+import './ProfileButton.css';
 
 const ProfileButton = () => {
   const [isOpen, setIsOpen] = useState(false);

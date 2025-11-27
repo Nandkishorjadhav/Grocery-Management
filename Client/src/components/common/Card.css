@@ -56,5 +56,37 @@
   padding: 1.5rem;
 }
 
+/* ========== DARK THEME ========== */
+[data-theme="dark"] .card {
+  background: linear-gradient(135deg, #1a1f35 0%, #252b42 100%);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .card.hoverable:hover {
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .card-header {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .card-title {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .card-subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .card-action {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .card-action:hover {
+  color: #93c5fd;
+}
+
 /* ========== ALERTS ========== */
 .alerts-grid {

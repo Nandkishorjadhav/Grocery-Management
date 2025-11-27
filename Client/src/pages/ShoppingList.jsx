@@ -5,6 +5,7 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
 import Breadcrumb from '../components/common/Breadcrumb';
+import './ShoppingList.css';
 
 const ShoppingList = () => {
   const { shoppingList, addShoppingItem, updateShoppingItem, deleteShoppingItem, togglePurchased } = useGrocery();

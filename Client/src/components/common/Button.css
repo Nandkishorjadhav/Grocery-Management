@@ -98,3 +98,48 @@
   font-size: 1.125rem;
 }
 
+/* ========== DARK THEME ========== */
+[data-theme="dark"] .btn-outline {
+  background: transparent;
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+[data-theme="dark"] .btn-outline:hover {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: #93c5fd;
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+}
+
+[data-theme="dark"] .btn-success {
+  background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+}
+
+[data-theme="dark"] .btn-success:hover {
+  background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+}
+
+[data-theme="dark"] .btn-danger {
+  background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+}
+
+[data-theme="dark"] .btn-danger:hover {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: linear-gradient(135deg, #90a4ae 0%, #607d8b 100%);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: linear-gradient(135deg, #b0bec5 0%, #78909c 100%);
+}
+

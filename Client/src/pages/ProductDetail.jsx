@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useGrocery } from '../context/GroceryContext';
 import Button from '../components/common/Button';
 import Breadcrumb from '../components/common/Breadcrumb';
+import './ProductDetail.css';
 
 const ProductDetail = () => {
   const { id } = useParams();
