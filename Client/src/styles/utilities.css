@@ -113,7 +113,7 @@ tbody tr {
 
 tbody tr:hover {
   background-color: #fff8f0;
-  border-left-color: #ff6f00;
+  border-left-color: var(--accent-primary);
   transform: translateX(2px);
 }
 
@@ -184,7 +184,7 @@ tbody tr:last-child td {
 
 .badge-primary {
   background: #fff3e0;
-  color: #e65100;
+  color: var(--accent-primary);
   border: 1px solid #ffb74d;
 }
 
@@ -196,7 +196,7 @@ tbody tr:last-child td {
 
 .badge-warning {
   background: #fff8e1;
-  color: #f57c00;
+  color: var(--accent-warning);
   border: 1px solid #ffd54f;
 }
 
@@ -412,7 +412,7 @@ tbody tr:last-child td {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

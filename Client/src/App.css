@@ -87,14 +87,14 @@
 
 /* Gradient backgrounds */
 .gradient-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
 }
 
 .gradient-green {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.gradient-purple {
+.gradient-accent {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 

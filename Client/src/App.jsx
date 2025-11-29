@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GroceryProvider } from './context/GroceryContext';
 import Layout from './components/layout/Layout';
@@ -9,9 +9,24 @@ import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
+import Preloader from './components/common/Preloader';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Show preloader for 3 seconds on initial load
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Preloader />;
+  }
 
   return (
     <Router

@@ -12,12 +12,18 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
+    // Scroll to top when product changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // Find the product by ID
     const foundProduct = inventory.find(item => item.id === parseInt(id));
     if (foundProduct) {
       setProduct(foundProduct);
+      setSelectedImage(0); // Reset selected image
+      setSelectedQuantity(1); // Reset quantity
       
       // Find related products from same category
       const related = inventory
@@ -47,18 +53,51 @@ const ProductDetail = () => {
     );
   }
 
-  const getProductImage = (category) => {
-    const imageMap = {
-      'Vegetables': '🥬',
-      'Fruits': '🍎',
-      'Dairy': '🥛',
-      'Bakery': '🍞',
-      'Snacks': '🍿',
-      'Beverages': '🥤',
-      'Meat': '🥩',
-      'default': '🛒'
+  const getProductImage = (category, name) => {
+    // Product specific images
+    const productImages = {
+      'Fresh Red Apples': 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400',
+      'Organic Bananas': 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400',
+      'Sweet Oranges': 'https://images.unsplash.com/photo-1547514701-42782101795e?w=400',
+      'Whole Wheat Bread': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+      'Farm Fresh Milk': 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400',
+      'Greek Yogurt': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
+      'Cheddar Cheese': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400',
+      'Fresh Spinach': 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400',
+      'Organic Tomatoes': 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400',
+      'Baby Carrots': 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400',
+      'Fresh Broccoli': 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400',
+      'Potato Chips': 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400',
+      'Dark Chocolate Bar': 'https://images.unsplash.com/photo-1606312619070-d48b4cac5bf2?w=400'
     };
-    return imageMap[category] || imageMap['default'];
+
+    if (productImages[name]) {
+      return productImages[name];
+    }
+
+    // Category fallback images
+    const categoryImages = {
+      'Vegetables': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400',
+      'Fruits': 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400',
+      'Dairy': 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400',
+      'Bakery': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+      'Snacks': 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400',
+      'Beverages': 'https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=400',
+      'Meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400',
+      'default': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'
+    };
+    return categoryImages[category] || categoryImages['default'];
+  };
+
+  // Generate multiple image variants for gallery
+  const getProductImages = (category, name) => {
+    const mainImage = getProductImage(category, name);
+    return [
+      mainImage,
+      mainImage + '&sat=-20', // Slightly different variant
+      mainImage + '&hue=20',
+      mainImage + '&con=10'
+    ];
   };
 
   const getDiscount = () => {
@@ -68,6 +107,7 @@ const ProductDetail = () => {
   const originalPrice = Math.round(product.price * 1.3);
   const discount = getDiscount();
   const isLowStock = product.quantity <= product.minStock;
+  const productImages = getProductImages(product.category, product.name);
 
   const handleAddToCart = () => {
     alert(`Added ${selectedQuantity} ${product.unit} of ${product.name} to cart!`);
@@ -87,7 +127,11 @@ const ProductDetail = () => {
           {/* Left - Product Image */}
           <div className="product-image-section">
             <div className="product-main-image">
-              <span className="product-large-emoji">{getProductImage(product.category)}</span>
+              <img 
+                src={productImages[selectedImage]} 
+                alt={product.name}
+                className="product-large-image"
+              />
               {discount > 0 && (
                 <div className="product-discount-badge">{discount}% OFF</div>
               )}
@@ -98,10 +142,15 @@ const ProductDetail = () => {
             
             {/* Image Thumbnails */}
             <div className="product-thumbnails">
-              <div className="thumbnail active">{getProductImage(product.category)}</div>
-              <div className="thumbnail">{getProductImage(product.category)}</div>
-              <div className="thumbnail">{getProductImage(product.category)}</div>
-              <div className="thumbnail">{getProductImage(product.category)}</div>
+              {productImages.map((imgUrl, index) => (
+                <div 
+                  key={index}
+                  className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+                  onClick={() => setSelectedImage(index)}
+                >
+                  <img src={imgUrl} alt={`${product.name} ${index + 1}`} />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -259,7 +308,11 @@ const ProductDetail = () => {
                   className="related-product-card"
                 >
                   <div className="related-product-image">
-                    <span className="related-emoji">{getProductImage(item.category)}</span>
+                    <img 
+                      src={getProductImage(item.category, item.name)} 
+                      alt={item.name}
+                      loading="lazy"
+                    />
                     <div className="related-discount">{Math.floor(Math.random() * 30) + 10}% OFF</div>
                   </div>
                   <div className="related-product-info">

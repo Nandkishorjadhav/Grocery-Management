@@ -154,12 +154,12 @@
 .text-gray-400 { color: #9ca3af; }
 .text-green-600 { color: #16a34a; }
 .text-green-400 { color: #4ade80; }
-.text-purple-600 { color: #9333ea; }
-.text-purple-400 { color: #c084fc; }
+.text-accent-600 { color: var(--accent-warning); }
+.text-accent-400 { color: #c084fc; }
 
 [data-theme="dark"] .dark\:text-gray-400 { color: #9ca3af; }
 [data-theme="dark"] .dark\:text-green-400 { color: #4ade80; }
-[data-theme="dark"] .dark\:text-purple-400 { color: #c084fc; }
+[data-theme="dark"] .dark\:text-accent-400 { color: #c084fc; }
 
 .text-white { color: white; }
 
@@ -171,11 +171,11 @@
 .from-blue-50 { --tw-gradient-from: #eff6ff; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(239, 246, 255, 0)); }
 .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
 .from-green-50 { --tw-gradient-from: #f0fdf4; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(240, 253, 244, 0)); }
-.from-purple-50 { --tw-gradient-from: #faf5ff; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 245, 255, 0)); }
+.from-accent-50 { --tw-gradient-from: #faf5ff; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 245, 255, 0)); }
 .from-gray-800 { --tw-gradient-from: #1f2937; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(31, 41, 55, 0)); }
 
 .to-indigo-50 { --tw-gradient-to: #eef2ff; }
-.to-purple-600 { --tw-gradient-to: #9333ea; }
+.to-accent-600 { --tw-gradient-to: var(--accent-warning); }
 .to-emerald-50 { --tw-gradient-to: #ecfdf5; }
 .to-pink-50 { --tw-gradient-to: #fdf2f8; }
 .to-gray-700 { --tw-gradient-to: #374151; }
@@ -249,7 +249,7 @@ a {
 }
 
 [data-theme="dark"] .progress-fill {
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
 }
 
@@ -316,12 +316,12 @@ a {
 }
 
 [data-theme="dark"] .tooltip .tooltip-text {
-  background-color: #667eea;
+  background-color: var(--accent-primary);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 [data-theme="dark"] .tooltip .tooltip-text::after {
-  border-color: #667eea transparent transparent transparent;
+  border-color: var(--accent-primary) transparent transparent transparent;
 }
 
 /* Success/Error Messages */

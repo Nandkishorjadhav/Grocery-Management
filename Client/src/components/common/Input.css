@@ -41,7 +41,7 @@
 
 .form-input:focus,
 .form-select:focus {
-  border-color: #ff6f00;
+  border-color: var(--accent-primary);
   box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.12), 0 2px 8px rgba(255, 111, 0, 0.15);
 }
 

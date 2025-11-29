@@ -42,7 +42,7 @@
   align-items: center;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border-radius: 12px;
   color: white;
   margin-bottom: 1.5rem;
@@ -102,7 +102,7 @@
 
 .profile-stat-card:hover {
   transform: translateY(-2px);
-  border-color: #ff6f00;
+  border-color: var(--accent-primary);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -114,7 +114,7 @@
 .profile-stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #ff6f00;
+  color: var(--accent-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -178,7 +178,7 @@
 
 .order-status.pending {
   background: #fff3e0;
-  color: #ff6f00;
+  color: var(--accent-primary);
 }
 
 .order-info {
@@ -216,7 +216,7 @@
 }
 
 .activity-item:hover {
-  border-color: #ff6f00;
+  border-color: var(--accent-primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -266,7 +266,7 @@
 
 .profile-notice p {
   font-size: 0.875rem;
-  color: #f57c00;
+  color: var(--accent-warning);
   margin: 0;
 }
 
@@ -305,7 +305,7 @@
 }
 
 [data-theme="dark"] .profile-stat-card:hover {
-  border-color: #ff6f00;
+  border-color: var(--accent-primary);
 }
 
 [data-theme="dark"] .profile-stat-label {
@@ -329,7 +329,7 @@
 
 [data-theme="dark"] .order-summary-item:hover,
 [data-theme="dark"] .activity-item:hover {
-  border-color: #ff6f00;
+  border-color: var(--accent-primary);
 }
 
 [data-theme="dark"] .order-label {

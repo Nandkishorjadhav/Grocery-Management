@@ -64,8 +64,8 @@ const Home = ({ searchQuery = '' }) => {
     return randomDiscount[Math.floor(Math.random() * randomDiscount.length)];
   };
 
-  const getProductImage = (category) => {
-    const imageMap = {
+  const getCategoryEmoji = (category) => {
+    const emojiMap = {
       'Vegetables': '🥬',
       'Fruits': '🍎',
       'Dairy': '🥛',
@@ -73,9 +73,53 @@ const Home = ({ searchQuery = '' }) => {
       'Snacks': '🍿',
       'Beverages': '🥤',
       'Meat': '🥩',
+      'Grains': '🌾',
       'default': '🛒'
     };
-    return imageMap[category] || imageMap['default'];
+    return emojiMap[category] || emojiMap['default'];
+  };
+
+  const getProductImage = (category, itemName = '') => {
+    // When filtering by category, show emoji
+    if (selectedCategory !== 'all') {
+      return null; // Will show emoji instead
+    }
+
+    // Real product image URLs from reliable sources
+    const productImages = {
+      'Fresh Red Apples': 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
+      'Organic Bananas': 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400',
+      'Sweet Oranges': 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=400',
+      'Green Grapes': 'https://images.unsplash.com/photo-1599819177333-612e79d4a0f7?w=400',
+      'Strawberries': 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400',
+      'Brown Rice': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
+      'Whole Wheat Bread': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+      'Fresh Milk': 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400',
+      'Cheddar Cheese': 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=400',
+      'Greek Yogurt': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
+      'Chicken Breast': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400',
+      'Salmon Fillet': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400',
+      'Almond Nuts': 'https://images.unsplash.com/photo-1508736793122-f516e3ba5569?w=400',
+    };
+    
+    // Return specific image if available, otherwise category default
+    if (productImages[itemName]) {
+      return productImages[itemName];
+    }
+    
+    // Category defaults
+    const categoryImages = {
+      'Vegetables': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400',
+      'Fruits': 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400',
+      'Dairy': 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400',
+      'Bakery': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+      'Snacks': 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400',
+      'Beverages': 'https://images.unsplash.com/photo-1546548970-71785318a17b?w=400',
+      'Meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400',
+      'Grains': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
+    };
+    
+    return categoryImages[category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400';
   };
 
   const filterButtons = [
@@ -142,7 +186,7 @@ const Home = ({ searchQuery = '' }) => {
                         setShowCategoryDropdown(false);
                       }}
                     >
-                      <span>{getProductImage(category)}</span>
+                      <span>{getCategoryEmoji(category)}</span>
                       <span>{category}</span>
                       <span className="category-item-count">
                         {inventory.filter(item => item.category === category).length}
@@ -170,9 +214,16 @@ const Home = ({ searchQuery = '' }) => {
                 className="home-product-card"
               >
                 <div className="product-image-wrapper">
-                  <div className="product-image">
-                    {getProductImage(item.category)}
-                  </div>
+                  {getProductImage(item.category, item.name) ? (
+                    <img 
+                      src={getProductImage(item.category, item.name)} 
+                      alt={item.name}
+                      className="product-image"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
+                  )}
                   <span className="discount-badge">{getDiscountBadge(item)}% OFF</span>
                   {item.quantity <= item.minStock && (
                     <span className="stock-badge low">Low Stock</span>

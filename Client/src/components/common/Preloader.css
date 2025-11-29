@@ -1,0 +1,180 @@
+/* ========== PRELOADER ========== */
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeOut 0.5s ease-in-out 2.5s forwards;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.preloader-content {
+  text-align: center;
+  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Cart Animation */
+.cart-animation {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 2rem;
+}
+
+.cart-icon {
+  font-size: 5rem;
+  animation: cartBounce 1s ease-in-out infinite;
+}
+
+@keyframes cartBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Items Loading Animation */
+.items-loading {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.item {
+  font-size: 2rem;
+  animation: itemDrop 1.5s ease-in-out infinite;
+  opacity: 0;
+}
+
+.item-1 { animation-delay: 0s; }
+.item-2 { animation-delay: 0.2s; }
+.item-3 { animation-delay: 0.4s; }
+.item-4 { animation-delay: 0.6s; }
+
+@keyframes itemDrop {
+  0% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(80px);
+    opacity: 0;
+  }
+}
+
+/* Preloader Title */
+.preloader-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: titlePulse 2s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Loading Bar */
+.loading-bar {
+  width: 300px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.loading-progress {
+  height: 100%;
+  background: white;
+  border-radius: 10px;
+  animation: loadProgress 2s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes loadProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Loading Text */
+.loading-text {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 500;
+  opacity: 0.95;
+  animation: textFade 1.5s ease-in-out infinite;
+}
+
+@keyframes textFade {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Dark Theme */
+[data-theme="dark"] .preloader {
+  background: linear-gradient(135deg, #1a1f35 0%, #2b2d42 100%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .preloader-title {
+    font-size: 2.25rem;
+  }
+  
+  .cart-icon {
+    font-size: 4rem;
+  }
+  
+  .loading-bar {
+    width: 240px;
+  }
+}

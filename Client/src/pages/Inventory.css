@@ -94,7 +94,7 @@ tbody tr {
 
 tbody tr:hover {
   background-color: #fff8f0;
-  border-left-color: #ff6f00;
+  border-left-color: var(--accent-primary);
   transform: translateX(2px);
 }
 
@@ -137,7 +137,7 @@ tbody tr:last-child td {
 
 .badge-warning {
   background: #fff8e1;
-  color: #f57c00;
+  color: var(--accent-warning);
   border: 1px solid #ffd54f;
 }
 
