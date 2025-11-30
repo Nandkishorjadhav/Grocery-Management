@@ -7,6 +7,7 @@ import './Navbar.css';
 
 const Navbar = ({ onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -111,7 +112,7 @@ const Navbar = ({ onSearch }) => {
             ))}
           </div>
 
-          <div className="navbar-search" ref={searchRef}>
+          <div className="navbar-search navbar-search-desktop" ref={searchRef}>
             <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -147,6 +148,15 @@ const Navbar = ({ onSearch }) => {
           </div>
           
           <div className="navbar-actions">
+            <button 
+              onClick={() => setShowMobileSearch(!showMobileSearch)} 
+              className="mobile-search-btn"
+              aria-label="Toggle search"
+            >
+              <svg className="mobile-menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <ProfileButton />
             <ThemeToggle />
             
@@ -162,6 +172,46 @@ const Navbar = ({ onSearch }) => {
           </div>
         </div>
       </div>
+
+      {showMobileSearch && (
+        <div className="mobile-search-container">
+          <div className="navbar-search" ref={searchRef}>
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search for products, categories..."
+              value={searchQuery}
+              onChange={handleSearch}
+              onFocus={() => searchQuery && setShowSuggestions(true)}
+              autoFocus
+            />
+            
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="search-suggestions">
+                {suggestions.map((product) => (
+                  <div
+                    key={product.id}
+                    className="suggestion-item"
+                    onClick={() => handleSuggestionClick(product.id)}
+                  >
+                    <span className="suggestion-icon">{getProductImage(product.category)}</span>
+                    <div className="suggestion-content">
+                      <div className="suggestion-name">{product.name}</div>
+                      <div className="suggestion-meta">
+                        <span className="suggestion-category">{product.category}</span>
+                        <span className="suggestion-price">₹{product.price}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {isOpen && (
         <div className="mobile-menu">

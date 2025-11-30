@@ -525,3 +525,95 @@ tbody tr:last-child td {
   color: #93c5fd;
 }
 
+
+/* ========== ADDITIONAL RESPONSIVE UTILITIES ========== */
+/* Display utilities for different screen sizes */
+.hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hidden-mobile {
+    display: block;
+  }
+}
+
+.hidden-desktop {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .hidden-desktop {
+    display: none;
+  }
+}
+
+/* Flexbox responsive utilities */
+.flex-mobile-col {
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .flex-mobile-col {
+    flex-direction: row;
+  }
+}
+
+/* Text alignment responsive */
+.text-mobile-center {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .text-mobile-center {
+    text-align: left;
+  }
+}
+
+/* Width utilities */
+.w-full {
+  width: 100%;
+}
+
+.w-auto {
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .md\\:w-auto {
+    width: auto;
+  }
+  
+  .md\\:w-full {
+    width: 100%;
+  }
+}
+
+/* Overflow utilities for mobile */
+.overflow-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Mobile-first grid utilities */
+.grid-mobile-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-mobile-1 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-mobile-1 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
