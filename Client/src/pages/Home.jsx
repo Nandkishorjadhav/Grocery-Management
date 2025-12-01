@@ -132,7 +132,6 @@ const Home = ({ searchQuery = '' }) => {
   return (
     <div className="home-page">
       {/* Filter Buttons */}
-      <div className="filter-section">
         <div className="filter-buttons">
           {filterButtons.map(button => (
             <button
@@ -145,8 +144,7 @@ const Home = ({ searchQuery = '' }) => {
             </button>
           ))}
         </div>
-      </div>
-
+     <br></br>
       {/* Products Grid */}
       <div className="products-section">
         <div className="section-header">
