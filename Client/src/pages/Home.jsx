@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = ({ searchQuery = '' }) => {
-  const { inventory } = useGrocery();
+  const { inventory, addShoppingItem } = useGrocery();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [addedItems, setAddedItems] = useState(new Set());
 
   useEffect(() => {
     let products = [...inventory];
@@ -120,6 +121,31 @@ const Home = ({ searchQuery = '' }) => {
     };
     
     return categoryImages[category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400';
+  };
+
+  const handleAddToCart = (e, item) => {
+    e.preventDefault(); // Prevent Link navigation
+    e.stopPropagation(); // Stop event from bubbling to Link
+    
+    // Add item to shopping list
+    addShoppingItem({
+      name: item.name,
+      category: item.category,
+      quantity: 1,
+      unit: item.unit
+    });
+    
+    // Mark item as added
+    setAddedItems(prev => new Set([...prev, item.id]));
+    
+    // Remove the "added" state after 2 seconds
+    setTimeout(() => {
+      setAddedItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
+    }, 2000);
   };
 
   const filterButtons = [
@@ -244,9 +270,12 @@ const Home = ({ searchQuery = '' }) => {
                       <span className="price-current">₹{item.price}</span>
                       <span className="price-original">₹{Math.round(item.price * 1.25)}</span>
                     </div>
-                    <button className="add-to-cart-btn">
-                      <span>Add</span>
-                      <span className="cart-icon">🛒</span>
+                    <button 
+                      className={`add-to-cart-btn ${addedItems.has(item.id) ? 'added' : ''}`}
+                      onClick={(e) => handleAddToCart(e, item)}
+                    >
+                      <span>{addedItems.has(item.id) ? 'Added' : 'Add'}</span>
+                      <span className="cart-icon">{addedItems.has(item.id) ? '✓' : '🛒'}</span>
                     </button>
                   </div>
                 </div>
