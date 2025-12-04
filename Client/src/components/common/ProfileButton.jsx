@@ -36,11 +36,15 @@ const ProfileButton = () => {
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title="My Profile"
       >
         <div className="profile-modal">
           {/* User Info Section */}
           <div className="profile-header">
+            <button onClick={() => setIsOpen(false)} className="profile-close-btn" aria-label="Close">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <div className="profile-avatar-large">{userData.avatar}</div>
             <div className="profile-info">
               <h2 className="profile-name">{userData.name}</h2>

@@ -6,9 +6,10 @@
   backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 2rem 1rem;
+  overflow-y: auto;
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -16,10 +17,12 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: 650px;
+  width: 100%;
+  max-height: none;
+  margin: auto 0;
   animation: slideUp 0.3s ease-out;
+  position: relative;
 }
 
 .modal-header {
@@ -58,6 +61,12 @@
 }
 
 .modal-body {
+  padding: 0;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.modal-header + .modal-body {
   padding: 1.5rem;
 }
 
@@ -73,11 +82,12 @@
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .modal-overlay {
-    padding: 0.75rem;
+    padding: 1rem 0.5rem;
   }
 
   .modal-content {
-    max-width: 95vw;
+    max-width: 100%;
+    width: 100%;
     border-radius: 12px;
   }
 
@@ -90,11 +100,16 @@
   }
 
   .modal-body {
-    padding: 1.25rem;
+    padding: 0;
+    max-height: calc(90vh - 120px);
+  }
+
+  .modal-header + .modal-body {
+    padding: 1rem;
   }
 
   .modal-footer {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 }
 
