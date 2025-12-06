@@ -33,23 +33,23 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
         {/* Modal panel */}
         <div className={`modal-content ${sizeClass} slide-up`}>
           {/* Header */}
-          {title && (
-            <div className="modal-header">
-              <div className="modal-header-content">
+          <div className="modal-header">
+            <div className="modal-header-content">
+              {title && (
                 <h3 className="modal-title">
                   {title}
                 </h3>
-                <button
-                  onClick={onClose}
-                  className="modal-close"
-                >
-                  <svg className="modal-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              )}
+              <button
+                onClick={onClose}
+                className="modal-close"
+              >
+                <svg className="modal-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          )}
+          </div>
 
           {/* Body */}
           <div className="modal-body">
