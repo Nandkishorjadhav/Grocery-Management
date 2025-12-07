@@ -98,10 +98,6 @@
   font-size: 1.125rem;
 }
 
-.btn-fullwidth {
-  width: 100%;
-}
-
 /* ========== DARK THEME ========== */
 [data-theme="dark"] .btn-outline {
   background: transparent;

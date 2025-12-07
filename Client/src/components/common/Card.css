@@ -124,5 +124,31 @@
   }
 }
 
+@media (max-width: 480px) {
+  .card {
+    border-radius: 12px;
+  }
+
+  .card-header {
+    padding: 0.875rem;
+  }
+
+  .card-body {
+    padding: 0.875rem;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .card-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .card-action {
+    font-size: 0.8125rem;
+  }
+}
+
 /* ========== ALERTS ========== */
 .alerts-grid {
