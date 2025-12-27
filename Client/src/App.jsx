@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GroceryProvider } from './context/GroceryContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
+import Cart from './pages/Cart';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 import Preloader from './components/common/Preloader';
+import AuthModal from './components/common/AuthModal';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show preloader for 3 seconds on initial load
+    // Show preloader for 1 second on initial load
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -35,20 +38,34 @@ function App() {
         v7_relativeSplatPath: true,
       }}
     >
-      <GroceryProvider>
-        <Layout onSearch={setSearchQuery}>
-          <Routes>
-            <Route path="/" element={<Home searchQuery={searchQuery} />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/cart" element={<ShoppingList />} />
-            <Route path="/reports" element={<Reports />} />
-          </Routes>
-        </Layout>
-      </GroceryProvider>
+      <AuthProvider>
+        <GroceryProvider>
+          <AppContent searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </GroceryProvider>
+      </AuthProvider>
     </Router>
+  );
+}
+
+function AppContent({ searchQuery, setSearchQuery }) {
+  const { showAuthModal } = useAuth();
+
+  return (
+    <>
+      <Layout onSearch={setSearchQuery}>
+        <Routes>
+          <Route path="/" element={<Home searchQuery={searchQuery} />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/shopping-list" element={<ShoppingList />} />
+          <Route path="/reports" element={<Reports />} />
+        </Routes>
+      </Layout>
+      {showAuthModal && <AuthModal />}
+    </>
   );
 }
 

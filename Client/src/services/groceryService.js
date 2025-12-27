@@ -1,6 +1,6 @@
 import api from './api';
 
-export const inventoryService = {
+const inventoryService = {
   // Get all items
   getAll: () => api.get('/inventory'),
 
@@ -23,7 +23,7 @@ export const inventoryService = {
   getExpiringSoon: () => api.get('/inventory/expiring-soon'),
 };
 
-export const shoppingListService = {
+const shoppingListService = {
   // Get all items
   getAll: () => api.get('/shopping-list'),
 
@@ -45,3 +45,10 @@ export const shoppingListService = {
   // Clear purchased items
   clearPurchased: () => api.delete('/shopping-list/purchased/clear'),
 };
+
+export default {
+  inventoryService,
+  shoppingListService
+};
+
+export { inventoryService, shoppingListService };

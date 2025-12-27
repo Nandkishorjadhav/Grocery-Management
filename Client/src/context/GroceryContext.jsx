@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import groceryService from '../services/groceryService.js';
+import cartService from '../services/cartService.js';
+import { useAuth } from './AuthContext';
 
 const GroceryContext = createContext();
 
@@ -47,73 +50,238 @@ const initialData = {
 };
 
 export const GroceryProvider = ({ children }) => {
+  const auth = useAuth();
   const [inventory, setInventory] = useState(initialData.inventory);
   const [shoppingList, setShoppingList] = useState(initialData.shoppingList);
-  const [categories, setCategories] = useState(initialData.categories);
+  const [cart, setCart] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [categories, setCategories] = useState(['Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat', 'Snacks', 'Beverages', 'Grains', 'Others']);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load data from localStorage on mount
-  useEffect(() => {
+  // Fetch inventory from backend
+  const fetchInventory = async () => {
     try {
-      // Force clear old data and use new dummy products
-      localStorage.removeItem(STORAGE_KEY);
-      console.log('Loaded 24 dummy products:', initialData.inventory.length);
-      
-      // Uncomment below to enable localStorage persistence later
-      /*
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        setInventory(parsed.inventory || initialData.inventory);
-        setShoppingList(parsed.shoppingList || initialData.shoppingList);
-        setCategories(parsed.categories || initialData.categories);
-      }
-      */
+      setLoading(true);
+      const response = await groceryService.inventoryService.getAll();
+      setInventory(response);
+      setError(null);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error fetching inventory:', error);
+      setError(error.message);
+      // Keep using initialData as fallback
+      console.log('Using local dummy data as fallback');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Fetch cart from backend
+  const fetchCart = async () => {
+    try {
+      const response = await cartService.getCartItems();
+      if (response.success) {
+        setCart(response.data || []);
+        setCartCount(response.totalItems || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      // Keep empty cart as fallback
+    }
+  };
+
+  // Fetch shopping list from backend
+  const fetchShoppingList = async () => {
+    try {
+      const response = await groceryService.shoppingListService.getAll();
+      setShoppingList(response);
+    } catch (error) {
+      console.error('Error fetching shopping list:', error);
+      // Keep initial shopping list as fallback
+    }
+  };
+
+  // Load data on mount
+  useEffect(() => {
+    // Try to fetch from API, but don't block rendering
+    fetchInventory().catch(err => console.log('Failed to fetch inventory, using local data'));
+    fetchCart().catch(err => console.log('Failed to fetch cart, starting with empty cart'));
+    fetchShoppingList().catch(err => console.log('Failed to fetch shopping list, using local data'));
   }, []);
 
-  // Save data to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ inventory, shoppingList, categories }));
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
-  }, [inventory, shoppingList, categories]);
-
   // Inventory functions
-  const addInventoryItem = (item) => {
-    const newItem = { ...item, id: Date.now() };
-    setInventory([...inventory, newItem]);
+  const addInventoryItem = async (item) => {
+    try {
+      const newItem = await groceryService.inventoryService.create(item);
+      setInventory([...inventory, newItem]);
+      return newItem;
+    } catch (error) {
+      console.error('Error adding item:', error);
+      throw error;
+    }
   };
 
-  const updateInventoryItem = (id, updates) => {
-    setInventory(inventory.map(item => item.id === id ? { ...item, ...updates } : item));
+  const updateInventoryItem = async (id, updates) => {
+    try {
+      const updatedItem = await groceryService.inventoryService.update(id, updates);
+      setInventory(inventory.map(item => item._id === id ? updatedItem : item));
+      return updatedItem;
+    } catch (error) {
+      console.error('Error updating item:', error);
+      throw error;
+    }
   };
 
-  const deleteInventoryItem = (id) => {
-    setInventory(inventory.filter(item => item.id !== id));
+  const deleteInventoryItem = async (id) => {
+    try {
+      await groceryService.inventoryService.delete(id);
+      setInventory(inventory.filter(item => item._id !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      throw error;
+    }
+  };
+
+  // Cart functions
+  const addToCart = async (product) => {
+    // Check authentication first
+    if (!auth.isAuthenticated()) {
+      auth.openAuthModal();
+      return null;
+    }
+
+    try {
+      const cartItem = {
+        productId: product._id || product.id,
+        name: product.name,
+        category: product.category,
+        quantity: 1,
+        unit: product.unit,
+        price: product.price
+      };
+      
+      const response = await cartService.addToCart(cartItem);
+      if (response.success) {
+        await fetchCart(); // Refresh cart
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Fallback: add to local state
+      const newCartItem = {
+        _id: Date.now().toString(),
+        ...product,
+        quantity: 1,
+        totalPrice: product.price
+      };
+      setCart([...cart, newCartItem]);
+      setCartCount(cartCount + 1);
+      return newCartItem;
+    }
+  };
+
+  const removeFromCart = async (id) => {
+    try {
+      const response = await cartService.removeFromCart(id);
+      if (response.success) {
+        await fetchCart(); // Refresh cart
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      throw error;
+    }
+  };
+
+  const updateCartItemQuantity = async (id, quantity) => {
+    try {
+      const response = await cartService.updateCartItem(id, quantity);
+      if (response.success) {
+        await fetchCart(); // Refresh cart
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      throw error;
+    }
+  };
+
+  const incrementCartItem = async (id) => {
+    try {
+      const response = await cartService.incrementQuantity(id);
+      if (response.success) {
+        await fetchCart(); // Refresh cart
+      }
+    } catch (error) {
+      console.error('Error incrementing cart item:', error);
+      throw error;
+    }
+  };
+
+  const decrementCartItem = async (id) => {
+    try {
+      const response = await cartService.decrementQuantity(id);
+      if (response.success) {
+        await fetchCart(); // Refresh cart
+      }
+    } catch (error) {
+      console.error('Error decrementing cart item:', error);
+      throw error;
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      const response = await cartService.clearCart();
+      if (response.success) {
+        setCart([]);
+        setCartCount(0);
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      throw error;
+    }
   };
 
   // Shopping list functions
-  const addShoppingItem = (item) => {
-    const newItem = { ...item, id: Date.now(), purchased: false };
-    setShoppingList([...shoppingList, newItem]);
+  const addShoppingItem = async (item) => {
+    try {
+      const newItem = await groceryService.shoppingListService.create(item);
+      setShoppingList([...shoppingList, newItem]);
+      return newItem;
+    } catch (error) {
+      console.error('Error adding shopping item:', error);
+      throw error;
+    }
   };
 
-  const updateShoppingItem = (id, updates) => {
-    setShoppingList(shoppingList.map(item => item.id === id ? { ...item, ...updates } : item));
+  const updateShoppingItem = async (id, updates) => {
+    try {
+      const updatedItem = await groceryService.shoppingListService.update(id, updates);
+      setShoppingList(shoppingList.map(item => item._id === id ? updatedItem : item));
+      return updatedItem;
+    } catch (error) {
+      console.error('Error updating shopping item:', error);
+      throw error;
+    }
   };
 
-  const deleteShoppingItem = (id) => {
-    setShoppingList(shoppingList.filter(item => item.id !== id));
+  const deleteShoppingItem = async (id) => {
+    try {
+      await groceryService.shoppingListService.delete(id);
+      setShoppingList(shoppingList.filter(item => item._id !== id));
+    } catch (error) {
+      console.error('Error deleting shopping item:', error);
+      throw error;
+    }
   };
 
-  const togglePurchased = (id) => {
-    setShoppingList(shoppingList.map(item => 
-      item.id === id ? { ...item, purchased: !item.purchased } : item
-    ));
+  const togglePurchased = async (id) => {
+    try {
+      const updatedItem = await groceryService.shoppingListService.togglePurchased(id);
+      setShoppingList(shoppingList.map(item => item._id === id ? updatedItem : item));
+    } catch (error) {
+      console.error('Error toggling purchased:', error);
+      throw error;
+    }
   };
 
   // Category functions
@@ -143,14 +311,31 @@ export const GroceryProvider = ({ children }) => {
   const value = {
     inventory,
     shoppingList,
+    cart,
+    cartCount,
     categories,
+    loading,
+    error,
+    // Inventory methods
     addInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
+    fetchInventory,
+    // Cart methods
+    addToCart,
+    removeFromCart,
+    updateCartItemQuantity,
+    incrementCartItem,
+    decrementCartItem,
+    clearCart,
+    fetchCart,
+    // Shopping list methods
     addShoppingItem,
     updateShoppingItem,
     deleteShoppingItem,
     togglePurchased,
+    fetchShoppingList,
+    // Utility methods
     addCategory,
     getLowStockItems,
     getExpiringSoonItems,

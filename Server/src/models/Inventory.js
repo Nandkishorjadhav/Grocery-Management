@@ -24,6 +24,14 @@ const inventorySchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  image: {
+    type: String,
+    default: 'https://via.placeholder.com/150'
+  },
+  description: {
+    type: String,
+    default: ''
+  },
   expiryDate: {
     type: Date
   },

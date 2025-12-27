@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
 import ProfileButton from '../common/ProfileButton';
 import { useGrocery } from '../../context/GroceryContext';
+import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = ({ onSearch }) => {
@@ -14,7 +15,9 @@ const Navbar = ({ onSearch }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef(null);
-  const { inventory } = useGrocery();
+  const { inventory, cartCount } = useGrocery();
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -108,6 +111,9 @@ const Navbar = ({ onSearch }) => {
               >
                 <span className="nav-icon">{item.icon}</span>
                 {item.name}
+                {item.path === '/cart' && cartCount > 0 && (
+                  <span className="cart-badge">{cartCount}</span>
+                )}
               </Link>
             ))}
           </div>
@@ -157,7 +163,40 @@ const Navbar = ({ onSearch }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
-            <ProfileButton />
+            
+            {isAuthenticated() ? (
+              <div className="user-menu-container">
+                <button 
+                  className="user-btn" 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="User menu"
+                >
+                  <span className="user-icon">👤</span>
+                  <span className="user-name">{user?.name}</span>
+                </button>
+                {showUserMenu && (
+                  <div className="user-dropdown">
+                    <div className="user-info">
+                      <div className="user-info-name">{user?.name}</div>
+                      <div className="user-info-contact">
+                        {user?.email || user?.mobile}
+                      </div>
+                    </div>
+                    <button className="logout-btn" onClick={() => {
+                      logout();
+                      setShowUserMenu(false);
+                    }}>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button className="login-btn" onClick={openAuthModal}>
+                Login
+              </button>
+            )}
+            
             <ThemeToggle />
             
             <button onClick={() => setIsOpen(!isOpen)} className="mobile-menu-btn">
@@ -224,6 +263,9 @@ const Navbar = ({ onSearch }) => {
             >
               <span className="nav-icon">{item.icon}</span>
               {item.name}
+              {item.path === '/cart' && cartCount > 0 && (
+                <span className="cart-badge">{cartCount}</span>
+              )}
             </Link>
           ))}
         </div>

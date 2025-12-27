@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = ({ searchQuery = '' }) => {
-  const { inventory, addShoppingItem } = useGrocery();
+  const { inventory, addToCart } = useGrocery();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -123,29 +123,29 @@ const Home = ({ searchQuery = '' }) => {
     return categoryImages[category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400';
   };
 
-  const handleAddToCart = (e, item) => {
+  const handleAddToCart = async (e, item) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation(); // Stop event from bubbling to Link
     
-    // Add item to shopping list
-    addShoppingItem({
-      name: item.name,
-      category: item.category,
-      quantity: 1,
-      unit: item.unit
-    });
-    
-    // Mark item as added
-    setAddedItems(prev => new Set([...prev, item.id]));
-    
-    // Remove the "added" state after 2 seconds
-    setTimeout(() => {
-      setAddedItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(item.id);
-        return newSet;
-      });
-    }, 2000);
+    try {
+      // Add item to cart via API
+      await addToCart(item);
+      
+      // Mark item as added
+      setAddedItems(prev => new Set([...prev, item._id || item.id]));
+      
+      // Remove the "added" state after 2 seconds
+      setTimeout(() => {
+        setAddedItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(item._id || item.id);
+          return newSet;
+        });
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    }
   };
 
   const filterButtons = [
@@ -233,8 +233,8 @@ const Home = ({ searchQuery = '' }) => {
           <div className="products-grid">
             {filteredProducts.map(item => (
               <Link
-                key={item.id}
-                to={`/product/${item.id}`}
+                key={item._id || item.id}
+                to={`/product/${item._id || item.id}`}
                 className="home-product-card"
               >
                 <div className="product-image-wrapper">
@@ -271,11 +271,11 @@ const Home = ({ searchQuery = '' }) => {
                       <span className="price-original">₹{Math.round(item.price * 1.25)}</span>
                     </div>
                     <button 
-                      className={`add-to-cart-btn ${addedItems.has(item.id) ? 'added' : ''}`}
+                      className={`add-to-cart-btn ${addedItems.has(item._id || item.id) ? 'added' : ''}`}
                       onClick={(e) => handleAddToCart(e, item)}
                     >
-                      <span>{addedItems.has(item.id) ? 'Added' : 'Add'}</span>
-                      <span className="cart-icon">{addedItems.has(item.id) ? '✓' : '🛒'}</span>
+                      <span>{addedItems.has(item._id || item.id) ? 'Added' : 'Add'}</span>
+                      <span className="cart-icon">{addedItems.has(item._id || item.id) ? '✓' : '🛒'}</span>
                     </button>
                   </div>
                 </div>
