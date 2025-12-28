@@ -34,10 +34,8 @@ const authService = {
   // Set auth token
   setAuthToken: (token) => {
     if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       localStorage.setItem('token', token);
     } else {
-      delete api.defaults.headers.common['Authorization'];
       localStorage.removeItem('token');
     }
   },
@@ -62,7 +60,6 @@ const authService = {
   clearAuth: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    delete api.defaults.headers.common['Authorization'];
   }
 };
 

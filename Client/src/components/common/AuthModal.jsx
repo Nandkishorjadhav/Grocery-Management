@@ -45,14 +45,17 @@ const AuthModal = () => {
 
       const response = await authService.initiateAuth(payload);
 
-      if (response.success) {
+      if (response && response.success) {
         setUserId(response.userId);
         setIsNewUser(response.isNewUser);
         setStep('otp');
         startCountdown();
+      } else {
+        setError('Failed to initiate authentication. Please try again.');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to send OTP. Please try again.');
+      console.error('Auth initiate error:', err);
+      setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -69,12 +72,15 @@ const AuthModal = () => {
         otp: formData.otp
       });
 
-      if (response.success) {
+      if (response && response.success) {
         login(response.token, response.user);
         closeAuthModal();
+      } else {
+        setError('Invalid OTP verification response.');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid OTP. Please try again.');
+      console.error('OTP verification error:', err);
+      setError(err.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -86,12 +92,15 @@ const AuthModal = () => {
 
     try {
       const response = await authService.resendOTP(userId);
-      if (response.success) {
+      if (response && response.success) {
         setFormData({ ...formData, otp: '' });
         startCountdown();
+      } else {
+        setError('Failed to resend OTP.');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to resend OTP.');
+      console.error('Resend OTP error:', err);
+      setError(err.message || 'Failed to resend OTP.');
     } finally {
       setLoading(false);
     }

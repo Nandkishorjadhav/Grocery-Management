@@ -164,7 +164,7 @@ const Reports = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {stats.topExpensive.length > 0 ? (
               stats.topExpensive.map((item, index) => (
-                <div key={item.id} style={{
+                <div key={item._id || item.id || index} style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem',

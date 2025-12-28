@@ -23,18 +23,23 @@ export const AuthProvider = ({ children }) => {
       const storedUser = authService.getStoredUser();
 
       if (token && storedUser) {
-        authService.setAuthToken(token);
         setUser(storedUser);
 
         // Verify token is still valid
         try {
           const response = await authService.getProfile();
-          if (response.success) {
+          if (response && response.success) {
             setUser(response.user);
             authService.storeUser(response.user);
+          } else {
+            // Invalid response
+            console.log('Invalid profile response, clearing auth');
+            authService.clearAuth();
+            setUser(null);
           }
         } catch (error) {
-          // Token expired or invalid
+          // Token expired or invalid - clear everything
+          console.log('Token invalid or expired, clearing auth');
           authService.clearAuth();
           setUser(null);
         }

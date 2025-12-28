@@ -78,15 +78,26 @@ export const GroceryProvider = ({ children }) => {
 
   // Fetch cart from backend
   const fetchCart = async () => {
+    // Only fetch cart if user is authenticated
+    if (!auth?.isAuthenticated || !auth.isAuthenticated()) {
+      setCart([]);
+      setCartCount(0);
+      return;
+    }
+
     try {
       const response = await cartService.getCartItems();
-      if (response.success) {
+      if (response && response.success) {
         setCart(response.data || []);
         setCartCount(response.totalItems || 0);
       }
     } catch (error) {
-      console.error('Error fetching cart:', error);
-      // Keep empty cart as fallback
+      // Silently handle 401 errors for unauthenticated users
+      if (error.message !== 'Invalid token') {
+        console.error('Error fetching cart:', error);
+      }
+      setCart([]);
+      setCartCount(0);
     }
   };
 
@@ -105,9 +116,15 @@ export const GroceryProvider = ({ children }) => {
   useEffect(() => {
     // Try to fetch from API, but don't block rendering
     fetchInventory().catch(err => console.log('Failed to fetch inventory, using local data'));
-    fetchCart().catch(err => console.log('Failed to fetch cart, starting with empty cart'));
     fetchShoppingList().catch(err => console.log('Failed to fetch shopping list, using local data'));
   }, []);
+
+  // Fetch cart when auth state changes
+  useEffect(() => {
+    if (!auth?.loading) {
+      fetchCart().catch(err => console.log('Failed to fetch cart, starting with empty cart'));
+    }
+  }, [auth?.user, auth?.loading]);
 
   // Inventory functions
   const addInventoryItem = async (item) => {
@@ -161,7 +178,7 @@ export const GroceryProvider = ({ children }) => {
       };
       
       const response = await cartService.addToCart(cartItem);
-      if (response.success) {
+      if (response && response.success) {
         await fetchCart(); // Refresh cart
         return response.data;
       }
@@ -183,7 +200,7 @@ export const GroceryProvider = ({ children }) => {
   const removeFromCart = async (id) => {
     try {
       const response = await cartService.removeFromCart(id);
-      if (response.success) {
+      if (response && response.success) {
         await fetchCart(); // Refresh cart
       }
     } catch (error) {
@@ -195,7 +212,7 @@ export const GroceryProvider = ({ children }) => {
   const updateCartItemQuantity = async (id, quantity) => {
     try {
       const response = await cartService.updateCartItem(id, quantity);
-      if (response.success) {
+      if (response && response.success) {
         await fetchCart(); // Refresh cart
       }
     } catch (error) {
@@ -207,7 +224,7 @@ export const GroceryProvider = ({ children }) => {
   const incrementCartItem = async (id) => {
     try {
       const response = await cartService.incrementQuantity(id);
-      if (response.success) {
+      if (response && response.success) {
         await fetchCart(); // Refresh cart
       }
     } catch (error) {
@@ -219,7 +236,7 @@ export const GroceryProvider = ({ children }) => {
   const decrementCartItem = async (id) => {
     try {
       const response = await cartService.decrementQuantity(id);
-      if (response.success) {
+      if (response && response.success) {
         await fetchCart(); // Refresh cart
       }
     } catch (error) {
@@ -231,7 +248,7 @@ export const GroceryProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       const response = await cartService.clearCart();
-      if (response.success) {
+      if (response && response.success) {
         setCart([]);
         setCartCount(0);
       }
