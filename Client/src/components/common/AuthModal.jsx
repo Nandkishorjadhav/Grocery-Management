@@ -38,12 +38,14 @@ const AuthModal = () => {
     try {
       const payload = {
         method,
-        name: formData.name,
-        email: method === 'email' ? formData.email : undefined,
-        mobile: method === 'mobile' ? formData.mobile : undefined
+        name: formData.name.trim(),
+        email: method === 'email' ? formData.email.trim() : undefined,
+        mobile: method === 'mobile' ? formData.mobile.trim() : undefined
       };
 
+      console.log('Sending auth request with payload:', payload);
       const response = await authService.initiateAuth(payload);
+      console.log('Auth response received:', response);
 
       if (response && response.success) {
         setUserId(response.userId);
@@ -51,11 +53,12 @@ const AuthModal = () => {
         setStep('otp');
         startCountdown();
       } else {
-        setError('Failed to initiate authentication. Please try again.');
+        console.error('Auth response not successful:', response);
+        setError(response?.error || 'Failed to initiate authentication. Please try again.');
       }
     } catch (err) {
       console.error('Auth initiate error:', err);
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      setError(err.message || 'Failed to send OTP. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }

@@ -3,32 +3,34 @@ import api from './api.js';
 const authService = {
   // Initiate authentication (send OTP)
   initiateAuth: async (data) => {
+    console.log('authService.initiateAuth called with:', data);
     const response = await api.post('/auth/initiate', data);
-    return response.data;
+    console.log('authService.initiateAuth response:', response);
+    return response;
   },
 
   // Verify OTP
   verifyOTP: async (data) => {
     const response = await api.post('/auth/verify-otp', data);
-    return response.data;
+    return response;
   },
 
   // Resend OTP
   resendOTP: async (userId) => {
     const response = await api.post('/auth/resend-otp', { userId });
-    return response.data;
+    return response;
   },
 
   // Get user profile
   getProfile: async () => {
     const response = await api.get('/auth/profile');
-    return response.data;
+    return response;
   },
 
   // Logout
   logout: async () => {
     const response = await api.post('/auth/logout');
-    return response.data;
+    return response;
   },
 
   // Set auth token

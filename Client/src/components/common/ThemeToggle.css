@@ -2,7 +2,7 @@
   background: transparent;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  padding: 8px;
+  padding: 0;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -11,12 +11,17 @@
   color: white;
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover {
   border-color: white;
   background: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
 }
 
 [data-theme="dark"] .theme-toggle {
@@ -33,14 +38,27 @@
   width: 24px;
   height: 24px;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 /* ========== RESPONSIVE ========== */
-@media (max-width: 640px) {
+@media (max-width: 1250px) {
+  .theme-toggle {
+    width: 42px;
+    height: 42px;
+  }
+
+  .theme-icon {
+    width: 23px;
+    height: 23px;
+  }
+}
+
+@media (max-width: 1100px) {
   .theme-toggle {
     width: 40px;
     height: 40px;
-    padding: 6px;
+    border-width: 2px;
   }
 
   .theme-icon {
@@ -49,15 +67,62 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 1000px) {
+  .theme-toggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .theme-icon {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+@media (max-width: 768px) {
+  .theme-toggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .theme-icon {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+@media (max-width: 640px) {
   .theme-toggle {
     width: 36px;
     height: 36px;
-    padding: 5px;
   }
 
   .theme-icon {
     width: 20px;
     height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+  }
+
+  .theme-icon {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+@media (max-width: 375px) {
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .theme-icon {
+    width: 18px;
+    height: 18px;
   }
 }

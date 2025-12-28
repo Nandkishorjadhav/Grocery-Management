@@ -18,15 +18,26 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server is not responding properly. Please ensure the backend server is running.');
+      }
+      
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+        throw new Error(data.error || data.message || 'Something went wrong');
       }
 
       return data;
     } catch (error) {
       console.error('API Error:', error);
+      // Improve error message for network errors
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Cannot connect to server. Please ensure the backend server is running on port 5000.');
+      }
       throw error;
     }
   }
