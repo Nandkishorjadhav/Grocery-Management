@@ -6,3 +6,4 @@ export { default as Products } from './Products';
 export { default as Inventory } from './Inventory';
 export { default as ShoppingList } from './ShoppingList';
 export { default as Reports } from './Reports';
+export { default as AdminPanel } from './AdminPanel';

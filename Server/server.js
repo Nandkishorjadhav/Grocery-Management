@@ -6,6 +6,7 @@ import inventoryRoutes from './src/routes/inventoryRoutes.js';
 import shoppingListRoutes from './src/routes/shoppingListRoutes.js';
 import cartRoutes from './src/routes/cartRoutes.js';
 import authRoutes from './src/routes/authRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shopping-list', shoppingListRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

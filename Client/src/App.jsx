@@ -11,6 +11,7 @@ import Inventory from './pages/Inventory';
 import Cart from './pages/Cart';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
+import AdminPanel from './pages/AdminPanel';
 import Preloader from './components/common/Preloader';
 import AuthModal from './components/common/AuthModal';
 
@@ -62,6 +63,7 @@ function AppContent({ searchQuery, setSearchQuery }) {
           <Route path="/cart" element={<Cart />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </Layout>
       {showAuthModal && <AuthModal />}

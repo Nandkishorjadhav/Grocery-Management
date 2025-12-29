@@ -50,6 +50,20 @@ const userSchema = new mongoose.Schema({
     enum: ['email', 'mobile'],
     required: true
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'approved'
+  },
   createdAt: {
     type: Date,
     default: Date.now

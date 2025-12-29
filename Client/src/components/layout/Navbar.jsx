@@ -93,6 +93,11 @@ const Navbar = ({ onSearch }) => {
     { path: '/reports', name: 'Reports', icon: '📈' },
   ];
 
+  // Add admin panel link if user is admin
+  const adminNavItems = (user?.isAdmin || user?.role === 'admin')
+    ? [...navItems, { path: '/admin', name: 'Admin Panel', icon: '⚙️' }]
+    : navItems;
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -103,7 +108,7 @@ const Navbar = ({ onSearch }) => {
           </Link>
 
           <div className="navbar-desktop">
-            {navItems.map((item) => (
+            {adminNavItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
@@ -254,7 +259,7 @@ const Navbar = ({ onSearch }) => {
 
       {isOpen && (
         <div className="mobile-menu">
-          {navItems.map((item) => (
+          {adminNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
