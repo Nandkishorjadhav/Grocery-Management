@@ -1,7 +1,7 @@
-const Order = require('../models/Order');
+import Order from '../models/Order.js';
 
 // Create a new order
-const createOrder = async (req, res) => {
+export const createOrder = async (req, res) => {
   try {
     const { orderId, items, deliveryAddress, paymentMethod, totalAmount, deliveryCharges, finalAmount } = req.body;
 
@@ -16,7 +16,7 @@ const createOrder = async (req, res) => {
     // Create order
     const order = new Order({
       orderId,
-      user: req.user._id,
+      user: req.user.id || req.user._id,
       items,
       deliveryAddress,
       paymentMethod: paymentMethod || 'cod',
@@ -44,7 +44,7 @@ const createOrder = async (req, res) => {
 };
 
 // Get all orders for the logged-in user
-const getUserOrders = async (req, res) => {
+export const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
       .sort({ orderDate: -1 })
@@ -74,7 +74,7 @@ const getUserOrders = async (req, res) => {
 };
 
 // Get a specific order by ID
-const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
@@ -103,7 +103,7 @@ const getOrderById = async (req, res) => {
 };
 
 // Update order status (for admin or system)
-const updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const { id } = req.params;
@@ -141,7 +141,7 @@ const updateOrderStatus = async (req, res) => {
 };
 
 // Cancel order
-const cancelOrder = async (req, res) => {
+export const cancelOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
@@ -178,12 +178,4 @@ const cancelOrder = async (req, res) => {
       error: error.message
     });
   }
-};
-
-module.exports = {
-  createOrder,
-  getUserOrders,
-  getOrderById,
-  updateOrderStatus,
-  cancelOrder
 };

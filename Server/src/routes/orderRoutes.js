@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
-const {
+import { authenticate } from '../middleware/auth.js';
+import {
   createOrder,
   getUserOrders,
   getOrderById,
   updateOrderStatus,
   cancelOrder
-} = require('../controllers/orderController');
+} from '../controllers/orderController.js';
 
 // All routes require authentication
 router.use(authenticate);
@@ -27,4 +27,4 @@ router.patch('/:id/status', updateOrderStatus);
 // Cancel order
 router.patch('/:id/cancel', cancelOrder);
 
-module.exports = router;
+export default router;

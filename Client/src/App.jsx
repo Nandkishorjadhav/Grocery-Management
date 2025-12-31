@@ -13,6 +13,7 @@ import Checkout from './pages/Checkout';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 import AdminPanel from './pages/AdminPanel';
+import Profile from './pages/Profile';
 import Preloader from './components/common/Preloader';
 import AuthModal from './components/common/AuthModal';
 
@@ -66,6 +67,7 @@ function AppContent({ searchQuery, setSearchQuery }) {
           <Route path="/shopping-list" element={<ShoppingList />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Layout>
       {showAuthModal && <AuthModal />}

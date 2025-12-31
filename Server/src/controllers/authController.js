@@ -132,6 +132,7 @@ export const verifyOTP = async (req, res) => {
       message: 'Authentication successful',
       token,
       user: {
+        _id: user._id,
         id: user._id,
         name: user.name,
         email: user.email,
@@ -205,6 +206,7 @@ export const getProfile = async (req, res) => {
     res.json({
       success: true,
       user: {
+        _id: user._id,
         id: user._id,
         name: user.name,
         email: user.email,

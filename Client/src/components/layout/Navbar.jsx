@@ -15,9 +15,7 @@ const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
   const searchRef = useRef(null);
   const { inventory, cartCount } = useGrocery();
-  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const profileRef = useRef(null);
+  const { user, isAuthenticated, openAuthModal } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
@@ -25,9 +23,6 @@ const Navbar = ({ onSearch }) => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setShowProfileDropdown(false);
       }
     };
 
@@ -170,77 +165,9 @@ const Navbar = ({ onSearch }) => {
             </button>
             
             {isAuthenticated() ? (
-              <div className="profile-menu-container" ref={profileRef}>
-                <button 
-                  className="profile-icon-btn" 
-                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  aria-label="Profile menu"
-                  title="My Profile"
-                >
-                  <span className="profile-avatar-icon">👤</span>
-                </button>
-                {showProfileDropdown && (
-                  <div className="profile-dropdown">
-                    <div className="profile-dropdown-header">
-                      <div className="profile-dropdown-avatar">👤</div>
-                      <div className="profile-dropdown-info">
-                        <div className="profile-dropdown-name">{user?.name}</div>
-                        <div className="profile-dropdown-email">
-                          {user?.email || user?.mobile}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="profile-dropdown-divider"></div>
-                    
-                    <div className="profile-dropdown-details">
-                      <div className="profile-detail-item">
-                        <span className="profile-detail-icon">📧</span>
-                        <div className="profile-detail-content">
-                          <div className="profile-detail-label">Email</div>
-                          <div className="profile-detail-value">{user?.email || 'Not provided'}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="profile-detail-item">
-                        <span className="profile-detail-icon">📱</span>
-                        <div className="profile-detail-content">
-                          <div className="profile-detail-label">Mobile</div>
-                          <div className="profile-detail-value">{user?.mobile || 'Not provided'}</div>
-                        </div>
-                      </div>
-                      
-                      {user?.role && (
-                        <div className="profile-detail-item">
-                          <span className="profile-detail-icon">👔</span>
-                          <div className="profile-detail-content">
-                            <div className="profile-detail-label">Role</div>
-                            <div className="profile-detail-value">
-                              {user.role === 'admin' ? 'Administrator' : 'User'}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {user?.isAdmin && (
-                        <div className="profile-admin-badge">
-                          ⚙️ Admin Access
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="profile-dropdown-divider"></div>
-                    
-                    <button className="profile-logout-btn" onClick={() => {
-                      logout();
-                      setShowProfileDropdown(false);
-                    }}>
-                      <span className="logout-icon">🚪</span>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <Link to="/profile" className="profile-icon-link" title="My Profile">
+                <span className="profile-avatar-icon">👤</span>
+              </Link>
             ) : (
               <button className="login-btn" onClick={openAuthModal}>
                 Login

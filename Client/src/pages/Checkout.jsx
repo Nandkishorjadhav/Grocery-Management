@@ -15,6 +15,7 @@ const Checkout = () => {
   const [step, setStep] = useState(1); // 1: Address, 2: Review, 3: Confirmation
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
 
   const [deliveryAddress, setDeliveryAddress] = useState({
     fullName: user?.name || '',
@@ -37,6 +38,20 @@ const Checkout = () => {
       navigate('/cart');
     }
     fetchCart();
+
+    // Load saved address from localStorage
+    const savedAddress = localStorage.getItem(`deliveryAddress_${user?._id}`);
+    if (savedAddress) {
+      try {
+        const parsedAddress = JSON.parse(savedAddress);
+        setDeliveryAddress(parsedAddress);
+        setIsEditingAddress(false); // Address is already saved, no need to edit
+      } catch (error) {
+        console.error('Error loading saved address:', error);
+      }
+    } else {
+      setIsEditingAddress(true); // No saved address, enable edit mode
+    }
   }, []);
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
@@ -102,6 +117,9 @@ const Checkout = () => {
 
   const handleContinueToReview = () => {
     if (validateAddress()) {
+      // Save address to localStorage
+      localStorage.setItem(`deliveryAddress_${user?._id}`, JSON.stringify(deliveryAddress));
+      setIsEditingAddress(false);
       setStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -113,14 +131,25 @@ const Checkout = () => {
       return;
     }
 
+    // Check if user ID exists
+    if (!user || !user._id) {
+      alert('User information not found. Please login again.');
+      navigate('/');
+      return;
+    }
+
     setIsProcessing(true);
     try {
       // Generate order ID
       const newOrderId = 'ORD' + Date.now();
       
+      console.log('User data:', user);
+      console.log('User ID:', user._id);
+      
       // Prepare order data
       const orderData = {
         orderId: newOrderId,
+        user: user._id, // Add user ID
         items: cart.map(item => ({
           productId: item._id,
           name: item.name,
@@ -136,6 +165,8 @@ const Checkout = () => {
         deliveryCharges,
         finalAmount
       };
+      
+      console.log('Order data being sent:', orderData);
       
       // Save order to database
       await orderService.createOrder(orderData);
@@ -183,9 +214,50 @@ const Checkout = () => {
     <div className="checkout-content">
       <div className="checkout-main">
         <Card>
-          <h2 className="section-title">📍 Delivery Address</h2>
-          <p className="section-subtitle">Enter your delivery details</p>
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">📍 Delivery Address</h2>
+              <p className="section-subtitle">Enter your delivery details</p>
+            </div>
+            {!isEditingAddress && deliveryAddress.addressLine1 && (
+              <Button 
+                variant="secondary" 
+                size="small"
+                onClick={() => setIsEditingAddress(true)}
+              >
+                Edit Address
+              </Button>
+            )}
+          </div>
 
+          {!isEditingAddress && deliveryAddress.addressLine1 ? (
+            <div className="saved-address-display">
+              <div className="address-detail">
+                <strong>{deliveryAddress.fullName}</strong>
+              </div>
+              <div className="address-detail">
+                {deliveryAddress.mobile} | {deliveryAddress.email}
+              </div>
+              <div className="address-detail">
+                {deliveryAddress.addressLine1}
+                {deliveryAddress.addressLine2 && `, ${deliveryAddress.addressLine2}`}
+              </div>
+              <div className="address-detail">
+                {deliveryAddress.city}, {deliveryAddress.state} - {deliveryAddress.pincode}
+              </div>
+              {deliveryAddress.landmark && (
+                <div className="address-detail">
+                  Landmark: {deliveryAddress.landmark}
+                </div>
+              )}
+              <div className="address-type-badge">
+                {deliveryAddress.addressType === 'home' && '🏠'}
+                {deliveryAddress.addressType === 'work' && '💼'}
+                {deliveryAddress.addressType === 'other' && '📍'}
+                {' '}{deliveryAddress.addressType.charAt(0).toUpperCase() + deliveryAddress.addressType.slice(1)}
+              </div>
+            </div>
+          ) : (
           <form className="address-form">
             <div className="form-row">
               <div className="form-group">
@@ -360,6 +432,7 @@ const Checkout = () => {
               </div>
             </div>
           </form>
+          )}
         </Card>
       </div>
 
