@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 import AdminPanel from './pages/AdminPanel';
@@ -61,6 +62,7 @@ function AppContent({ searchQuery, setSearchQuery }) {
           <Route path="/products" element={<Products />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/admin" element={<AdminPanel />} />

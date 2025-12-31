@@ -205,9 +205,11 @@ const Cart = () => {
                     Continue Shopping
                   </Button>
                 </Link>
-                <Button variant="primary" style={{ flex: 1 }}>
-                  Proceed to Checkout
-                </Button>
+                <Link to="/checkout" style={{ flex: 1 }}>
+                  <Button variant="primary" style={{ width: '100%' }}>
+                    Proceed to Checkout
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>

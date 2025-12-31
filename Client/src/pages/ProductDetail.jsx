@@ -8,32 +8,47 @@ import './ProductDetail.css';
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { inventory } = useGrocery();
+  const { inventory, addToCart } = useGrocery();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addToCartSuccess, setAddToCartSuccess] = useState(false);
 
   useEffect(() => {
     // Scroll to top when product changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Find the product by ID
-    const foundProduct = inventory.find(item => item.id === parseInt(id));
+    // Find the product by ID - handle both _id and id, both string and numeric
+    const foundProduct = inventory.find(item => {
+      const itemId = item._id || item.id;
+      // Try both string and numeric comparison
+      return itemId == id || String(itemId) === String(id) || Number(itemId) === Number(id);
+    });
+    
     if (foundProduct) {
       setProduct(foundProduct);
       setSelectedImage(0); // Reset selected image
       setSelectedQuantity(1); // Reset quantity
       
+      const currentItemId = foundProduct._id || foundProduct.id;
+      
       // Find related products from same category
       const related = inventory
-        .filter(item => item.id !== parseInt(id) && item.category === foundProduct.category)
+        .filter(item => {
+          const itemId = item._id || item.id;
+          return itemId != currentItemId && item.category === foundProduct.category;
+        })
         .slice(0, 6);
       
       // If not enough related products in same category, add from other categories
       if (related.length < 6) {
         const additional = inventory
-          .filter(item => item.id !== parseInt(id) && item.category !== foundProduct.category)
+          .filter(item => {
+            const itemId = item._id || item.id;
+            return itemId != currentItemId && item.category !== foundProduct.category;
+          })
           .slice(0, 6 - related.length);
         setRelatedProducts([...related, ...additional]);
       } else {
@@ -109,12 +124,59 @@ const ProductDetail = () => {
   const isLowStock = product.quantity <= product.minStock;
   const productImages = getProductImages(product.category, product.name);
 
-  const handleAddToCart = () => {
-    alert(`Added ${selectedQuantity} ${product.unit} of ${product.name} to cart!`);
+  const handleAddToCart = async () => {
+    if (isAddingToCart) return;
+    
+    try {
+      setIsAddingToCart(true);
+      
+      // Add item to cart with selected quantity
+      for (let i = 0; i < selectedQuantity; i++) {
+        await addToCart(product);
+      }
+      
+      // Show success feedback
+      setAddToCartSuccess(true);
+      
+      // Reset success state after 2 seconds
+      setTimeout(() => {
+        setAddToCartSuccess(false);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
-  const handleBuyNow = () => {
-    alert(`Proceeding to checkout with ${selectedQuantity} ${product.unit} of ${product.name}`);
+  const handleBuyNow = async () => {
+    try {
+      // Add to cart first
+      for (let i = 0; i < selectedQuantity; i++) {
+        await addToCart(product);
+      }
+      // Navigate to cart page
+      navigate('/cart');
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    }
+  };
+
+  const handleRelatedProductAddToCart = async (e, item) => {
+    e.preventDefault(); // Prevent Link navigation
+    e.stopPropagation();
+    
+    try {
+      await addToCart(item);
+      // Could add visual feedback here
+      alert(`${item.name} added to cart!`);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    }
   };
 
   return (
@@ -221,12 +283,13 @@ const ProductDetail = () => {
 
             <div className="product-actions">
               <Button 
-                variant="primary" 
+                variant={addToCartSuccess ? "success" : "primary"}
                 fullWidth 
                 onClick={handleAddToCart}
-                icon="🛒"
+                icon={addToCartSuccess ? "✓" : (isAddingToCart ? "⏳" : "🛒")}
+                disabled={isAddingToCart}
               >
-                Add to Cart
+                {addToCartSuccess ? "Added to Cart!" : (isAddingToCart ? "Adding..." : "Add to Cart")}
               </Button>
               <Button 
                 variant="success" 
@@ -301,31 +364,39 @@ const ProductDetail = () => {
             <p className="related-subtitle">You might also like these products</p>
             
             <div className="related-products-grid">
-              {relatedProducts.map((item) => (
-                <Link
-                  key={item.id}
-                  to={`/product/${item.id}`}
-                  className="related-product-card"
-                >
-                  <div className="related-product-image">
-                    <img 
-                      src={getProductImage(item.category, item.name)} 
-                      alt={item.name}
-                      loading="lazy"
-                    />
-                    <div className="related-discount">{Math.floor(Math.random() * 30) + 10}% OFF</div>
-                  </div>
-                  <div className="related-product-info">
-                    <h3 className="related-product-name">{item.name}</h3>
-                    <span className="related-product-category">{item.category}</span>
-                    <div className="related-product-price">
-                      <span className="related-price-current">₹{item.price}</span>
-                      <span className="related-price-original">₹{Math.round(item.price * 1.3)}</span>
+              {relatedProducts.map((item) => {
+                const itemId = item._id || item.id;
+                return (
+                  <Link
+                    key={itemId}
+                    to={`/product/${itemId}`}
+                    className="related-product-card"
+                  >
+                    <div className="related-product-image">
+                      <img 
+                        src={getProductImage(item.category, item.name)} 
+                        alt={item.name}
+                        loading="lazy"
+                      />
+                      <div className="related-discount">{Math.floor(Math.random() * 30) + 10}% OFF</div>
                     </div>
-                    <button className="related-add-btn">Add to Cart</button>
-                  </div>
-                </Link>
-              ))}
+                    <div className="related-product-info">
+                      <h3 className="related-product-name">{item.name}</h3>
+                      <span className="related-product-category">{item.category}</span>
+                      <div className="related-product-price">
+                        <span className="related-price-current">₹{item.price}</span>
+                        <span className="related-price-original">₹{Math.round(item.price * 1.3)}</span>
+                      </div>
+                      <button 
+                        className="related-add-btn"
+                        onClick={(e) => handleRelatedProductAddToCart(e, item)}
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
