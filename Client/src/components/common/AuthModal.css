@@ -11,6 +11,7 @@
   z-index: 1000;
   backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
+  padding: 1rem;
 }
 
 .auth-modal {
@@ -18,10 +19,28 @@
   border-radius: 16px;
   padding: 40px;
   max-width: 450px;
-  width: 90%;
+  width: 100%;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .auth-modal {
+    padding: 30px 20px;
+    max-width: 95%;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: 25px 16px;
+    max-width: 100%;
+    margin: 0.5rem;
+  }
 }
 
 .auth-modal-close {
@@ -48,6 +67,19 @@
   font-size: 28px;
   color: var(--text-color, #333);
   text-align: center;
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .auth-modal h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-modal h2 {
+    font-size: 22px;
+  }
 }
 
 .auth-subtitle {
@@ -55,6 +87,14 @@
   color: var(--text-secondary, #666);
   margin-bottom: 30px;
   font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .auth-subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
 }
 
 .auth-method-toggle {
@@ -64,6 +104,12 @@
   background: var(--surface-color, #f5f5f5);
   padding: 4px;
   border-radius: 12px;
+}
+
+@media (max-width: 640px) {
+  .auth-method-toggle {
+    margin-bottom: 20px;
+  }
 }
 
 .auth-method-toggle button {
@@ -79,6 +125,20 @@
   transition: all 0.2s;
 }
 
+@media (max-width: 640px) {
+  .auth-method-toggle button {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-method-toggle button {
+    padding: 9px;
+    font-size: 14px;
+  }
+}
+
 .auth-method-toggle button.active {
   background: white;
   color: var(--primary-color, #ff6347);
@@ -89,12 +149,25 @@
   margin-bottom: 20px;
 }
 
+@media (max-width: 640px) {
+  .form-group {
+    margin-bottom: 16px;
+  }
+}
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
   color: var(--text-color, #333);
   font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
 }
 
 .form-group input {
@@ -106,6 +179,21 @@
   transition: all 0.2s;
   background: var(--input-bg, white);
   color: var(--text-color, #333);
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .form-group input {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group input {
+    padding: 11px 12px;
+    font-size: 14px;
+  }
 }
 
 .form-group input:focus {
@@ -138,10 +226,30 @@
   box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
 }
 
+@media (max-width: 640px) {
+  .auth-submit-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-submit-btn {
+    padding: 13px;
+    font-size: 14px;
+  }
+}
+
 .auth-submit-btn:hover:not(:disabled) {
   background: var(--primary-hover, #e5533d);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 99, 71, 0.4);
+}
+
+@media (max-width: 640px) {
+  .auth-submit-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 }
 
 .auth-submit-btn:disabled {
@@ -212,13 +320,88 @@
 }
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .auth-modal {
-    --background-color: #1e1e1e;
-    --text-color: #e0e0e0;
-    --text-secondary: #999;
-    --surface-color: #2a2a2a;
-    --input-bg: #2a2a2a;
-    --border-color: #404040;
-  }
+[data-theme="dark"] .auth-modal {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 152, 0, 0.1);
+}
+
+[data-theme="dark"] .auth-modal h2 {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(255, 152, 0, 0.2);
+}
+
+[data-theme="dark"] .auth-subtitle {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .auth-method-toggle {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 152, 0, 0.1);
+}
+
+[data-theme="dark"] .auth-method-toggle button {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .auth-method-toggle button.active {
+  background: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+[data-theme="dark"] .form-group label {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-group input {
+  background: #0a0a0a;
+  border-color: rgba(255, 152, 0, 0.2);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .form-group input:focus {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] .error-message {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-left-color: #ef4444;
+}
+
+[data-theme="dark"] .auth-submit-btn {
+  background: linear-gradient(135deg, #ff6f00 0%, #f57c00 100%);
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+}
+
+[data-theme="dark"] .auth-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+  box-shadow: 0 6px 16px rgba(255, 111, 0, 0.4);
+}
+
+[data-theme="dark"] .auth-info {
+  color: #999;
+}
+
+[data-theme="dark"] .resend-timer {
+  color: #999;
+}
+
+[data-theme="dark"] .resend-btn,
+[data-theme="dark"] .back-btn {
+  color: #ff9800;
+}
+
+[data-theme="dark"] .auth-modal-close {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .auth-modal-close:hover {
+  color: #ff9800;
 }
