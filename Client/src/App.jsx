@@ -14,6 +14,7 @@ import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 import AdminPanel from './pages/AdminPanel';
 import Profile from './pages/Profile';
+import NotFound from './pages/NotFound';
 import Preloader from './components/common/Preloader';
 import AuthModal from './components/common/AuthModal';
 
@@ -55,21 +56,64 @@ function AppContent({ searchQuery, setSearchQuery }) {
 
   return (
     <>
-      <Layout onSearch={setSearchQuery}>
-        <Routes>
-          <Route path="/" element={<Home searchQuery={searchQuery} />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/shopping-list" element={<ShoppingList />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="*" element={<NotFound />} />
+        <Route path="/" element={
+          <Layout onSearch={setSearchQuery}>
+            <Home searchQuery={searchQuery} />
+          </Layout>
+        } />
+        <Route path="/product/:id" element={
+          <Layout onSearch={setSearchQuery}>
+            <ProductDetail />
+          </Layout>
+        } />
+        <Route path="/dashboard" element={
+          <Layout onSearch={setSearchQuery}>
+            <Dashboard />
+          </Layout>
+        } />
+        <Route path="/products" element={
+          <Layout onSearch={setSearchQuery}>
+            <Products />
+          </Layout>
+        } />
+        <Route path="/inventory" element={
+          <Layout onSearch={setSearchQuery}>
+            <Inventory />
+          </Layout>
+        } />
+        <Route path="/cart" element={
+          <Layout onSearch={setSearchQuery}>
+            <Cart />
+          </Layout>
+        } />
+        <Route path="/checkout" element={
+          <Layout onSearch={setSearchQuery}>
+            <Checkout />
+          </Layout>
+        } />
+        <Route path="/shopping-list" element={
+          <Layout onSearch={setSearchQuery}>
+            <ShoppingList />
+          </Layout>
+        } />
+        <Route path="/reports" element={
+          <Layout onSearch={setSearchQuery}>
+            <Reports />
+          </Layout>
+        } />
+        <Route path="/admin" element={
+          <Layout onSearch={setSearchQuery}>
+            <AdminPanel />
+          </Layout>
+        } />
+        <Route path="/profile" element={
+          <Layout onSearch={setSearchQuery}>
+            <Profile />
+          </Layout>
+        } />
+      </Routes>
       {showAuthModal && <AuthModal />}
     </>
   );
