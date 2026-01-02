@@ -22,8 +22,5 @@
       "src": "/(.*)",
       "dest": "Client/dist/$1"
     }
-  ],
-  "buildCommand": "cd Client && npm install && npm run build",
-  "outputDirectory": "Client/dist",
-  "installCommand": "npm install --prefix Client && npm install --prefix Server"
+  ]
 }
