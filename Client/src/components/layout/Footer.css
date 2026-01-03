@@ -19,6 +19,116 @@
   flex-wrap: wrap;
 }
 
+.footer-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  transition: color 0.25s ease;
+  font-weight: 400;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.footer-link:hover {
+  color: #ff9800;
+  text-decoration: underline;
+}
+
+/* About Modal Content */
+.about-modal-content {
+  padding: 1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.about-modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ff6f00;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #ff9800;
+  padding-bottom: 1rem;
+}
+
+.about-section {
+  margin-bottom: 2rem;
+}
+
+.about-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.about-section p {
+  color: #555;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.about-features-list {
+  list-style: none;
+  padding-left: 0;
+  color: #555;
+}
+
+.about-features-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.about-features-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #ff6f00;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.about-features-list li strong {
+  color: #ff6f00;
+}
+
+/* Dark Theme */
+[data-theme="dark"] .about-modal-title {
+  color: #ff8f00;
+}
+
+[data-theme="dark"] .about-section h3 {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .about-section p,
+[data-theme="dark"] .about-features-list {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .about-features-list li strong {
+  color: #ff8f00;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .footer-content {
     padding: 0.5rem 0.875rem;
@@ -35,6 +145,14 @@
 
   .footer-link {
     font-size: 0.75rem;
+  }
+
+  .about-modal-title {
+    font-size: 1.5rem;
+  }
+
+  .about-section h3 {
+    font-size: 1.1rem;
   }
 }
 
@@ -59,35 +177,18 @@
   .footer-link {
     font-size: 0.6875rem;
   }
+
+  .about-modal-content {
+    padding: 0.5rem;
+  }
+
+  .about-modal-title {
+    font-size: 1.25rem;
+  }
 }
 
 @media (max-width: 480px) {
   .footer-links {
     gap: 0.5rem;
   }
-}
-
-.footer-text {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8125rem;
-  font-weight: 400;
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.footer-link {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  transition: color 0.25s ease;
-  font-weight: 400;
-}
-
-.footer-link:hover {
-  color: #ff9800;
-  text-decoration: underline;
 }
