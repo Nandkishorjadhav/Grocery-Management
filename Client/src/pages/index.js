@@ -10,4 +10,4 @@ export { default as ShoppingList } from './ShoppingList';
 export { default as Reports } from './Reports';
 export { default as AdminPanel } from './AdminPanel';
 export { default as Profile } from './Profile';
-export { default as NotFound } from './NotFound';
+export { default as Terms } from './Terms';

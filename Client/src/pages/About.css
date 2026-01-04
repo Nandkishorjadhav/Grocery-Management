@@ -1,0 +1,399 @@
+/* About Page */
+.about-page {
+  padding: 1rem 0.5rem;
+  width: 95%;
+  max-width: 95%;
+  margin: 0 auto;
+}
+
+.about-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 1rem auto;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ff6f00;
+}
+
+.about-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ff6f00;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-subtitle {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.about-content {
+  padding: 0.5rem 0;
+}
+
+.about-section {
+  margin-bottom: 1.5rem;
+}
+
+.about-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid #ff9800;
+}
+
+.about-section p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+/* Features Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.feature-card {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(255, 111, 0, 0.2);
+  border-color: #ff9800;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ff6f00;
+  margin-bottom: 0.4rem;
+}
+
+.feature-card p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Mission Section */
+.mission-section {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.mission-text {
+  font-size: 0.95rem;
+  color: #1565c0;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Benefits List */
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+}
+
+.benefits-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.benefits-list li:hover {
+  background: #fff3e0;
+}
+
+.benefit-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background: #ff6f00;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.benefits-list li strong {
+  display: block;
+  color: #ff6f00;
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+.benefits-list li p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Values Section */
+.values-section {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.value-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.value-item h3 {
+  color: #7b1fa2;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.value-item p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Contact Section */
+.contact-section {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.contact-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.contact-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-3px);
+}
+
+.contact-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-card h4 {
+  color: #2e7d32;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.contact-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* CTA Section */
+.about-cta {
+  background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+  color: white;
+  padding: 1.25rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.about-cta h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.about-cta p {
+  font-size: 0.95rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Dark Theme */
+[data-theme="dark"] .about-title {
+  color: #ff8f00;
+}
+
+[data-theme="dark"] .about-subtitle {
+  color: #999;
+}
+
+[data-theme="dark"] .about-section h2 {
+  color: #e0e0e0;
+  border-bottom-color: #ff8f00;
+}
+
+[data-theme="dark"] .about-section p {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .feature-card {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+  border-color: #444;
+}
+
+[data-theme="dark"] .feature-card h3 {
+  color: #ff8f00;
+}
+
+[data-theme="dark"] .feature-card p {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .mission-section {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152842 100%);
+  border-left-color: #4a90e2;
+}
+
+[data-theme="dark"] .mission-text {
+  color: #64b5f6;
+}
+
+[data-theme="dark"] .benefits-list li {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .benefits-list li:hover {
+  background: #1e1e1e;
+}
+
+[data-theme="dark"] .benefits-list li strong {
+  color: #ff8f00;
+}
+
+[data-theme="dark"] .benefits-list li p {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .values-section {
+  background: linear-gradient(135deg, #2a1a3a 0%, #1e1427 100%);
+}
+
+[data-theme="dark"] .value-item {
+  background: #1e1e1e;
+}
+
+[data-theme="dark"] .value-item h3 {
+  color: #ba68c8;
+}
+
+[data-theme="dark"] .value-item p {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .contact-section {
+  background: linear-gradient(135deg, #1e3a2a 0%, #14281e 100%);
+}
+
+[data-theme="dark"] .contact-card {
+  background: #1e1e1e;
+}
+
+[data-theme="dark"] .contact-card h4 {
+  color: #66bb6a;
+}
+
+[data-theme="dark"] .contact-card p {
+  color: #b0b0b0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .about-title {
+    font-size: 2rem;
+  }
+
+  .about-subtitle {
+    font-size: 1rem;
+  }
+
+  .about-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .values-grid,
+  .contact-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-title {
+    font-size: 1.75rem;
+    flex-direction: column;
+  }
+
+  .about-section h2 {
+    font-size: 1.35rem;
+  }
+
+  .feature-card,
+  .mission-section,
+  .values-section,
+  .contact-section,
+  .about-cta {
+    padding: 1.25rem;
+  }
+}

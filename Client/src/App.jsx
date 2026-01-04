@@ -14,6 +14,8 @@ import ShoppingList from './pages/ShoppingList';
 import Reports from './pages/Reports';
 import AdminPanel from './pages/AdminPanel';
 import Profile from './pages/Profile';
+import About from './pages/About';
+import Terms from './pages/Terms';
 import NotFound from './pages/NotFound';
 import Preloader from './components/common/Preloader';
 import AuthModal from './components/common/AuthModal';
@@ -111,6 +113,16 @@ function AppContent({ searchQuery, setSearchQuery }) {
         <Route path="/profile" element={
           <Layout onSearch={setSearchQuery}>
             <Profile />
+          </Layout>
+        } />
+        <Route path="/about" element={
+          <Layout onSearch={setSearchQuery}>
+            <About />
+          </Layout>
+        } />
+        <Route path="/terms" element={
+          <Layout onSearch={setSearchQuery}>
+            <Terms />
           </Layout>
         } />
       </Routes>
