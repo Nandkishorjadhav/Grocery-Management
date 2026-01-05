@@ -1,104 +1,202 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGrocery } from '../context/GroceryContext';
-import Card from '../components/common/Card';
-import Breadcrumb from '../components/common/Breadcrumb';
 import { Link } from 'react-router-dom';
 import './Products.css';
 
 const Products = () => {
   const { inventory } = useGrocery();
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('name');
 
-  // Group products by category
-  const productsByCategory = inventory.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {});
+  // Get unique categories
+  const categories = ['all', ...new Set(inventory.map(item => item.category))];
+
+  // Filter and sort products
+  const filteredProducts = inventory
+    .filter(item => {
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'stock':
+          return b.quantity - a.quantity;
+        default:
+          return 0;
+      }
+    });
+
+  // Get category emoji
+  const getCategoryEmoji = (category) => {
+    const emojiMap = {
+      'Fruits': '🍎',
+      'Vegetables': '🥗',
+      'Dairy': '🥛',
+      'Bakery': '🥖',
+      'Meat': '🥩',
+      'Beverages': '🧃',
+      'Snacks': '🍿',
+      'Frozen': '🧊',
+      'Canned': '🥫',
+      'all': '🛒'
+    };
+    return emojiMap[category] || '📦';
+  };
 
   return (
-    <div className="fade-in">
-      <Breadcrumb />
-      
-      <div className="page-header">
-        <h1 className="page-title gradient-text">Products</h1>
+    <div className="products-page">
+      {/* Header Section */}
+      <div className="products-header">
+        <div className="header-content">
+          <div className="header-text">
+            <h1 className="page-title">Our Products</h1>
+            <p className="page-subtitle">Browse our wide selection of quality grocery items</p>
+          </div>
+          <div className="header-stats">
+            <div className="stat-card">
+              <span className="stat-emoji">📦</span>
+              <div>
+                <div className="stat-value">{inventory.length}</div>
+                <div className="stat-label">Total Products</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <span className="stat-emoji">📂</span>
+              <div>
+                <div className="stat-value">{categories.length - 1}</div>
+                <div className="stat-label">Categories</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {inventory.length === 0 ? (
-        <Card>
-          <div className="empty-state">
-            <div className="empty-state-icon">🏷️</div>
-            <p className="empty-state-text">No products found. Add products from Dashboard!</p>
-            <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-              Go to Dashboard
-            </Link>
+      {/* Filters Section */}
+      <div className="products-filters">
+        <div className="search-box">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className="filter-group">
+          <label className="filter-label">Category:</label>
+          <div className="category-buttons">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+              >
+                <span className="category-emoji">{getCategoryEmoji(category)}</span>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
           </div>
-        </Card>
+        </div>
+
+        <div className="sort-group">
+          <label className="filter-label">Sort by:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="sort-select"
+          >
+            <option value="name">Name (A-Z)</option>
+            <option value="price-low">Price (Low to High)</option>
+            <option value="price-high">Price (High to Low)</option>
+            <option value="stock">Stock Level</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      {searchQuery && (
+        <div className="results-info">
+          Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} matching "{searchQuery}"
+        </div>
+      )}
+
+      {/* Products Grid */}
+      {filteredProducts.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-emoji">
+            {inventory.length === 0 ? '📦' : '🔍'}
+          </span>
+          <h3 className="empty-title">
+            {inventory.length === 0 ? 'No Products Available' : 'No Products Found'}
+          </h3>
+          <p className="empty-text">
+            {inventory.length === 0 
+              ? 'Start adding products to your inventory from the dashboard.'
+              : 'Try adjusting your search or filter criteria.'}
+          </p>
+          {inventory.length === 0 && (
+            <Link to="/dashboard" className="btn-primary">
+              <span>➕</span> Add Products
+            </Link>
+          )}
+        </div>
       ) : (
-        <div style={{ display: 'grid', gap: '1.5rem' }}>
-          {Object.entries(productsByCategory).map(([category, items]) => (
-            <Card key={category} title={`${category} (${items.length})`} hover={true}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: '1rem',
-                      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
-                      transition: 'all 0.3s ease',
-                    }}
-                    className="product-card"
-                  >
-                    <div style={{ marginBottom: '0.75rem' }}>
-                      <h3 style={{ 
-                        fontSize: '1.125rem', 
-                        fontWeight: 700, 
-                        color: '#0f172a',
-                        marginBottom: '0.25rem'
-                      }}>
-                        {item.name}
-                      </h3>
-                      <span className="badge badge-primary">{item.category}</span>
-                    </div>
-                    
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      fontSize: '0.875rem',
-                      color: '#64748b'
-                    }}>
-                      <div>
-                        <div style={{ marginBottom: '0.25rem' }}>
-                          <strong>Qty:</strong> {item.quantity} {item.unit}
-                        </div>
-                        <div>
-                          <strong>Price:</strong> ${item.price.toFixed(2)}
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ marginBottom: '0.25rem' }}>
-                          <strong>Min:</strong> {item.minStock}
-                        </div>
-                        {item.expiryDate && (
-                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                            Exp: {new Date(item.expiryDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {item.quantity <= item.minStock && (
-                      <div style={{ marginTop: '0.75rem' }}>
-                        <span className="badge badge-warning">Low Stock</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+        <div className="products-grid">
+          {filteredProducts.map((item) => (
+            <div key={item.id} className="product-card">
+              <div className="product-image">
+                <span className="product-emoji">{getCategoryEmoji(item.category)}</span>
+                {item.quantity <= item.minStock && (
+                  <span className="badge-low-stock">Low Stock</span>
+                )}
               </div>
-            </Card>
+              
+              <div className="product-content">
+                <div className="product-category">{item.category}</div>
+                <h3 className="product-name">{item.name}</h3>
+                
+                <div className="product-details">
+                  <div className="detail-row">
+                    <span className="detail-label">💰 Price:</span>
+                    <span className="detail-value price">${item.price.toFixed(2)}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">📦 Stock:</span>
+                    <span className={`detail-value ${item.quantity <= item.minStock ? 'low-stock' : ''}`}>
+                      {item.quantity} {item.unit}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">📊 Min Stock:</span>
+                    <span className="detail-value">{item.minStock} {item.unit}</span>
+                  </div>
+                  {item.expiryDate && (
+                    <div className="detail-row">
+                      <span className="detail-label">📅 Expiry:</span>
+                      <span className="detail-value expiry">
+                        {new Date(item.expiryDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="product-footer">
+                <Link to={`/#product-${item.id}`} className="btn-view-details">
+                  View Details
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       )}
