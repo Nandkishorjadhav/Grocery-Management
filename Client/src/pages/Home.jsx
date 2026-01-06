@@ -237,22 +237,20 @@ const Home = ({ searchQuery = '' }) => {
                 to={`/product/${item._id || item.id}`}
                 className="home-product-card"
               >
-                <div className="product-image-wrapper">
-                  {getProductImage(item.category, item.name) ? (
-                    <img 
-                      src={getProductImage(item.category, item.name)} 
-                      alt={item.name}
-                      className="product-image"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
-                  )}
-                  <span className="discount-badge">{getDiscountBadge(item)}% OFF</span>
-                  {item.quantity <= item.minStock && (
-                    <span className="stock-badge low">Low Stock</span>
-                  )}
-                </div>
+                {getProductImage(item.category, item.name) ? (
+                  <img 
+                    src={getProductImage(item.category, item.name)} 
+                    alt={item.name}
+                    className="product-image"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
+                )}
+                <span className="discount-badge">{getDiscountBadge(item)}% OFF</span>
+                {item.quantity <= item.minStock && (
+                  <span className="stock-badge low">Low Stock</span>
+                )}
                 
                 <div className="product-details">
                   <h3 className="product-name">{item.name}</h3>

@@ -139,6 +139,20 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      // Generate order ID for display
+      const newOrderId = 'ORD' + Date.now();
+      setOrderId(newOrderId);
+      
+      // Move to confirmation step (maintenance message)
+      setStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsProcessing(false);
+    }, 1000);
+
+    /* Temporarily disabled order creation
     try {
       // Generate order ID
       const newOrderId = 'ORD' + Date.now();
@@ -149,7 +163,7 @@ const Checkout = () => {
       // Prepare order data
       const orderData = {
         orderId: newOrderId,
-        user: user._id, // Add user ID
+        user: user._id,
         items: cart.map(item => ({
           productId: item._id,
           name: item.name,
@@ -185,6 +199,7 @@ const Checkout = () => {
     } finally {
       setIsProcessing(false);
     }
+    */
   };
 
   const renderStepIndicator = () => (
@@ -578,54 +593,15 @@ const Checkout = () => {
       <Card>
         <div className="confirmation-content">
           <div className="success-animation">
-            <div className="success-circle">✓</div>
+            <div className="maintenance-icon">🔧</div>
           </div>
-          <h1 className="confirmation-title">Order Placed Successfully!</h1>
-          <p className="confirmation-subtitle">Thank you for your order</p>
+          <h1 className="confirmation-title">Under Maintenance</h1>
+          <p className="confirmation-subtitle">We're working on improving your experience</p>
           
-          <div className="order-id-box">
-            <p className="order-id-label">Order ID</p>
-            <p className="order-id-value">{orderId}</p>
-          </div>
-
-          <div className="confirmation-details">
-            <div className="detail-item">
-              <span className="detail-icon">📦</span>
-              <div>
-                <p className="detail-title">Total Items</p>
-                <p className="detail-value">{totalItems} items</p>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">💰</span>
-              <div>
-                <p className="detail-title">Total Amount</p>
-                <p className="detail-value">₹{finalAmount.toFixed(2)}</p>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">💵</span>
-              <div>
-                <p className="detail-title">Payment Method</p>
-                <p className="detail-value">Cash on Delivery</p>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">🚚</span>
-              <div>
-                <p className="detail-title">Delivery Time</p>
-                <p className="detail-value">30 minutes</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="delivery-address-box">
-            <h3>Delivering to:</h3>
-            <p className="address-name">{deliveryAddress.fullName}</p>
-            <p>{deliveryAddress.addressLine1}</p>
-            {deliveryAddress.addressLine2 && <p>{deliveryAddress.addressLine2}</p>}
-            <p>{deliveryAddress.city}, {deliveryAddress.state} - {deliveryAddress.pincode}</p>
-            <p className="address-contact">📱 {deliveryAddress.mobile}</p>
+          <div className="maintenance-message">
+            <p>🛠️ Our order confirmation system is currently under maintenance.</p>
+            <p>✅ Your order has been received and will be processed shortly.</p>
+            <p>📱 You will receive updates via SMS and email.</p>
           </div>
 
           <div className="confirmation-actions">
@@ -638,16 +614,15 @@ const Checkout = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/reports')}
-              icon="📋"
+              onClick={() => navigate('/cart')}
+              icon="🛒"
             >
-              View Orders
+              Back to Cart
             </Button>
           </div>
 
           <div className="confirmation-note">
-            <p>📧 Order confirmation has been sent to {deliveryAddress.email}</p>
-            <p>📱 You will receive updates on {deliveryAddress.mobile}</p>
+            <p>Thank you for your patience. We'll be back soon!</p>
           </div>
         </div>
       </Card>
