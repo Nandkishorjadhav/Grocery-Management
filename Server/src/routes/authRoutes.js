@@ -4,7 +4,8 @@ import {
   verifyOTP,
   resendOTP,
   getProfile,
-  logout
+  logout,
+  updateProfile
 } from '../controllers/authController.js';
 import { authenticate } from '../middleware/auth.js';
 
@@ -17,6 +18,7 @@ router.post('/resend-otp', resendOTP);
 
 // Protected routes
 router.get('/profile', authenticate, getProfile);
+router.put('/profile', authenticate, updateProfile);
 router.post('/logout', authenticate, logout);
 
 export default router;

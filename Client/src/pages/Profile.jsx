@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import orderService from '../services/orderService';
+import authService from '../services/authService';
 import Button from '../components/common/Button';
 import './Profile.css';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, updateUser } = useAuth();
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -16,6 +17,14 @@ const Profile = () => {
     pendingOrders: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    mobile: user?.mobile || ''
+  });
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -24,6 +33,16 @@ const Profile = () => {
     }
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      setEditForm({
+        name: user.name || '',
+        email: user.email || '',
+        mobile: user.mobile || ''
+      });
+    }
+  }, [user]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -83,6 +102,57 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Reset form when canceling
+      setEditForm({
+        name: user?.name || '',
+        email: user?.email || '',
+        mobile: user?.mobile || ''
+      });
+      setUpdateMessage({ type: '', text: '' });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setUpdateLoading(true);
+    setUpdateMessage({ type: '', text: '' });
+
+    try {
+      const response = await authService.updateProfile(editForm);
+      if (response.success) {
+        // Update user in context and localStorage
+        updateUser(response.user);
+        authService.storeUser(response.user);
+        
+        setUpdateMessage({ type: 'success', text: 'Profile updated successfully!' });
+        setIsEditing(false);
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setUpdateMessage({ type: '', text: '' });
+        }, 3000);
+      } else {
+        setUpdateMessage({ type: 'error', text: response.error || 'Failed to update profile' });
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      setUpdateMessage({ type: 'error', text: error.response?.data?.error || 'Failed to update profile' });
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   return (
     <div className="profile-page">
       <div className="profile-container">
@@ -97,34 +167,122 @@ const Profile = () => {
             <span className="profile-avatar-emoji">👤</span>
           </div>
           <div className="profile-user-info">
-            <h2 className="profile-user-name">{user?.name || 'User'}</h2>
-            <div className="profile-user-details">
-              <div className="profile-detail-row">
-                <span className="profile-detail-icon">📧</span>
-                <span className="profile-detail-text">{user?.email || 'Not provided'}</span>
-              </div>
-              <div className="profile-detail-row">
-                <span className="profile-detail-icon">📱</span>
-                <span className="profile-detail-text">{user?.mobile || 'Not provided'}</span>
-              </div>
-              {user?.role && (
-                <div className="profile-detail-row">
-                  <span className="profile-detail-icon">👔</span>
-                  <span className="profile-detail-text">
-                    {user.role === 'admin' ? 'Administrator' : 'Customer'}
-                  </span>
+            {!isEditing ? (
+              <>
+                <div className="profile-header-with-actions">
+                  <h2 className="profile-user-name">{user?.name || 'User'}</h2>
+                  <button className="profile-edit-btn" onClick={handleEditToggle}>
+                    ✏️ Edit Profile
+                  </button>
                 </div>
-              )}
-              {user?.createdAt && (
-                <div className="profile-detail-row">
-                  <span className="profile-detail-icon">📅</span>
-                  <span className="profile-detail-text">
-                    Member since {new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                  </span>
+                <div className="profile-user-details">
+                  <div className="profile-detail-row">
+                    <span className="profile-detail-icon">📧</span>
+                    <span className="profile-detail-text">{user?.email || 'Not provided'}</span>
+                  </div>
+                  <div className="profile-detail-row">
+                    <span className="profile-detail-icon">📱</span>
+                    <span className="profile-detail-text">{user?.mobile || 'Not provided'}</span>
+                  </div>
+                  {user?.role && (
+                    <div className="profile-detail-row">
+                      <span className="profile-detail-icon">👔</span>
+                      <span className="profile-detail-text">
+                        {user.role === 'admin' ? 'Administrator' : 'Customer'}
+                      </span>
+                    </div>
+                  )}
+                  {user?.createdAt && (
+                    <div className="profile-detail-row">
+                      <span className="profile-detail-icon">📅</span>
+                      <span className="profile-detail-text">
+                        Member since {new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <form onSubmit={handleUpdateProfile} className="profile-edit-form">
+                <h3 className="profile-edit-title">✏️ Edit Profile</h3>
+                
+                {updateMessage.text && (
+                  <div className={`profile-update-message ${updateMessage.type}`}>
+                    {updateMessage.text}
+                  </div>
+                )}
+
+                <div className="profile-form-group">
+                  <label className="profile-form-label">
+                    <span className="profile-form-icon">👤</span>
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editForm.name}
+                    onChange={handleInputChange}
+                    className="profile-form-input"
+                    placeholder="Enter your name"
+                    required
+                  />
+                </div>
+
+                <div className="profile-form-group">
+                  <label className="profile-form-label">
+                    <span className="profile-form-icon">📧</span>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editForm.email}
+                    onChange={handleInputChange}
+                    className="profile-form-input"
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="profile-form-group">
+                  <label className="profile-form-label">
+                    <span className="profile-form-icon">📱</span>
+                    Mobile
+                  </label>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    value={editForm.mobile}
+                    onChange={handleInputChange}
+                    className="profile-form-input"
+                    placeholder="Enter your mobile number"
+                    pattern="[0-9]{10}"
+                    title="Please enter a valid 10-digit mobile number"
+                  />
+                </div>
+
+                <div className="profile-form-actions">
+                  <button
+                    type="submit"
+                    className="profile-form-btn profile-form-btn-save"
+                    disabled={updateLoading}
+                  >
+                    {updateLoading ? '💾 Saving...' : '💾 Save Changes'}
+                  </button>
+                  <button
+                    type="button"
+                    className="profile-form-btn profile-form-btn-cancel"
+                    onClick={handleEditToggle}
+                    disabled={updateLoading}
+                  >
+                    ❌ Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
+          <button className="profile-logout-btn-corner" onClick={handleLogout} title="Logout">
+            🚪
+          </button>
         </div>
 
         {/* Order Statistics */}
@@ -284,18 +442,6 @@ const Profile = () => {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Logout Button */}
-        <div className="profile-actions">
-          <Button 
-            variant="danger" 
-            fullWidth 
-            onClick={handleLogout}
-            icon="🚪"
-          >
-            Logout
-          </Button>
         </div>
       </div>
     </div>

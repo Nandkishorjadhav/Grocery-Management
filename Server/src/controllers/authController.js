@@ -240,3 +240,79 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+// Update user profile
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, mobile } = req.body;
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'Name is required'
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if email is being changed and if it's already in use
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: user._id } });
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email is already in use'
+        });
+      }
+    }
+
+    // Check if mobile is being changed and if it's already in use
+    if (mobile && mobile !== user.mobile) {
+      const mobileExists = await User.findOne({ mobile, _id: { $ne: user._id } });
+      if (mobileExists) {
+        return res.status(400).json({
+          success: false,
+          error: 'Mobile number is already in use'
+        });
+      }
+    }
+
+    // Update user fields
+    user.name = name;
+    if (email) user.email = email;
+    if (mobile) user.mobile = mobile;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        loginMethod: user.loginMethod,
+        isVerified: user.isVerified,
+        role: user.role,
+        isAdmin: user.isAdmin,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};

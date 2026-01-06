@@ -88,7 +88,6 @@ const Navbar = ({ onSearch }) => {
     { path: '/products', name: 'Products', icon: '🏷️' },
     { path: '/inventory', name: 'Inventory', icon: '📦' },
     { path: '/cart', name: 'Cart', icon: '🛒' },
-    { path: '/reports', name: 'Reports', icon: '📈' },
   ];
 
   // Add admin panel link if user is admin

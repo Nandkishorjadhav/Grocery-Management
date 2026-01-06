@@ -68,6 +68,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    authService.storeUser(userData);
+  };
+
   const openAuthModal = () => {
     setShowAuthModal(true);
   };
@@ -86,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     showAuthModal,
     login,
     logout,
+    updateUser,
     openAuthModal,
     closeAuthModal,
     isAuthenticated

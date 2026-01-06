@@ -27,6 +27,12 @@ const authService = {
     return response;
   },
 
+  // Update user profile
+  updateProfile: async (data) => {
+    const response = await api.put('/auth/profile', data);
+    return response;
+  },
+
   // Logout
   logout: async () => {
     const response = await api.post('/auth/logout');
