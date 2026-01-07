@@ -16,6 +16,7 @@ import AdminPanel from './pages/AdminPanel';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 import Preloader from './components/common/Preloader';
 import AuthModal from './components/common/AuthModal';
@@ -123,6 +124,11 @@ function AppContent({ searchQuery, setSearchQuery }) {
         <Route path="/terms" element={
           <Layout onSearch={setSearchQuery}>
             <Terms />
+          </Layout>
+        } />
+        <Route path="/privacy" element={
+          <Layout onSearch={setSearchQuery}>
+            <Privacy />
           </Layout>
         } />
       </Routes>
