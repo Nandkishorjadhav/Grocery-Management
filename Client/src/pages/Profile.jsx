@@ -125,15 +125,34 @@ const Profile = () => {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    
+    // Validate form fields
+    if (!editForm.name || editForm.name.trim() === '') {
+      setUpdateMessage({ type: 'error', text: 'Name is required' });
+      return;
+    }
+
+    if (editForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email)) {
+      setUpdateMessage({ type: 'error', text: 'Please enter a valid email address' });
+      return;
+    }
+
+    if (editForm.mobile && !/^[0-9]{10}$/.test(editForm.mobile)) {
+      setUpdateMessage({ type: 'error', text: 'Please enter a valid 10-digit mobile number' });
+      return;
+    }
+
     setUpdateLoading(true);
     setUpdateMessage({ type: '', text: '' });
 
     try {
+      console.log('Sending update request with:', editForm);
       const response = await authService.updateProfile(editForm);
-      if (response.success) {
+      console.log('Update profile response:', response);
+      
+      if (response && response.success) {
         // Update user in context and localStorage
         updateUser(response.user);
-        authService.storeUser(response.user);
         
         setUpdateMessage({ type: 'success', text: 'Profile updated successfully!' });
         setIsEditing(false);
@@ -143,11 +162,12 @@ const Profile = () => {
           setUpdateMessage({ type: '', text: '' });
         }, 3000);
       } else {
-        setUpdateMessage({ type: 'error', text: response.error || 'Failed to update profile' });
+        setUpdateMessage({ type: 'error', text: response?.error || 'Failed to update profile' });
       }
     } catch (error) {
       console.error('Update profile error:', error);
-      setUpdateMessage({ type: 'error', text: error.response?.data?.error || 'Failed to update profile' });
+      const errorMessage = error.message || 'Failed to update profile. Please check your connection and try again.';
+      setUpdateMessage({ type: 'error', text: errorMessage });
     } finally {
       setUpdateLoading(false);
     }
@@ -280,8 +300,9 @@ const Profile = () => {
               </form>
             )}
           </div>
-          <button className="profile-logout-btn-corner" onClick={handleLogout} title="Logout">
-            🚪
+          <button className="profile-logout-btn-corner" onClick={handleLogout}>
+            <span>🚪</span>
+            <span>Logout</span>
           </button>
         </div>
 
