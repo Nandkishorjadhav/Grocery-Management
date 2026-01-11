@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,6 +153,15 @@
 /* Dark Theme */
 [data-theme="dark"] .preloader {
   background: linear-gradient(135deg, #1a1f35 0%, #2b2d42 100%);
+}
+
+[data-theme="dark"] .preloader-title {
+  color: white;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .loading-text {
+  color: rgba(255, 255, 255, 0.95);
 }
 
 /* Responsive */

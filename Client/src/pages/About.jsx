@@ -163,17 +163,18 @@ const About = () => {
                 <div className="contact-card">
                   <div className="contact-icon">📧</div>
                   <h4>Email</h4>
-                  <p>support@grocerymanagement.com</p>
+                  <p>nandkishorjadhav9580@gmail.com</p>
+                  <p>pallavitate746@gmail.com</p>
                 </div>
                 <div className="contact-card">
                   <div className="contact-icon">📱</div>
                   <h4>Phone</h4>
-                  <p>+91-XXXXXXXXXX</p>
+                  <p>+91-7378828085</p>
                 </div>
                 <div className="contact-card">
                   <div className="contact-icon">📍</div>
-                  <h4>Address</h4>
-                  <p>[Your Business Address]</p>
+                  <h4>SGGSIE&T</h4>
+                  <p>[SGGSIE&T VISHNUPURI, NANDED]</p>
                 </div>
               </div>
             </section>
