@@ -155,7 +155,15 @@ const Products = () => {
           {filteredProducts.map((item) => (
             <div key={item.id} className="product-card">
               <div className="product-image">
-                <span className="product-emoji">{getCategoryEmoji(item.category)}</span>
+                <img 
+                  src={item.image || 'https://via.placeholder.com/300x200?text=No+Image'} 
+                  alt={item.name}
+                  className="product-img"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                  }}
+                />
                 {item.quantity <= item.minStock && (
                   <span className="badge-low-stock">Low Stock</span>
                 )}

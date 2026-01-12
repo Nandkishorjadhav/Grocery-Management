@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Inventory from '../models/Inventory.js';
 import Cart from '../models/Cart.js';
 import ShoppingList from '../models/ShoppingList.js';
+import Order from '../models/Order.js';
 
 // Get dashboard statistics
 export const getDashboardStats = async (req, res) => {
@@ -267,6 +268,180 @@ export const getSystemOverview = async (req, res) => {
     res.json({
       userStats,
       productStats: productStats[0] || { totalProducts: 0, totalValue: 0, lowStock: 0 }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get all orders
+export const getAllOrders = async (req, res) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const query = {};
+    if (status) query.status = status;
+
+    const orders = await Order.find(query)
+      .populate('userId', 'name email mobile')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const count = await Order.countDocuments(query);
+
+    res.json({
+      orders,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalOrders: count
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status, updatedAt: Date.now() },
+      { new: true }
+    ).populate('userId', 'name email mobile');
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ message: 'Order status updated successfully', order });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get inventory data
+export const getInventoryData = async (req, res) => {
+  try {
+    const { category, search, page = 1, limit = 100 } = req.query;
+    const query = {};
+
+    if (category) query.category = category;
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    const inventory = await Inventory.find(query)
+      .sort({ name: 1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const count = await Inventory.countDocuments(query);
+
+    res.json({
+      inventory,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalItems: count
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update inventory item
+export const updateInventory = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const updateData = req.body;
+
+    const item = await Inventory.findByIdAndUpdate(
+      itemId,
+      { ...updateData, updatedAt: Date.now() },
+      { new: true, runValidators: true }
+    );
+
+    if (!item) {
+      return res.status(404).json({ error: 'Inventory item not found' });
+    }
+
+    res.json({ message: 'Inventory updated successfully', item });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get reports and analytics
+export const getReports = async (req, res) => {
+  try {
+    // Calculate sales overview
+    const orderStats = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$totalAmount' },
+          totalOrders: { $sum: 1 },
+          avgOrderValue: { $avg: '$totalAmount' }
+        }
+      }
+    ]);
+
+    // User statistics
+    const totalUsers = await User.countDocuments();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const activeToday = await User.countDocuments({
+      lastLogin: { $gte: today }
+    });
+
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const newThisMonth = await User.countDocuments({
+      createdAt: { $gte: firstDayOfMonth }
+    });
+
+    // Inventory status
+    const totalProducts = await Inventory.countDocuments();
+    const lowStockItems = await Inventory.countDocuments({ quantity: { $lt: 10, $gt: 0 } });
+    const outOfStock = await Inventory.countDocuments({ quantity: 0 });
+
+    // Order status breakdown
+    const pendingOrders = await Order.countDocuments({ status: 'pending' });
+    const processingOrders = await Order.countDocuments({ status: 'processing' });
+    const completedOrders = await Order.countDocuments({ status: 'delivered' });
+
+    // Top selling products
+    const topProducts = await Order.aggregate([
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.productId',
+          name: { $first: '$items.name' },
+          category: { $first: '$items.category' },
+          orderCount: { $sum: '$items.quantity' },
+          revenue: { $sum: '$items.totalPrice' }
+        }
+      },
+      { $sort: { orderCount: -1 } },
+      { $limit: 10 }
+    ]);
+
+    res.json({
+      totalRevenue: orderStats[0]?.totalRevenue || 0,
+      totalOrders: orderStats[0]?.totalOrders || 0,
+      avgOrderValue: orderStats[0]?.avgOrderValue || 0,
+      totalUsers,
+      activeToday,
+      newThisMonth,
+      totalProducts,
+      lowStockItems,
+      outOfStock,
+      pendingOrders,
+      processingOrders,
+      completedOrders,
+      topProducts
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

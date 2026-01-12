@@ -31,6 +31,16 @@ const Profile = () => {
       navigate('/');
       return;
     }
+    // Debug: Check user object for admin status
+    console.log('========== PROFILE DEBUG ==========');
+    console.log('📋 Full user object:', user);
+    console.log('📋 user.isAdmin:', user?.isAdmin, '(type:', typeof user?.isAdmin, ')');
+    console.log('📋 user.role:', user?.role, '(type:', typeof user?.role, ')');
+    console.log('📋 Condition check: user?.isAdmin =', user?.isAdmin);
+    console.log('📋 Condition check: user?.role === "admin" =', user?.role === 'admin');
+    console.log('📋 Button should show:', (user?.isAdmin || user?.role === 'admin'));
+    console.log('📋 LocalStorage user:', JSON.parse(localStorage.getItem('user') || '{}'));
+    console.log('===================================');
     fetchOrders();
   }, []);
 
@@ -191,9 +201,20 @@ const Profile = () => {
               <>
                 <div className="profile-header-with-actions">
                   <h2 className="profile-user-name">{user?.name || 'User'}</h2>
-                  <button className="profile-edit-btn" onClick={handleEditToggle}>
-                    ✏️ Edit Profile
-                  </button>
+                  <div className="profile-action-buttons">
+                    {(user?.isAdmin || user?.role === 'admin') && (
+                      <button 
+                        className="profile-admin-btn" 
+                        onClick={() => navigate('/admin')}
+                        title="Go to Admin Panel"
+                      >
+                        ⚙️ Admin Panel
+                      </button>
+                    )}
+                    <button className="profile-edit-btn" onClick={handleEditToggle}>
+                      ✏️ Edit Profile
+                    </button>
+                  </div>
                 </div>
                 <div className="profile-user-details">
                   <div className="profile-detail-row">
@@ -300,10 +321,12 @@ const Profile = () => {
               </form>
             )}
           </div>
-          <button className="profile-logout-btn-corner" onClick={handleLogout}>
-            <span>🚪</span>
-            <span>Logout</span>
-          </button>
+          <div className="profile-header-actions">
+            <button className="profile-logout-btn-corner" onClick={handleLogout}>
+              <span>🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
 
         {/* Order Statistics */}

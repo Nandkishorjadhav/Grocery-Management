@@ -15,6 +15,9 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [activityLogs, setActivityLogs] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [reports, setReports] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -46,6 +49,15 @@ const AdminPanel = () => {
       } else if (activeTab === 'activity') {
         const data = await adminService.getActivityLogs();
         setActivityLogs(data);
+      } else if (activeTab === 'orders') {
+        const data = await adminService.getAllOrders();
+        setOrders(data.orders || []);
+      } else if (activeTab === 'inventory') {
+        const data = await adminService.getInventoryData();
+        setInventory(data.inventory || []);
+      } else if (activeTab === 'reports') {
+        const data = await adminService.getReports();
+        setReports(data);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -405,52 +417,315 @@ const AdminPanel = () => {
     </div>
   );
 
+  const renderOrders = () => (
+    <div className="admin-orders">
+      <h2>All Orders</h2>
+      {orders.length === 0 ? (
+        <p className="no-data">No orders found</p>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map(order => (
+              <tr key={order._id}>
+                <td>#{order._id.substring(0, 8)}</td>
+                <td>{order.userId?.name || 'N/A'}</td>
+                <td>{order.userId?.email || order.userId?.mobile || 'N/A'}</td>
+                <td>{order.items?.length || 0}</td>
+                <td>₹{order.totalAmount?.toFixed(2) || '0.00'}</td>
+                <td>
+                  <span className={`status-badge ${order.status}`}>
+                    {order.status}
+                  </span>
+                </td>
+                <td>
+                  <span className={`payment-badge ${order.paymentStatus}`}>
+                    {order.paymentStatus}
+                  </span>
+                </td>
+                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+
+  const renderInventory = () => (
+    <div className="admin-inventory">
+      <h2>Inventory Management</h2>
+      {inventory.length === 0 ? (
+        <p className="no-data">No inventory items found</p>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Unit</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inventory.map(item => (
+              <tr key={item._id}>
+                <td>
+                  <div className="product-cell">
+                    <span className="product-icon">{item.icon || '📦'}</span>
+                    {item.name}
+                  </div>
+                </td>
+                <td>{item.category}</td>
+                <td>₹{item.price.toFixed(2)}</td>
+                <td>
+                  <span className={item.quantity < 10 ? 'low-stock' : ''}>
+                    {item.quantity}
+                  </span>
+                </td>
+                <td>{item.unit}</td>
+                <td>
+                  <span className={`stock-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
+                    {item.quantity === 0 ? 'Out of Stock' : item.quantity < 10 ? 'Low Stock' : 'In Stock'}
+                  </span>
+                </td>
+                <td>{new Date(item.updatedAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+
+  const renderReports = () => (
+    <div className="admin-reports">
+      <h2>Analytics & Reports</h2>
+      {reports && (
+        <>
+          <div className="reports-grid">
+            <Card className="report-card">
+              <h3>📊 Sales Overview</h3>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Revenue</span>
+                  <span className="stat-value">₹{reports.totalRevenue?.toFixed(2) || '0.00'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Total Orders</span>
+                  <span className="stat-value">{reports.totalOrders || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Average Order Value</span>
+                  <span className="stat-value">₹{reports.avgOrderValue?.toFixed(2) || '0.00'}</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="report-card">
+              <h3>👥 User Statistics</h3>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Users</span>
+                  <span className="stat-value">{reports.totalUsers || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Active Today</span>
+                  <span className="stat-value">{reports.activeToday || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">New This Month</span>
+                  <span className="stat-value">{reports.newThisMonth || 0}</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="report-card">
+              <h3>📦 Inventory Status</h3>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Products</span>
+                  <span className="stat-value">{reports.totalProducts || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Low Stock Items</span>
+                  <span className="stat-value danger">{reports.lowStockItems || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Out of Stock</span>
+                  <span className="stat-value danger">{reports.outOfStock || 0}</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="report-card">
+              <h3>📈 Order Status</h3>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Pending</span>
+                  <span className="stat-value warning">{reports.pendingOrders || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Processing</span>
+                  <span className="stat-value">{reports.processingOrders || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Completed</span>
+                  <span className="stat-value success">{reports.completedOrders || 0}</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {reports.topProducts && reports.topProducts.length > 0 && (
+            <div className="top-products-section">
+              <h3>🏆 Top Selling Products</h3>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reports.topProducts.map((product, index) => (
+                    <tr key={product._id}>
+                      <td>#{index + 1}</td>
+                      <td>{product.name}</td>
+                      <td>{product.category}</td>
+                      <td>{product.orderCount}</td>
+                      <td>₹{product.revenue?.toFixed(2) || '0.00'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+
   if (loading && !dashboardStats && !users.length) {
     return <div className="admin-loading">Loading...</div>;
   }
 
   return (
-    <div className="admin-panel">
-      <div className="admin-header">
-        <h1>Admin Panel</h1>
-        <p>Manage users, monitor activity, and control access</p>
-      </div>
+    <div className="admin-panel-wrapper">
+      {/* Admin Navbar */}
+      <nav className="admin-navbar">
+        <div className="admin-navbar-content">
+          <div className="admin-brand">
+            <span className="admin-brand-icon">⚙️</span>
+            <div className="admin-brand-text">
+              <h1 className="admin-brand-title">Admin Dashboard</h1>
+              <p className="admin-brand-subtitle">GroceryHub Management</p>
+            </div>
+          </div>
+          
+          <div className="admin-navbar-actions">
+            <div className="admin-user-info">
+              <span className="admin-user-avatar">👤</span>
+              <div className="admin-user-details">
+                <span className="admin-user-name">{user?.name}</span>
+                <span className="admin-user-role">Administrator</span>
+              </div>
+            </div>
+            <button 
+              className="admin-exit-btn" 
+              onClick={() => navigate('/dashboard')}
+              title="Exit Admin Panel"
+            >
+              <span className="exit-icon">🚪</span>
+              Exit Admin Panel
+            </button>
+          </div>
+        </div>
+      </nav>
 
-      <div className="admin-tabs">
-        <button
-          className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          Dashboard
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Users
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'approvals' ? 'active' : ''}`}
-          onClick={() => setActiveTab('approvals')}
-        >
-          Approvals
-          {dashboardStats?.stats.pendingUsers > 0 && (
-            <span className="badge">{dashboardStats.stats.pendingUsers}</span>
-          )}
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'activity' ? 'active' : ''}`}
-          onClick={() => setActiveTab('activity')}
-        >
-          Activity
-        </button>
-      </div>
+      {/* Admin Content */}
+      <div className="admin-panel">
+        <div className="admin-tabs">
+          <button
+            className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <span className="tab-icon">📊</span>
+            Dashboard
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            <span className="tab-icon">👥</span>
+            Users
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <span className="tab-icon">🛒</span>
+            Orders
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inventory')}
+          >
+            <span className="tab-icon">📦</span>
+            Inventory
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'approvals' ? 'active' : ''}`}
+            onClick={() => setActiveTab('approvals')}
+          >
+            <span className="tab-icon">✓</span>
+            Approvals
+            {dashboardStats?.stats.pendingUsers > 0 && (
+              <span className="badge">{dashboardStats.stats.pendingUsers}</span>
+            )}
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reports')}
+          >
+            <span className="tab-icon">📈</span>
+            Reports
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'activity' ? 'active' : ''}`}
+            onClick={() => setActiveTab('activity')}
+          >
+            <span className="tab-icon">📝</span>
+            Activity
+          </button>
+        </div>
 
-      <div className="admin-content">
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'users' && renderUsers()}
-        {activeTab === 'approvals' && renderApprovals()}
-        {activeTab === 'activity' && renderActivity()}
+        <div className="admin-content">
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'users' && renderUsers()}
+          {activeTab === 'orders' && renderOrders()}
+          {activeTab === 'inventory' && renderInventory()}
+          {activeTab === 'approvals' && renderApprovals()}
+          {activeTab === 'reports' && renderReports()}
+          {activeTab === 'activity' && renderActivity()}
+        </div>
       </div>
     </div>
   );

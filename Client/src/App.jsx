@@ -106,11 +106,7 @@ function AppContent({ searchQuery, setSearchQuery }) {
             <Reports />
           </Layout>
         } />
-        <Route path="/admin" element={
-          <Layout onSearch={setSearchQuery}>
-            <AdminPanel />
-          </Layout>
-        } />
+        <Route path="/admin" element={<AdminPanel />} />
         <Route path="/profile" element={
           <Layout onSearch={setSearchQuery}>
             <Profile />

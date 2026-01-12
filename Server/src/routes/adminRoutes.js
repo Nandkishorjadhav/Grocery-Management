@@ -11,7 +11,12 @@ import {
   getPendingApprovals,
   bulkApproveUsers,
   bulkRejectUsers,
-  getSystemOverview
+  getSystemOverview,
+  getAllOrders,
+  updateOrderStatus,
+  getInventoryData,
+  updateInventory,
+  getReports
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -39,5 +44,16 @@ router.get('/activity-logs', getActivityLogs);
 
 // Pending approvals
 router.get('/pending-approvals', getPendingApprovals);
+
+// Orders management
+router.get('/orders', getAllOrders);
+router.put('/orders/:orderId/status', updateOrderStatus);
+
+// Inventory management
+router.get('/inventory', getInventoryData);
+router.put('/inventory/:itemId', updateInventory);
+
+// Reports and analytics
+router.get('/reports', getReports);
 
 export default router;

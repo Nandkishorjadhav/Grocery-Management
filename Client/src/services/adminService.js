@@ -60,6 +60,34 @@ const adminService = {
     const response = await api.get('/admin/pending-approvals');
     return response.data;
   },
+
+  // Orders management
+  getAllOrders: async (params = {}) => {
+    const response = await api.get('/admin/orders', { params });
+    return response.data;
+  },
+
+  updateOrderStatus: async (orderId, status) => {
+    const response = await api.put(`/admin/orders/${orderId}/status`, { status });
+    return response.data;
+  },
+
+  // Inventory management
+  getInventoryData: async (params = {}) => {
+    const response = await api.get('/admin/inventory', { params });
+    return response.data;
+  },
+
+  updateInventory: async (itemId, data) => {
+    const response = await api.put(`/admin/inventory/${itemId}`, data);
+    return response.data;
+  },
+
+  // Reports and analytics
+  getReports: async (params = {}) => {
+    const response = await api.get('/admin/reports', { params });
+    return response.data;
+  },
 };
 
 export default adminService;

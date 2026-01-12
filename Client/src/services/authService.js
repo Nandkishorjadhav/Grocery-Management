@@ -61,7 +61,11 @@ const authService = {
 
   // Store user
   storeUser: (user) => {
+    console.log('💾 Storing user in localStorage:', user);
+    console.log('💾 Admin fields - isAdmin:', user?.isAdmin, 'role:', user?.role);
     localStorage.setItem('user', JSON.stringify(user));
+    const stored = localStorage.getItem('user');
+    console.log('💾 Verification - stored user:', JSON.parse(stored));
   },
 
   // Clear auth data

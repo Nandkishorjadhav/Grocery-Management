@@ -137,7 +137,9 @@ export const verifyOTP = async (req, res) => {
         name: user.name,
         email: user.email,
         mobile: user.mobile,
-        loginMethod: user.loginMethod
+        loginMethod: user.loginMethod,
+        role: user.role,
+        isAdmin: user.isAdmin
       }
     });
   } catch (error) {
@@ -213,6 +215,8 @@ export const getProfile = async (req, res) => {
         mobile: user.mobile,
         loginMethod: user.loginMethod,
         isVerified: user.isVerified,
+        role: user.role,
+        isAdmin: user.isAdmin,
         createdAt: user.createdAt,
         lastLogin: user.lastLogin
       }
