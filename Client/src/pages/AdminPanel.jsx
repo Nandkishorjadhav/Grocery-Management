@@ -21,6 +21,7 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is admin
@@ -633,6 +634,14 @@ const AdminPanel = () => {
       <nav className="admin-navbar">
         <div className="admin-navbar-content">
           <div className="admin-brand">
+            <button 
+              className="menu-toggle-btn" 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle Menu"
+              type="button"
+            >
+              <span className="hamburger-icon">{sidebarOpen ? '✕' : '☰'}</span>
+            </button>
             <span className="admin-brand-icon">⚙️</span>
             <div className="admin-brand-text">
               <h1 className="admin-brand-title">Admin Dashboard</h1>
@@ -652,6 +661,7 @@ const AdminPanel = () => {
               className="admin-exit-btn" 
               onClick={() => navigate('/dashboard')}
               title="Exit Admin Panel"
+              type="button"
             >
               <span className="exit-icon">🚪</span>
               Exit Admin Panel
@@ -660,64 +670,102 @@ const AdminPanel = () => {
         </div>
       </nav>
 
-      {/* Admin Content */}
-      <div className="admin-panel">
-        <div className="admin-tabs">
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Admin Content Layout */}
+      <div className="admin-layout">
+        {/* Sidebar */}
+        <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
           <button
-            className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('dashboard');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">📊</span>
-            Dashboard
+            <span className="sidebar-icon">📊</span>
+            <span className="sidebar-text">Dashboard</span>
           </button>
           <button
-            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('users');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">👥</span>
-            Users
+            <span className="sidebar-icon">👥</span>
+            <span className="sidebar-text">Users</span>
           </button>
           <button
-            className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => setActiveTab('orders')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('orders');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">🛒</span>
-            Orders
+            <span className="sidebar-icon">🛒</span>
+            <span className="sidebar-text">Orders</span>
           </button>
           <button
-            className={`tab-button ${activeTab === 'inventory' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inventory')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('inventory');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">📦</span>
-            Inventory
+            <span className="sidebar-icon">📦</span>
+            <span className="sidebar-text">Inventory</span>
           </button>
           <button
-            className={`tab-button ${activeTab === 'approvals' ? 'active' : ''}`}
-            onClick={() => setActiveTab('approvals')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'approvals' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('approvals');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">✓</span>
-            Approvals
+            <span className="sidebar-icon">✓</span>
+            <span className="sidebar-text">Approvals</span>
             {dashboardStats?.stats.pendingUsers > 0 && (
-              <span className="badge">{dashboardStats.stats.pendingUsers}</span>
+              <span className="sidebar-badge">{dashboardStats.stats.pendingUsers}</span>
             )}
           </button>
           <button
-            className={`tab-button ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('reports');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">📈</span>
-            Reports
+            <span className="sidebar-icon">📈</span>
+            <span className="sidebar-text">Reports</span>
           </button>
           <button
-            className={`tab-button ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => setActiveTab('activity')}
+            type="button"
+            className={`sidebar-button ${activeTab === 'activity' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('activity');
+              setSidebarOpen(false);
+            }}
           >
-            <span className="tab-icon">📝</span>
-            Activity
+            <span className="sidebar-icon">📝</span>
+            <span className="sidebar-text">Activity</span>
           </button>
-        </div>
+        </aside>
 
-        <div className="admin-content">
+        {/* Main Content */}
+        <main className="admin-main-content">
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'users' && renderUsers()}
           {activeTab === 'orders' && renderOrders()}
@@ -725,7 +773,7 @@ const AdminPanel = () => {
           {activeTab === 'approvals' && renderApprovals()}
           {activeTab === 'reports' && renderReports()}
           {activeTab === 'activity' && renderActivity()}
-        </div>
+        </main>
       </div>
     </div>
   );

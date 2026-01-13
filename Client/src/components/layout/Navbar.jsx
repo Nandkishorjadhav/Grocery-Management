@@ -222,7 +222,7 @@ const Navbar = ({ onSearch }) => {
 
       {isOpen && (
         <div className="mobile-menu">
-          {adminNavItems.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}

@@ -58,7 +58,7 @@ const Profile = () => {
     setLoading(true);
     try {
       const response = await orderService.getUserOrders();
-      if (response.success) {
+      if (response && response.success) {
         setOrders(response.orders || []);
         setStats(response.stats || {
           totalOrders: 0,
@@ -69,6 +69,14 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
+      // Set empty state on error
+      setOrders([]);
+      setStats({
+        totalOrders: 0,
+        totalSpent: 0,
+        completedOrders: 0,
+        pendingOrders: 0
+      });
     } finally {
       setLoading(false);
     }
