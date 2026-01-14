@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import orderService from '../services/orderService';
 import authService from '../services/authService';
 import Button from '../components/common/Button';
+import SellProductForm from '../components/common/SellProductForm';
 import './Profile.css';
 
 const Profile = () => {
@@ -25,6 +26,9 @@ const Profile = () => {
   });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
+  const [showSellForm, setShowSellForm] = useState(false);
+  const [myProducts, setMyProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -42,6 +46,7 @@ const Profile = () => {
     console.log('📋 LocalStorage user:', JSON.parse(localStorage.getItem('user') || '{}'));
     console.log('===================================');
     fetchOrders();
+    fetchMyProducts();
   }, []);
 
   useEffect(() => {
@@ -79,6 +84,95 @@ const Profile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyProducts = async () => {
+    setProductsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/products/my-listings', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMyProducts(data.products || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      setMyProducts([]);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const handleSellProduct = async (productData) => {
+    try {
+      const formData = new FormData();
+      
+      // Append text fields
+      Object.keys(productData).forEach(key => {
+        if (key !== 'images') {
+          formData.append(key, productData[key]);
+        }
+      });
+
+      // Append images
+      productData.images.forEach(image => {
+        formData.append('images', image);
+      });
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/products/sell', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Product listed successfully! Waiting for admin approval.');
+        setShowSellForm(false);
+        fetchMyProducts(); // Refresh product list
+      } else {
+        alert('Failed to list product: ' + (data.message || data.error));
+      }
+    } catch (error) {
+      console.error('Error listing product:', error);
+      alert('Failed to list product. Please try again.');
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product listing?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/products/my-listings/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Product deleted successfully!');
+        fetchMyProducts(); // Refresh product list
+      } else {
+        alert('Failed to delete product: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please try again.');
     }
   };
 
@@ -219,6 +313,13 @@ const Profile = () => {
                         ⚙️ Admin Panel
                       </button>
                     )}
+                    <button 
+                      className="profile-sell-btn" 
+                      onClick={() => setShowSellForm(true)}
+                      title="Sell Your Products"
+                    >
+                      🛒 Sell Product
+                    </button>
                     <button className="profile-edit-btn" onClick={handleEditToggle}>
                       ✏️ Edit Profile
                     </button>
@@ -495,7 +596,72 @@ const Profile = () => {
             </div>
           )}
         </div>
+
+        {/* My Products Section */}
+        {myProducts.length > 0 && (
+          <div className="profile-stats-section">
+            <h3 className="profile-section-title">📦 My Product Listings</h3>
+            {productsLoading ? (
+              <div className="profile-loading">Loading your products...</div>
+            ) : (
+              <div className="my-products-grid">
+                {myProducts.map((product) => (
+                  <div key={product._id} className="product-card">
+                    <div className="product-status">
+                      {product.status === 'pending' && '⏳ Pending Approval'}
+                      {product.status === 'approved' && '✅ Approved'}
+                      {product.status === 'rejected' && '❌ Rejected'}
+                    </div>
+                    {product.images && product.images.length > 0 ? (
+                      <img 
+                        src={`http://localhost:5000/${product.images[0]}`} 
+                        alt={product.name}
+                        className="product-image"
+                      />
+                    ) : (
+                      <div className="product-no-image">📦</div>
+                    )}
+                    <div className="product-info">
+                      <h4>{product.name}</h4>
+                      <p className="product-category">{product.category}</p>
+                      <p className="product-description">{product.description}</p>
+                      <div className="product-pricing">
+                        <div>Base: ₹{product.basePrice}</div>
+                        <div>GST ({product.gstPercent}%): ₹{product.gstAmount}</div>
+                        <div className="product-final-price">
+                          Final: ₹{product.price}
+                        </div>
+                      </div>
+                      <p className="product-quantity">
+                        Quantity: {product.quantity} {product.unit}
+                      </p>
+                      {product.expiryDate && (
+                        <p className="product-expiry">
+                          Expires: {new Date(product.expiryDate).toLocaleDateString()}
+                        </p>
+                      )}
+                      <button 
+                        className="btn-delete-product"
+                        onClick={() => handleDeleteProduct(product._id)}
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Sell Product Form Modal */}
+      {showSellForm && (
+        <SellProductForm
+          onClose={() => setShowSellForm(false)}
+          onSubmit={handleSellProduct}
+        />
+      )}
     </div>
   );
 };

@@ -24,9 +24,27 @@ const inventorySchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  basePrice: {
+    type: Number,
+    min: 0
+  },
+  gstPercent: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  gstAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   image: {
     type: String,
     default: 'https://via.placeholder.com/150'
+  },
+  images: {
+    type: [String],
+    default: []
   },
   description: {
     type: String,
@@ -39,6 +57,26 @@ const inventorySchema = new mongoose.Schema({
     type: Number,
     default: 1,
     min: 0
+  },
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  sellerName: {
+    type: String
+  },
+  isUserListed: {
+    type: Boolean,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'approved'
+  },
+  inStock: {
+    type: Boolean,
+    default: true
   },
   createdAt: {
     type: Date,
