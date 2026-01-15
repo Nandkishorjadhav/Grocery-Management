@@ -29,6 +29,25 @@
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.modal-content-sell::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content-sell::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content-sell::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+}
+
+.modal-content-sell::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
 }
 
 @keyframes slideUp {
