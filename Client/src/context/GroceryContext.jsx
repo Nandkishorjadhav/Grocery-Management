@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import groceryService from '../services/groceryService.js';
 import cartService from '../services/cartService.js';
+import sellerProductService from '../services/sellerProductService.js';
 import { useAuth } from './AuthContext';
 
 const GroceryContext = createContext();
@@ -63,8 +64,42 @@ export const GroceryProvider = ({ children }) => {
   const fetchInventory = async () => {
     try {
       setLoading(true);
-      const response = await groceryService.inventoryService.getAll();
-      setInventory(response);
+      
+      // Fetch regular inventory
+      const inventoryResponse = await groceryService.inventoryService.getAll();
+      
+      // Fetch approved seller products
+      let approvedSellerProducts = [];
+      try {
+        const sellerResponse = await sellerProductService.getMarketplaceProducts();
+        console.log('✅ Approved seller products:', sellerResponse);
+        
+        // Transform seller products to match inventory format
+        approvedSellerProducts = (sellerResponse.products || []).map(product => ({
+          _id: product._id,
+          id: product._id,
+          name: product.productName,
+          category: product.category,
+          quantity: product.quantity,
+          unit: product.unit,
+          price: product.finalPrice,
+          expiryDate: product.expiryDate,
+          description: product.description,
+          images: product.images,
+          seller: product.sellerName,
+          minStock: 5,
+          isSellerProduct: true // Flag to identify seller products
+        }));
+        console.log('🔄 Transformed seller products:', approvedSellerProducts.length);
+      } catch (sellerError) {
+        console.log('No seller products available:', sellerError.message);
+      }
+      
+      // Combine regular inventory with approved seller products
+      const combinedInventory = [...inventoryResponse, ...approvedSellerProducts];
+      console.log('📦 Combined inventory count:', combinedInventory.length);
+      
+      setInventory(combinedInventory);
       setError(null);
     } catch (error) {
       console.error('Error fetching inventory:', error);

@@ -237,7 +237,14 @@ const Home = ({ searchQuery = '' }) => {
                 to={`/product/${item._id || item.id}`}
                 className="home-product-card"
               >
-                {getProductImage(item.category, item.name) ? (
+                {item.isSellerProduct && item.images && item.images.length > 0 ? (
+                  <img 
+                    src={item.images[0].url} 
+                    alt={item.name}
+                    className="product-image"
+                    loading="lazy"
+                  />
+                ) : getProductImage(item.category, item.name) ? (
                   <img 
                     src={getProductImage(item.category, item.name)} 
                     alt={item.name}
@@ -248,7 +255,10 @@ const Home = ({ searchQuery = '' }) => {
                   <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
                 )}
                 <span className="discount-badge">{getDiscountBadge(item)}% OFF</span>
-                {item.quantity <= item.minStock && (
+                {item.isSellerProduct && (
+                  <span className="seller-badge">👤 Seller</span>
+                )}
+                {!item.isSellerProduct && item.quantity <= item.minStock && (
                   <span className="stock-badge low">Low Stock</span>
                 )}
                 

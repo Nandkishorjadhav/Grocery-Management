@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import orderService from '../services/orderService';
 import authService from '../services/authService';
+import sellerProductService from '../services/sellerProductService';
 import Button from '../components/common/Button';
 import SellProductForm from '../components/common/SellProductForm';
 import './Profile.css';
@@ -90,15 +91,9 @@ const Profile = () => {
   const fetchMyProducts = async () => {
     setProductsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/products/my-listings', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMyProducts(data.products || []);
+      const response = await sellerProductService.getMyProducts();
+      if (response && response.success) {
+        setMyProducts(response.products || []);
       }
     } catch (error) {
       console.error('Failed to fetch products:', error);
@@ -110,37 +105,46 @@ const Profile = () => {
 
   const handleSellProduct = async (productData) => {
     try {
-      const formData = new FormData();
+      console.log('📤 Submitting product data:', productData);
       
-      // Append text fields
-      Object.keys(productData).forEach(key => {
-        if (key !== 'images') {
-          formData.append(key, productData[key]);
-        }
+      // Convert images to base64 for now (you can implement proper file upload later)
+      const imagePromises = productData.images.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve({
+              url: reader.result,
+              filename: file.name,
+              uploadedAt: new Date()
+            });
+          };
+          reader.readAsDataURL(file);
+        });
       });
 
-      // Append images
-      productData.images.forEach(image => {
-        formData.append('images', image);
-      });
+      const images = await Promise.all(imagePromises);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/products/sell', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
+      const payload = {
+        productName: productData.name,
+        category: productData.category,
+        description: productData.description,
+        basePrice: parseFloat(productData.basePrice),
+        gstPercentage: parseInt(productData.gstPercent),
+        quantity: parseFloat(productData.quantity),
+        unit: productData.unit,
+        expiryDate: productData.expiryDate || null,
+        images: images
+      };
 
-      const data = await response.json();
+      console.log('📤 Sending payload:', payload);
+      const response = await sellerProductService.createProduct(payload);
       
-      if (data.success) {
+      if (response && response.success) {
         alert('Product listed successfully! Waiting for admin approval.');
         setShowSellForm(false);
         fetchMyProducts(); // Refresh product list
       } else {
-        alert('Failed to list product: ' + (data.message || data.error));
+        alert('Failed to list product: ' + (response.message || response.error));
       }
     } catch (error) {
       console.error('Error listing product:', error);
@@ -154,21 +158,13 @@ const Profile = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/products/my-listings/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
+      const response = await sellerProductService.deleteProduct(productId);
       
-      if (data.success) {
+      if (response && response.success) {
         alert('Product deleted successfully!');
         fetchMyProducts(); // Refresh product list
       } else {
-        alert('Failed to delete product: ' + (data.error || 'Unknown error'));
+        alert('Failed to delete product: ' + (response.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error deleting product:', error);

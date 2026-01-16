@@ -13,27 +13,6 @@
   gap: 1rem;
   margin-bottom: 0.3rem;
   flex-wrap: wrap;
-  overflow-x: auto;
-  padding: 0.5rem 0;
-}
-
-/* Enable horizontal scroll on mobile */
-@media (max-width: 768px) {
-  .filter-buttons {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    padding: 0.2rem 0.5rem;
-    margin-bottom: 0.4rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .filter-buttons {
-    gap: 0.25rem;
-    padding: 0.15rem 0.25rem;
-    margin-bottom: 0.3rem;
-  }
 }
 
 .filter-btn {
@@ -50,44 +29,6 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .filter-btn {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.7rem;
-    gap: 0.3rem;
-  }
-  
-  .filter-icon {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .filter-btn {
-    padding: 0.3rem 0.55rem;
-    font-size: 0.65rem;
-    gap: 0.25rem;
-  }
-  
-  .filter-icon {
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 375px) {
-  .filter-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.6rem;
-    gap: 0.2rem;
-  }
-  
-  .filter-icon {
-    font-size: 0.75rem;
-  }
 }
 
 .filter-btn:hover {
@@ -317,6 +258,21 @@
   color: white;
   box-shadow: 0 2px 8px rgba(255, 171, 0, 0.4),
               inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.seller-badge {
+  position: absolute;
+  top: 40px;
+  right: 8px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 2;
 }
 
 .product-details {

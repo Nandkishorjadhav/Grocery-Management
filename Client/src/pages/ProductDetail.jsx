@@ -105,7 +105,13 @@ const ProductDetail = () => {
   };
 
   // Generate multiple image variants for gallery
-  const getProductImages = (category, name) => {
+  const getProductImages = (category, name, productImages) => {
+    // If seller product with uploaded images, use those
+    if (productImages && productImages.length > 0) {
+      return productImages.map(img => img.url);
+    }
+    
+    // Otherwise use stock images
     const mainImage = getProductImage(category, name);
     return [
       mainImage,
@@ -121,8 +127,8 @@ const ProductDetail = () => {
 
   const originalPrice = Math.round(product.price * 1.3);
   const discount = getDiscount();
-  const isLowStock = product.quantity <= product.minStock;
-  const productImages = getProductImages(product.category, product.name);
+  const isLowStock = product.quantity <= (product.minStock || 5);
+  const productImages = getProductImages(product.category, product.name, product.images);
 
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
