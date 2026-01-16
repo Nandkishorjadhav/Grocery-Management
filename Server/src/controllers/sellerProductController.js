@@ -221,8 +221,8 @@ export const updateSellerProduct = async (req, res) => {
       });
     }
 
-    // Check if user is the seller
-    if (product.seller.toString() !== sellerId) {
+    // Check if user is the seller - convert both to strings for comparison
+    if (product.seller.toString() !== sellerId.toString()) {
       return res.status(403).json({
         success: false,
         error: 'Not authorized to update this product'
@@ -272,6 +272,10 @@ export const deleteSellerProduct = async (req, res) => {
     const { productId } = req.params;
     const sellerId = req.user.id;
 
+    console.log('🗑️ Delete request - Product ID:', productId);
+    console.log('🗑️ Delete request - Seller ID:', sellerId);
+    console.log('🗑️ Delete request - Seller ID type:', typeof sellerId);
+
     const product = await SellerProduct.findById(productId);
 
     if (!product) {
@@ -281,8 +285,13 @@ export const deleteSellerProduct = async (req, res) => {
       });
     }
 
-    // Check if user is the seller
-    if (product.seller.toString() !== sellerId) {
+    console.log('🗑️ Product seller ID:', product.seller);
+    console.log('🗑️ Product seller ID type:', typeof product.seller);
+    console.log('🗑️ Product seller toString:', product.seller.toString());
+    console.log('🗑️ Comparison result:', product.seller.toString() === sellerId.toString());
+
+    // Check if user is the seller - convert both to strings for comparison
+    if (product.seller.toString() !== sellerId.toString()) {
       return res.status(403).json({
         success: false,
         error: 'Not authorized to delete this product'
@@ -298,13 +307,14 @@ export const deleteSellerProduct = async (req, res) => {
     }
 
     await SellerProduct.findByIdAndDelete(productId);
+    console.log('✅ Product deleted successfully');
 
     res.json({
       success: true,
       message: 'Product deleted successfully'
     });
   } catch (error) {
-    console.error('Delete seller product error:', error);
+    console.error('❌ Delete seller product error:', error);
     res.status(500).json({
       success: false,
       error: error.message
