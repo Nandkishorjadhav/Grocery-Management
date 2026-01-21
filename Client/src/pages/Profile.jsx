@@ -158,17 +158,25 @@ const Profile = () => {
     }
 
     try {
+      // Optimistically remove from UI
+      setMyProducts(prev => prev.filter(p => p._id !== productId));
+      
       const response = await sellerProductService.deleteProduct(productId);
       
       if (response && response.success) {
         alert('Product deleted successfully!');
-        fetchMyProducts(); // Refresh product list
+        // Refresh to ensure sync with server
+        fetchMyProducts();
       } else {
+        // Revert on failure
         alert('Failed to delete product: ' + (response.error || 'Unknown error'));
+        fetchMyProducts();
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please try again.');
+      alert('Error deleting product: ' + error.message);
+      // Revert on error
+      fetchMyProducts();
     }
   };
 
@@ -596,7 +604,38 @@ const Profile = () => {
         {/* My Products Section */}
         {myProducts.length > 0 && (
           <div className="profile-stats-section">
-            <h3 className="profile-section-title">📦 My Product Listings</h3>
+            <div className="profile-section-header">
+              <h3 className="profile-section-title">📦 My Product Listings</h3>
+              {myProducts.filter(p => p.status === 'pending').length > 0 && (
+                <span className="pending-badge">
+                  {myProducts.filter(p => p.status === 'pending').length} Pending
+                </span>
+              )}
+            </div>
+            
+            {/* Notification for approved/rejected products */}
+            {myProducts.filter(p => p.status === 'approved' || p.status === 'rejected').length > 0 && (
+              <div className="product-notifications">
+                {myProducts.filter(p => p.status === 'approved').map(product => (
+                  <div key={product._id} className="notification approved">
+                    <span className="notification-icon">✅</span>
+                    <div className="notification-content">
+                      <strong>{product.productName}</strong> has been approved and is now live in the marketplace!
+                    </div>
+                  </div>
+                ))}
+                {myProducts.filter(p => p.status === 'rejected').map(product => (
+                  <div key={product._id} className="notification rejected">
+                    <span className="notification-icon">❌</span>
+                    <div className="notification-content">
+                      <strong>{product.productName}</strong> was rejected. 
+                      {product.rejectionReason && <span> Reason: {product.rejectionReason}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
             {productsLoading ? (
               <div className="profile-loading">Loading your products...</div>
             ) : (
@@ -610,22 +649,26 @@ const Profile = () => {
                     </div>
                     {product.images && product.images.length > 0 ? (
                       <img 
-                        src={`http://localhost:5000/${product.images[0]}`} 
-                        alt={product.name}
+                        src={product.images[0].url || product.images[0]} 
+                        alt={product.productName}
                         className="product-image"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="64"%3E📦%3C/text%3E%3C/svg%3E';
+                        }}
                       />
                     ) : (
                       <div className="product-no-image">📦</div>
                     )}
                     <div className="product-info">
-                      <h4>{product.name}</h4>
-                      <p className="product-category">{product.category}</p>
+                      <h4>{product.productName}</h4>
+                      <p className="product-category">{product.category.toUpperCase()}</p>
                       <p className="product-description">{product.description}</p>
                       <div className="product-pricing">
-                        <div>Base: ₹{product.basePrice}</div>
-                        <div>GST ({product.gstPercent}%): ₹{product.gstAmount}</div>
+                        <div>Base: ₹{product.basePrice?.toFixed(2)}</div>
+                        <div>GST ({product.gstPercentage}%): ₹{product.gstAmount?.toFixed(2)}</div>
                         <div className="product-final-price">
-                          Final: ₹{product.price}
+                          Final: ₹{product.finalPrice?.toFixed(2)}
                         </div>
                       </div>
                       <p className="product-quantity">

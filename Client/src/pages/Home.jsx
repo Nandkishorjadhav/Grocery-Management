@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import { Link } from 'react-router-dom';
+import sellerProductService from '../services/sellerProductService';
 import './Home.css';
 
 const Home = ({ searchQuery = '' }) => {
@@ -10,9 +11,55 @@ const Home = ({ searchQuery = '' }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [addedItems, setAddedItems] = useState(new Set());
+  const [sellerProducts, setSellerProducts] = useState([]);
+
+  // Fetch approved seller products
+  useEffect(() => {
+    const fetchSellerProducts = async () => {
+      try {
+        const response = await sellerProductService.getMarketplaceProducts({ status: 'approved' });
+        if (response && response.success) {
+          // Transform seller products to match inventory format
+          // Filter out products with 0 quantity or sold status
+          const transformedProducts = response.products
+            .filter(sp => sp.quantity > 0 && sp.status === 'approved')
+            .map(sp => ({
+              _id: sp._id,
+              name: sp.productName,
+              category: sp.category,
+              price: sp.finalPrice,
+              quantity: sp.quantity,
+              unit: sp.unit,
+              description: sp.description,
+              images: sp.images,
+              isSellerProduct: true,
+              sellerName: sp.sellerName,
+              minStock: 0 // Seller products don't have minStock
+            }));
+          setSellerProducts(transformedProducts);
+          console.log('✅ Fetched seller products:', transformedProducts.length);
+        }
+      } catch (error) {
+        console.error('Failed to fetch seller products:', error);
+        setSellerProducts([]);
+      }
+    };
+
+    fetchSellerProducts();
+    
+    // Refresh seller products every 30 seconds to reflect any deletions
+    const interval = setInterval(fetchSellerProducts, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    let products = [...inventory];
+    // Combine inventory and approved seller products
+    // Filter out products with 0 quantity
+    let products = [
+      ...inventory.filter(item => item.quantity > 0),
+      ...sellerProducts.filter(item => item.quantity > 0)
+    ];
 
     // Apply search filter
     if (searchQuery) {
@@ -55,9 +102,9 @@ const Home = ({ searchQuery = '' }) => {
     }
 
     setFilteredProducts(products);
-  }, [inventory, searchQuery, selectedFilter, selectedCategory]);
+  }, [inventory, sellerProducts, searchQuery, selectedFilter, selectedCategory]);
 
-  const categories = [...new Set(inventory.map(item => item.category))];
+  const categories = [...new Set([...inventory, ...sellerProducts].map(item => item.category))];
 
   const getDiscountBadge = (item) => {
     // Mock discount calculation
@@ -213,7 +260,7 @@ const Home = ({ searchQuery = '' }) => {
                       <span>{getCategoryEmoji(category)}</span>
                       <span>{category}</span>
                       <span className="category-item-count">
-                        {inventory.filter(item => item.category === category).length}
+                        {[...inventory, ...sellerProducts].filter(item => item.category === category).length}
                       </span>
                     </div>
                   ))}
