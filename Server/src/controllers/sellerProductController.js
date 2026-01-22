@@ -4,10 +4,9 @@ import User from '../models/User.js';
 // Create a new seller product
 export const createSellerProduct = async (req, res) => {
   try {
-    console.log('📦 Creating seller product...');
+    console.log('\n========== CREATE SELLER PRODUCT ==========');
     console.log('📦 User ID:', req.user?.id);
-    console.log('📦 Request body keys:', Object.keys(req.body));
-    console.log('📦 Product name:', req.body.productName);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
     
     const sellerId = req.user.id;
     const {
@@ -24,15 +23,14 @@ export const createSellerProduct = async (req, res) => {
       images
     } = req.body;
 
-    console.log('📦 Parsed data:', {
-      productName,
-      category,
-      basePrice,
-      gstPercentage,
-      quantity,
-      unit,
-      imagesCount: images?.length
-    });
+    // Validate required fields
+    if (!productName || !category || !description || !basePrice || !quantity || !unit) {
+      console.error('❌ Missing required fields');
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: productName, category, description, basePrice, quantity, unit'
+      });
+    }
 
     // Get seller details
     const seller = await User.findById(sellerId);
@@ -44,7 +42,7 @@ export const createSellerProduct = async (req, res) => {
       });
     }
 
-    console.log('👤 Seller found:', seller.name);
+    console.log('👤 Seller found:', seller.name, '| Email:', seller.email);
 
     // Create seller product
     const sellerProduct = new SellerProduct({
@@ -57,28 +55,48 @@ export const createSellerProduct = async (req, res) => {
       productName,
       category,
       description,
-      basePrice,
-      gstPercentage: gstPercentage || 5,
-      quantity,
+      basePrice: parseFloat(basePrice),
+      gstPercentage: parseInt(gstPercentage) || 5,
+      quantity: parseFloat(quantity),
       unit,
       expiryDate: expiryDate || null,
       brand: brand || '',
       origin: origin || '',
-      images: images || []
+      images: images || [],
+      status: 'pending' // Explicitly set status
     });
 
     console.log('💾 Saving product to database...');
-    await sellerProduct.save();
-    console.log('✅ Product saved successfully!');
+    console.log('💾 Product object:', {
+      productName: sellerProduct.productName,
+      status: sellerProduct.status,
+      seller: sellerProduct.seller,
+      basePrice: sellerProduct.basePrice
+    });
+    
+    const savedProduct = await sellerProduct.save();
+    console.log('✅ Product saved successfully! ID:', savedProduct._id);
+    console.log('✅ Product status:', savedProduct.status);
+    
+    // Verify it was saved
+    const verifyProduct = await SellerProduct.findById(savedProduct._id);
+    if (verifyProduct) {
+      console.log('✅ Verification: Product exists in DB with status:', verifyProduct.status);
+    } else {
+      console.error('❌ Verification failed: Product not found in DB');
+    }
+    console.log('==========================================\n');
 
     res.status(201).json({
       success: true,
       message: 'Product submitted for approval',
-      product: sellerProduct
+      product: savedProduct
     });
   } catch (error) {
-    console.error('❌ Create seller product error:', error);
+    console.error('\n❌ CREATE SELLER PRODUCT ERROR');
+    console.error('❌ Error message:', error.message);
     console.error('❌ Error stack:', error.stack);
+    console.error('==========================================\n');
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to create product'
@@ -89,7 +107,10 @@ export const createSellerProduct = async (req, res) => {
 // Get all seller products (for sellers to see their own products)
 export const getMySellerProducts = async (req, res) => {
   try {
+    console.log('\n========== GET MY SELLER PRODUCTS ==========');
     const sellerId = req.user.id;
+    console.log('👤 Seller ID:', sellerId);
+    
     const { status, category, page = 1, limit = 10 } = req.query;
 
     const query = { seller: sellerId };
@@ -101,6 +122,8 @@ export const getMySellerProducts = async (req, res) => {
     if (category) {
       query.category = category;
     }
+    
+    console.log('🔍 Query:', JSON.stringify(query));
 
     const products = await SellerProduct.find(query)
       .sort({ createdAt: -1 })
@@ -108,6 +131,10 @@ export const getMySellerProducts = async (req, res) => {
       .skip((page - 1) * limit);
 
     const count = await SellerProduct.countDocuments(query);
+    
+    console.log('✅ Found', count, 'products for seller');
+    console.log('✅ Products:', products.map(p => ({ name: p.productName, status: p.status, id: p._id })));
+    console.log('==========================================\n');
 
     res.json({
       success: true,
@@ -117,7 +144,7 @@ export const getMySellerProducts = async (req, res) => {
       totalProducts: count
     });
   } catch (error) {
-    console.error('Get my seller products error:', error);
+    console.error('❌ Get my seller products error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -394,12 +421,16 @@ export const rejectSellerProduct = async (req, res) => {
 // Admin: Get all seller products with filters
 export const getAllSellerProducts = async (req, res) => {
   try {
+    console.log('🔍 Admin fetching seller products...');
+    console.log('🔍 Query params:', req.query);
+    
     const { status, seller, category, page = 1, limit = 20 } = req.query;
 
     const query = {};
     
     if (status) {
       query.status = status;
+      console.log('🔍 Filtering by status:', status);
     }
     
     if (seller) {
@@ -410,6 +441,8 @@ export const getAllSellerProducts = async (req, res) => {
       query.category = category;
     }
 
+    console.log('🔍 Final query:', JSON.stringify(query));
+
     const products = await SellerProduct.find(query)
       .populate('seller', 'name email mobile')
       .populate('approvedBy', 'name')
@@ -418,6 +451,9 @@ export const getAllSellerProducts = async (req, res) => {
       .skip((page - 1) * limit);
 
     const count = await SellerProduct.countDocuments(query);
+    
+    console.log('🔍 Found products:', count);
+    console.log('🔍 Products:', products.map(p => ({ name: p.productName, status: p.status })));
 
     // Get stats
     const stats = await SellerProduct.aggregate([
@@ -428,6 +464,8 @@ export const getAllSellerProducts = async (req, res) => {
         }
       }
     ]);
+    
+    console.log('🔍 Stats:', stats);
 
     res.json({
       success: true,
@@ -438,7 +476,8 @@ export const getAllSellerProducts = async (req, res) => {
       totalProducts: count
     });
   } catch (error) {
-    console.error('Get all seller products error:', error);
+    console.error('❌ Get all seller products error:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({
       success: false,
       error: error.message

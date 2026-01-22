@@ -40,6 +40,15 @@ const AdminPanel = () => {
       if (activeTab === 'dashboard') {
         const stats = await adminService.getDashboardStats();
         setDashboardStats(stats);
+        // Also load pending seller products for dashboard display
+        try {
+          const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
+          console.log('📦 Pending seller products for dashboard:', productsData);
+          setSellerProducts(productsData.products || []);
+        } catch (err) {
+          console.error('Error loading pending products for dashboard:', err);
+          setSellerProducts([]);
+        }
       } else if (activeTab === 'users') {
         const data = await adminService.getAllUsers({ 
           status: filterStatus, 
@@ -143,26 +152,37 @@ const AdminPanel = () => {
   // Seller Product Handlers
   const handleApproveProduct = async (productId) => {
     try {
-      await sellerProductService.approveProduct(productId);
-      alert('Product approved successfully!');
+      const response = await sellerProductService.approveProduct(productId);
+      if (response && response.success) {
+        alert(`✅ Product "${response.product?.productName || 'Product'}" has been approved successfully!\\n\\nThe product is now live in the marketplace and visible to all customers on the home page.`);
+      } else {
+        alert('Product approved successfully!');
+      }
       loadData();
     } catch (error) {
       console.error('Error approving product:', error);
-      alert('Failed to approve product');
+      alert('Failed to approve product: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleRejectProduct = async (productId) => {
-    const reason = prompt('Enter rejection reason:');
-    if (!reason) return;
+    const reason = prompt('Enter rejection reason (will be shown to the seller):');
+    if (!reason) {
+      alert('Rejection cancelled. Please provide a reason to reject the product.');
+      return;
+    }
     
     try {
-      await sellerProductService.rejectProduct(productId, reason);
-      alert('Product rejected');
+      const response = await sellerProductService.rejectProduct(productId, reason);
+      if (response && response.success) {
+        alert(`❌ Product "${response.product?.productName || 'Product'}" has been rejected.\\n\\nThe seller will be notified with the reason: "${reason}"`);
+      } else {
+        alert('Product rejected');
+      }
       loadData();
     } catch (error) {
       console.error('Error rejecting product:', error);
-      alert('Failed to reject product');
+      alert('Failed to reject product: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -181,7 +201,7 @@ const AdminPanel = () => {
               <p className="stat-number">{dashboardStats.stats.activeUsers}</p>
             </Card>
             <Card className="stat-card">
-              <h3>Pending Approvals</h3>
+              <h3>Pending User Approvals</h3>
               <p className="stat-number warning">{dashboardStats.stats.pendingUsers}</p>
             </Card>
             <Card className="stat-card">
@@ -192,6 +212,18 @@ const AdminPanel = () => {
               <h3>Low Stock Items</h3>
               <p className="stat-number danger">{dashboardStats.stats.lowStockProducts}</p>
             </Card>
+            {sellerProducts.length > 0 && (
+              <Card 
+                className="stat-card attention" 
+                onClick={() => setActiveTab('approvals')} 
+                style={{cursor: 'pointer', border: '2px solid #ff6b6b'}}
+                title="Click to view pending products"
+              >
+                <h3>🛒 Pending Product Approvals</h3>
+                <p className="stat-number warning">{sellerProducts.length}</p>
+                <small style={{color: '#666'}}>Click to approve</small>
+              </Card>
+            )}
           </div>
 
           <div className="recent-users">
@@ -360,69 +392,48 @@ const AdminPanel = () => {
     <div className="admin-approvals">
       <h2>Pending Approvals</h2>
       
-      {/* User Approvals */}
+      {/* Seller Product Approvals - Show First for Priority */}
       <div className="approval-section">
-        <h3>👥 User Approvals</h3>
-        {pendingApprovals.length === 0 ? (
-          <p className="no-data">No pending user approvals</p>
-        ) : (
-          <div className="approvals-grid">
-            {pendingApprovals.map(user => (
-              <Card key={user._id} className="approval-card">
-                <h3>{user.name}</h3>
-                <p>{user.email || user.mobile}</p>
-                <p className="joined-date">
-                  Requested: {new Date(user.createdAt).toLocaleDateString()}
-                </p>
-                <div className="approval-actions">
-                  <Button
-                    onClick={() => handleApproveUser(user._id)}
-                    variant="success"
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    onClick={() => handleRejectUser(user._id)}
-                    variant="danger"
-                  >
-                    Reject
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Seller Product Approvals */}
-      <div className="approval-section" style={{ marginTop: '2rem' }}>
-        <h3>📦 Product Approvals</h3>
+        <div className="section-header-with-count">
+          <h3>🛒 Seller Product Approvals</h3>
+          {sellerProducts.length > 0 && (
+            <span className="count-badge">{sellerProducts.length} Pending</span>
+          )}
+        </div>
         {sellerProducts.length === 0 ? (
-          <p className="no-data">No pending product approvals</p>
+          <p className="no-data">✅ No pending product approvals</p>
         ) : (
           <div className="approvals-grid">
             {sellerProducts.map(product => (
               <Card key={product._id} className="approval-card product-approval-card">
+                <div className="product-status-badge pending-approval">⏳ Awaiting Approval</div>
                 {product.images && product.images.length > 0 && (
                   <div className="product-image">
                     <img src={product.images[0].url} alt={product.productName} />
                   </div>
                 )}
                 <h3>{product.productName}</h3>
-                <p className="product-category">{product.category}</p>
+                <p className="product-category">📂 {product.category}</p>
                 <p className="product-description">{product.description}</p>
                 <div className="product-details">
-                  <p><strong>Seller:</strong> {product.sellerName}</p>
-                  <p><strong>Price:</strong> ₹{product.finalPrice}</p>
-                  <p><strong>Quantity:</strong> {product.quantity} {product.unit}</p>
-                  <p><strong>Submitted:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
+                  <p><strong>👤 Seller:</strong> {product.sellerName}</p>
+                  {product.sellerContact?.email && (
+                    <p><strong>📧 Email:</strong> {product.sellerContact.email}</p>
+                  )}
+                  {product.sellerContact?.mobile && (
+                    <p><strong>📱 Mobile:</strong> {product.sellerContact.mobile}</p>
+                  )}
+                  <p><strong>💰 Base Price:</strong> ₹{product.basePrice} + GST ({product.gstPercentage}%)</p>
+                  <p><strong>💳 Final Price:</strong> ₹{product.finalPrice?.toFixed(2)}</p>
+                  <p><strong>📦 Quantity:</strong> {product.quantity} {product.unit}</p>
+                  <p><strong>📅 Submitted:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div className="approval-actions">
                   <Button
                     onClick={() => handleApproveProduct(product._id)}
                     variant="success"
                   >
-                    ✓ Approve
+                    ✓ Approve & Publish
                   </Button>
                   <Button
                     onClick={() => handleRejectProduct(product._id)}

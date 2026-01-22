@@ -43,8 +43,16 @@ class ApiService {
   }
 
   // GET request
-  async get(endpoint) {
-    return this.request(endpoint, { method: 'GET' });
+  async get(endpoint, options = {}) {
+    let url = endpoint;
+    
+    // Handle query parameters
+    if (options.params) {
+      const queryString = new URLSearchParams(options.params).toString();
+      url = queryString ? `${endpoint}?${queryString}` : endpoint;
+    }
+    
+    return this.request(url, { method: 'GET', ...options });
   }
 
   // POST request

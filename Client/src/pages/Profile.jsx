@@ -608,10 +608,32 @@ const Profile = () => {
               <h3 className="profile-section-title">📦 My Product Listings</h3>
               {myProducts.filter(p => p.status === 'pending').length > 0 && (
                 <span className="pending-badge">
-                  {myProducts.filter(p => p.status === 'pending').length} Pending
+                  {myProducts.filter(p => p.status === 'pending').length} Awaiting Admin Approval
                 </span>
               )}
             </div>
+            
+            {/* Info message for pending products */}
+            {myProducts.filter(p => p.status === 'pending').length > 0 && (
+              <div className="info-message" style={{
+                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+                padding: '1rem',
+                borderRadius: '10px',
+                marginBottom: '1rem',
+                border: '2px solid #3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                <span style={{fontSize: '1.5rem'}}>ℹ️</span>
+                <div>
+                  <strong>Your products are under review!</strong>
+                  <div style={{fontSize: '0.9rem', marginTop: '0.25rem', opacity: 0.9}}>
+                    Admin will review your product(s) and approve them. Once approved, they will be visible to customers on the home page.
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Notification for approved/rejected products */}
             {myProducts.filter(p => p.status === 'approved' || p.status === 'rejected').length > 0 && (
@@ -620,7 +642,12 @@ const Profile = () => {
                   <div key={product._id} className="notification approved">
                     <span className="notification-icon">✅</span>
                     <div className="notification-content">
-                      <strong>{product.productName}</strong> has been approved and is now live in the marketplace!
+                      <strong>Great news!</strong> Your product "<strong>{product.productName}</strong>" has been <strong>approved by admin</strong> and is now <strong>live in the marketplace</strong>! Customers can now see and purchase it on the home page.
+                      {product.approvedAt && (
+                        <div style={{fontSize: '0.85rem', marginTop: '0.25rem', opacity: 0.8}}>
+                          Approved on {new Date(product.approvedAt).toLocaleDateString()} at {new Date(product.approvedAt).toLocaleTimeString()}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -628,8 +655,15 @@ const Profile = () => {
                   <div key={product._id} className="notification rejected">
                     <span className="notification-icon">❌</span>
                     <div className="notification-content">
-                      <strong>{product.productName}</strong> was rejected. 
-                      {product.rejectionReason && <span> Reason: {product.rejectionReason}</span>}
+                      <strong>Product Rejected:</strong> Your product "<strong>{product.productName}</strong>" was not approved. 
+                      {product.rejectionReason && (
+                        <div style={{marginTop: '0.5rem'}}>
+                          <strong>Reason:</strong> {product.rejectionReason}
+                        </div>
+                      )}
+                      <div style={{fontSize: '0.85rem', marginTop: '0.5rem', opacity: 0.8}}>
+                        Please update your product details and resubmit, or contact admin for more information.
+                      </div>
                     </div>
                   </div>
                 ))}
