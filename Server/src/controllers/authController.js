@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import emailService from '../services/emailService.js';
+import smsService from '../services/smsService.js';
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -8,12 +10,57 @@ const generateToken = (userId) => {
   });
 };
 
-// Send OTP (Mock implementation - in production, integrate with SMS/Email service)
-const sendOTP = async (method, contact, otp) => {
-  console.log(`📱 Sending OTP to ${method}: ${contact}`);
-  console.log(`🔐 OTP: ${otp} (Valid for 10 minutes)`);
-  // TODO: Integrate with actual SMS/Email service (Twilio, SendGrid, etc.)
-  return true;
+// Display OTP prominently in terminal
+const displayOTPInTerminal = (method, contact, otp) => {
+  console.log('\n' + '='.repeat(60));
+  console.log('║' + ' '.repeat(58) + '║');
+  console.log('║' + '           🔐 YOUR OTP CODE (COPY THIS!)'.padEnd(58) + '║');
+  console.log('║' + ' '.repeat(58) + '║');
+  console.log('║' + `           Method: ${method.toUpperCase()}`.padEnd(58) + '║');
+  console.log('║' + `           ${method === 'email' ? 'Email' : 'Mobile'}: ${contact}`.padEnd(58) + '║');
+  console.log('║' + ' '.repeat(58) + '║');
+  console.log('║' + `                    OTP: ${otp}`.padEnd(58) + '║');
+  console.log('║' + ' '.repeat(58) + '║');
+  console.log('║' + '           Valid for: 10 minutes'.padEnd(58) + '║');
+  console.log('║' + ' '.repeat(58) + '║');
+  console.log('='.repeat(60) + '\n');
+};
+
+// Send OTP via Email or SMS
+const sendOTP = async (method, contact, otp, userName = 'User') => {
+  try {
+    console.log(`\n📤 Sending OTP via ${method} to ${contact}`);
+    
+    if (method === 'email') {
+      const result = await emailService.sendOTP(contact, otp, userName);
+      if (result.success) {
+        console.log(`✅ Email OTP sent successfully${result.mode === 'development' ? ' (DEV MODE)' : ''}`);
+        // Always show OTP in terminal for easy access
+        displayOTPInTerminal(method, contact, otp);
+        return true;
+      }
+    } else if (method === 'mobile') {
+      const result = await smsService.sendOTP(contact, otp);
+      if (result.success) {
+        console.log(`✅ SMS OTP sent successfully${result.mode === 'development' ? ' (DEV MODE)' : ''}`);
+        // Always show OTP in terminal for easy access
+        displayOTPInTerminal(method, contact, otp);
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error(`❌ Failed to send OTP via ${method}:`, error.message);
+    
+    // In development, log OTP to console as fallback
+    if (process.env.NODE_ENV === 'development') {
+      displayOTPInTerminal(method, contact, otp);
+      return true;
+    }
+    
+    throw error;
+  }
 };
 
 // Register/Login with Email or Mobile (Step 1: Send OTP)
@@ -71,11 +118,22 @@ export const initiateAuth = async (req, res) => {
 
     // Send OTP via SMS or Email
     const contact = method === 'email' ? email : mobile;
-    await sendOTP(method, contact, otp);
+    
+    console.log(`\n🎯 Initiating authentication for: ${contact}`);
+    console.log(`🔢 Generated OTP: ${otp}`);
+    
+    const otpSent = await sendOTP(method, contact, otp, name || user.name);
+    
+    if (!otpSent) {
+      return res.status(500).json({
+        success: false,
+        error: `Failed to send OTP to your ${method}. Please try again.`
+      });
+    }
 
     res.json({
       success: true,
-      message: `OTP sent to your ${method}`,
+      message: `OTP sent to your ${method}. Check the server console for OTP code!`,
       isNewUser,
       userId: user._id
     });
@@ -178,11 +236,22 @@ export const resendOTP = async (req, res) => {
 
     // Send OTP
     const contact = user.email || user.mobile;
-    await sendOTP(user.loginMethod, contact, otp);
+    
+    console.log(`\n🔄 Resending OTP for: ${contact}`);
+    console.log(`🔢 New OTP: ${otp}`);
+    
+    const otpSent = await sendOTP(user.loginMethod, contact, otp, user.name);
+    
+    if (!otpSent) {
+      return res.status(500).json({
+        success: false,
+        error: `Failed to resend OTP to your ${user.loginMethod}. Please try again.`
+      });
+    }
 
     res.json({
       success: true,
-      message: `OTP resent to your ${user.loginMethod}`
+      message: `OTP resent to your ${user.loginMethod}. Check the server console for OTP code!`
     });
   } catch (error) {
     console.error('Resend OTP error:', error);
