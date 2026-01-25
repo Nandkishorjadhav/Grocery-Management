@@ -216,32 +216,40 @@ class SMSService {
    * Send SMS via MSG91
    */
   async sendViaMSG91(mobile, otp) {
-    const axios = (await import('axios')).default;
-    
-    const message = `Your Grocery Management OTP is ${otp}. Valid for 10 minutes. Do not share this code.`;
-    
-    const url = 'https://api.msg91.com/api/v5/flow/';
-    const payload = {
-      sender: this.msg91Config.senderId,
-      route: this.msg91Config.route,
-      country: '91',
-      sms: [
-        {
-          message: message,
-          to: [mobile.replace('+91', '').replace('+', '')]
-        }
-      ]
-    };
+    try {
+      const axios = (await import('axios')).default;
+      
+      const message = `Your Grocery Management OTP is ${otp}. Valid for 10 minutes. Do not share this code.`;
+      
+      // Clean mobile number - remove +91 prefix for MSG91
+      const cleanMobile = mobile.replace('+91', '').replace('+', '').trim();
+      
+      // MSG91 SMS API v5
+      const url = 'https://control.msg91.com/api/v5/otp';
+      
+      // Alternative: Use simple SMS API
+      const smsUrl = `https://control.msg91.com/api/sendhttp.php`;
+      const params = {
+        authkey: this.msg91Config.authKey,
+        mobiles: cleanMobile,
+        message: message,
+        sender: this.msg91Config.senderId,
+        route: this.msg91Config.route,
+        country: '91'
+      };
 
-    const response = await axios.post(url, payload, {
-      headers: {
-        'authkey': this.msg91Config.authKey,
-        'content-type': 'application/json'
-      }
-    });
+      console.log(`📤 Sending SMS via MSG91 to ${cleanMobile}...`);
+      
+      const response = await axios.get(smsUrl, { params });
 
-    console.log(`✅ OTP SMS sent via MSG91 to ${mobile}`);
-    return { success: true, response: response.data, provider: 'msg91' };
+      console.log(`✅ OTP SMS sent via MSG91 to ${mobile}`);
+      console.log(`📱 MSG91 Response:`, response.data);
+      
+      return { success: true, response: response.data, provider: 'msg91' };
+    } catch (error) {
+      console.error('❌ MSG91 SMS Error:', error.response?.data || error.message);
+      throw error;
+    }
   }
 
   /**

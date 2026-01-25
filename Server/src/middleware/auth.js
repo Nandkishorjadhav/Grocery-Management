@@ -43,7 +43,9 @@ export const authenticate = async (req, res, next) => {
     };
 
     next();
-  } catch (error) {
+  }
+  
+  catch (error) {
     console.error('Authentication error:', error);
     
     if (error.name === 'JsonWebTokenError') {
