@@ -55,11 +55,25 @@ const AdminPanel = () => {
         });
         setUsers(data.users);
       } else if (activeTab === 'approvals') {
-        const data = await adminService.getPendingApprovals();
-        setPendingApprovals(data.pendingUsers || []);
-        // Also load pending seller products
-        const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
-        setSellerProducts(productsData.products || []);
+        // Load pending user approvals
+        try {
+          const data = await adminService.getPendingApprovals();
+          setPendingApprovals(data.pendingUsers || []);
+        } catch (err) {
+          console.error('Error loading pending user approvals:', err);
+          setPendingApprovals([]);
+        }
+        
+        // Load pending seller products
+        try {
+          console.log('🔍 Fetching seller products with status: pending');
+          const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
+          console.log('📦 Received products data:', productsData);
+          setSellerProducts(productsData.products || []);
+        } catch (err) {
+          console.error('Error loading pending seller products:', err);
+          setSellerProducts([]);
+        }
       } else if (activeTab === 'activity') {
         const data = await adminService.getActivityLogs();
         setActivityLogs(data);
