@@ -13,8 +13,44 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  const toggleTheme = (event) => {
+    // Check if View Transitions API is supported
+    if (!document.startViewTransition) {
+      setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+      return;
+    }
+
+    // Get click position
+    const x = event?.clientX ?? window.innerWidth / 2;
+    const y = event?.clientY ?? window.innerHeight / 2;
+
+    // Calculate radius to cover entire screen
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    // Start view transition
+    const transition = document.startViewTransition(() => {
+      setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    });
+
+    // Animate the transition
+    transition.ready.then(() => {
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`
+      ];
+
+      document.documentElement.animate(
+        { clipPath },
+        {
+          duration: 600,
+          easing: 'ease-in-out',
+          pseudoElement: '::view-transition-new(root)'
+        }
+      );
+    });
   };
 
   return (
