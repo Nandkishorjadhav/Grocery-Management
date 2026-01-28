@@ -19,11 +19,56 @@
 .theme-toggle:hover {
   border-color: white;
   background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .theme-toggle:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
+}
+
+.theme-toggle-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-icon-wrapper {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.theme-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Moon icon - visible in light mode */
+.moon-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle.is-dark .moon-icon {
+  opacity: 0;
+  transform: rotate(-180deg) scale(0);
+}
+
+/* Sun icon - visible in dark mode */
+.sun-icon {
+  opacity: 0;
+  transform: rotate(180deg) scale(0);
+}
+
+.theme-toggle.is-dark .sun-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* View Transitions API Support */
