@@ -1,0 +1,24 @@
+{
+  "name": "grocery-management-monorepo",
+  "version": "1.0.0",
+  "description": "Grocery Management System - Full Stack Application",
+  "private": true,
+  "scripts": {
+    "install:server": "cd Server && npm install",
+    "install:client": "cd Client && npm install",
+    "install:all": "npm run install:server && npm run install:client",
+    "build:client": "cd Client && npm run build",
+    "start:server": "cd Server && npm start",
+    "dev:server": "cd Server && npm run dev",
+    "dev:client": "cd Client && npm run dev",
+    "build": "npm run install:server && npm run install:client && npm run build:client",
+    "start": "npm run start:server"
+  },
+  "keywords": [
+    "grocery",
+    "management",
+    "fullstack"
+  ],
+  "author": "",
+  "license": "ISC"
+}
