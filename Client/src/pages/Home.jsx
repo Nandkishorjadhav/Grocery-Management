@@ -330,7 +330,7 @@ const Home = ({ searchQuery = '' }) => {
                       onClick={(e) => handleAddToCart(e, item)}
                     >
                       <span>{addedItems.has(item._id || item.id) ? 'Added' : 'Add'}</span>
-                      <span className="cart-icon">{addedItems.has(item._id || item.id) ? '✓' : '🛒'}</span>
+                      <span className="product-cart-icon">{addedItems.has(item._id || item.id) ? '✓' : '🛒'}</span>
                     </button>
                   </div>
                 </div>

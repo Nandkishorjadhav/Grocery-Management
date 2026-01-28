@@ -6,7 +6,7 @@ const Preloader = () => {
     <div className="preloader">
       <div className="preloader-content">
         <div className="cart-animation">
-          <div className="cart-icon">🛒</div>
+          <div className="preloader-cart-icon">🛒</div>
           <div className="items-loading">
             <span className="item item-1">🍎</span>
             <span className="item item-2">🥬</span>
