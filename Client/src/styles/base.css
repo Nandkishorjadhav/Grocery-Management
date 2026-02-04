@@ -24,12 +24,13 @@ body {
 }
 
 [data-theme="dark"] body {
-  background: #121212;
-  color: #e0e0e0;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1e 100%);
+  background-attachment: fixed;
+  color: #e8e9f3;
 }
 
 [data-theme="dark"] .layout-wrapper {
-  background: #121212;
+  background: transparent;
 }
 
 /* ========== RESPONSIVE IMPROVEMENTS ========== */
@@ -84,4 +85,49 @@ html {
   .container {
     padding: 0 2rem;
   }
+}
+
+/* ========== GLASSMORPHISM UTILITIES ========== */
+.glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .glass {
+  background: rgba(26, 26, 46, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(20, 20, 35, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Glow Effects */
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+}
+
+.glow-orange-hover:hover {
+  box-shadow: 0 0 30px rgba(255, 152, 0, 0.5),
+              0 0 60px rgba(255, 152, 0, 0.2);
+  transition: box-shadow 0.3s ease;
 }
