@@ -19,6 +19,17 @@
   }
 }
 
+@keyframes slideUpScale {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -68,9 +79,49 @@
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 25px rgba(255, 152, 0, 0.6);
+  }
+}
+
+@keyframes glowOrange {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.3),
+                0 0 30px rgba(255, 152, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 152, 0, 0.5),
+                0 0 50px rgba(255, 152, 0, 0.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
   }
 }
