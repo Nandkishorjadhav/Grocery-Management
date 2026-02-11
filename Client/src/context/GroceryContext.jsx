@@ -196,7 +196,6 @@ export const GroceryProvider = ({ children }) => {
 
   // Cart functions
   const addToCart = async (product) => {
-    // Check authentication first
     if (!auth.isAuthenticated()) {
       auth.openAuthModal();
       return null;

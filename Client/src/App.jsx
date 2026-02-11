@@ -26,7 +26,6 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show preloader for 1 second on initial load
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
