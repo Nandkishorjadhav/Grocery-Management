@@ -12,7 +12,6 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -25,13 +24,6 @@ const AdminPanel = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [toast, setToast] = useState(null);
-
-  // Show toast notification
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   useEffect(() => {
     // Check if user is admin
@@ -44,7 +36,6 @@ const AdminPanel = () => {
 
   const loadData = async () => {
     setLoading(true);
-    setError(null);
     try {
       if (activeTab === 'dashboard') {
         const stats = await adminService.getDashboardStats();
@@ -98,8 +89,6 @@ const AdminPanel = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      setError(error.message || 'Failed to load data. Please try again.');
-      showToast('Failed to load data', 'error');
     } finally {
       setLoading(false);
     }
@@ -108,22 +97,18 @@ const AdminPanel = () => {
   const handleApproveUser = async (userId) => {
     try {
       await adminService.approveUser(userId);
-      showToast('✅ User approved successfully', 'success');
       loadData();
     } catch (error) {
       console.error('Error approving user:', error);
-      showToast('Failed to approve user', 'error');
     }
   };
 
   const handleRejectUser = async (userId) => {
     try {
       await adminService.rejectUser(userId);
-      showToast('User rejected', 'success');
       loadData();
     } catch (error) {
       console.error('Error rejecting user:', error);
-      showToast('Failed to reject user', 'error');
     }
   };
 
@@ -131,22 +116,18 @@ const AdminPanel = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       await adminService.deleteUser(userId);
-      showToast('🗑️ User deleted successfully', 'success');
       loadData();
     } catch (error) {
       console.error('Error deleting user:', error);
-      showToast('Failed to delete user', 'error');
     }
   };
 
   const handleRoleChange = async (userId, newRole) => {
     try {
       await adminService.updateUserRole(userId, newRole);
-      showToast(`🔄 User role updated to ${newRole}`, 'success');
       loadData();
     } catch (error) {
       console.error('Error updating role:', error);
-      showToast('Failed to update user role', 'error');
     }
   };
 
@@ -154,12 +135,10 @@ const AdminPanel = () => {
     if (selectedUsers.length === 0) return;
     try {
       await adminService.bulkApproveUsers(selectedUsers);
-      showToast(`✅ ${selectedUsers.length} users approved successfully`, 'success');
       setSelectedUsers([]);
       loadData();
     } catch (error) {
       console.error('Error bulk approving:', error);
-      showToast('Failed to approve users', 'error');
     }
   };
 
@@ -167,12 +146,10 @@ const AdminPanel = () => {
     if (selectedUsers.length === 0) return;
     try {
       await adminService.bulkRejectUsers(selectedUsers);
-      showToast(`${selectedUsers.length} users rejected`, 'success');
       setSelectedUsers([]);
       loadData();
     } catch (error) {
       console.error('Error bulk rejecting:', error);
-      showToast('Failed to reject users', 'error');
     }
   };
 
@@ -189,35 +166,35 @@ const AdminPanel = () => {
     try {
       const response = await sellerProductService.approveProduct(productId);
       if (response && response.success) {
-        showToast(`✅ Product "${response.product?.productName || 'Product'}" approved successfully!`, 'success');
+        alert(`✅ Product "${response.product?.productName || 'Product'}" has been approved successfully!\\n\\nThe product is now live in the marketplace and visible to all customers on the home page.`);
       } else {
-        showToast('Product approved successfully!', 'success');
+        alert('Product approved successfully!');
       }
       loadData();
     } catch (error) {
       console.error('Error approving product:', error);
-      showToast('Failed to approve product: ' + (error.message || 'Unknown error'), 'error');
+      alert('Failed to approve product: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleRejectProduct = async (productId) => {
     const reason = prompt('Enter rejection reason (will be shown to the seller):');
     if (!reason) {
-      showToast('Rejection cancelled - please provide a reason', 'warning');
+      alert('Rejection cancelled. Please provide a reason to reject the product.');
       return;
     }
     
     try {
       const response = await sellerProductService.rejectProduct(productId, reason);
       if (response && response.success) {
-        showToast(`❌ Product "${response.product?.productName || 'Product'}" rejected`, 'success');
+        alert(`❌ Product "${response.product?.productName || 'Product'}" has been rejected.\\n\\nThe seller will be notified with the reason: "${reason}"`);
       } else {
-        showToast('Product rejected', 'success');
+        alert('Product rejected');
       }
       loadData();
     } catch (error) {
       console.error('Error rejecting product:', error);
-      showToast('Failed to reject product: ' + (error.message || 'Unknown error'), 'error');
+      alert('Failed to reject product: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -587,159 +564,63 @@ const AdminPanel = () => {
 
   const renderApprovals = () => (
     <div className="admin-approvals">
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">⏳ Pending Approvals</h2>
-          <p className="section-subtitle">Review and approve pending users and products</p>
+      <h2>Pending Approvals</h2>
+      
+      {/* Seller Product Approvals - Show First for Priority */}
+      <div className="approval-section">
+        <div className="section-header-with-count">
+          <h3>🛒 Seller Product Approvals</h3>
+          {sellerProducts.length > 0 && (
+            <span className="count-badge">{sellerProducts.length} Pending</span>
+          )}
         </div>
-        <button 
-          className="refresh-btn"
-          onClick={loadData}
-          title="Refresh Approvals"
-        >
-          🔄 Refresh
-        </button>
+        {sellerProducts.length === 0 ? (
+          <p className="no-data">✅ No pending product approvals</p>
+        ) : (
+          <div className="approvals-grid">
+            {sellerProducts.map(product => (
+              <Card key={product._id} className="approval-card product-approval-card">
+                <div className="product-status-badge pending-approval">⏳ Awaiting Approval</div>
+                {product.images && product.images.length > 0 && (
+                  <div className="product-image">
+                    <img src={product.images[0].url} alt={product.productName} />
+                  </div>
+                )}
+                <h3>{product.productName}</h3>
+                <p className="product-category">📂 {product.category}</p>
+                <p className="product-description">{product.description}</p>
+                <div className="product-details">
+                  <p><strong>👤 Seller:</strong> {product.sellerName}</p>
+                  {product.sellerContact?.email && (
+                    <p><strong>📧 Email:</strong> {product.sellerContact.email}</p>
+                  )}
+                  {product.sellerContact?.mobile && (
+                    <p><strong>📱 Mobile:</strong> {product.sellerContact.mobile}</p>
+                  )}
+                  <p><strong>💰 Base Price:</strong> ₹{product.basePrice} + GST ({product.gstPercentage}%)</p>
+                  <p><strong>💳 Final Price:</strong> ₹{product.finalPrice?.toFixed(2)}</p>
+                  <p><strong>📦 Quantity:</strong> {product.quantity} {product.unit}</p>
+                  <p><strong>📅 Submitted:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="approval-actions">
+                  <Button
+                    onClick={() => handleApproveProduct(product._id)}
+                    variant="success"
+                  >
+                    ✓ Approve & Publish
+                  </Button>
+                  <Button
+                    onClick={() => handleRejectProduct(product._id)}
+                    variant="danger"
+                  >
+                    ✗ Reject
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading pending approvals...</p>
-        </div>
-      ) : (
-        <>
-          {/* User Approvals Section */}
-          <div className="approval-section">
-            <div className="section-header-with-count">
-              <h3>👥 User Approvals</h3>
-              {pendingApprovals.length > 0 && (
-                <span className="count-badge">{pendingApprovals.length} Pending</span>
-              )}
-            </div>
-            {pendingApprovals.length === 0 ? (
-              <div className="no-data-card">
-                <span className="no-data-icon">✅</span>
-                <p className="no-data-text">No pending user approvals</p>
-              </div>
-            ) : (
-              <div className="approvals-grid">
-                {pendingApprovals.map(user => (
-                  <Card key={user._id} className="approval-card user-approval-card">
-                    <div className="approval-card-header">
-                      <span className="user-avatar-large">👤</span>
-                      <div className="user-status-badge pending">⏳ Awaiting Approval</div>
-                    </div>
-                    <h3 className="user-name">{user.name}</h3>
-                    <div className="user-approval-details">
-                      {user.email && (
-                        <p className="detail-item">
-                          <span className="detail-icon">📧</span>
-                          <span className="detail-text">{user.email}</span>
-                        </p>
-                      )}
-                      {user.mobile && (
-                        <p className="detail-item">
-                          <span className="detail-icon">📱</span>
-                          <span className="detail-text">{user.mobile}</span>
-                        </p>
-                      )}
-                      <p className="detail-item">
-                        <span className="detail-icon">🏷️</span>
-                        <span className="detail-text">Role: {user.role || 'user'}</span>
-                      </p>
-                      <p className="detail-item">
-                        <span className="detail-icon">📅</span>
-                        <span className="detail-text">
-                          Registered: {new Date(user.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="approval-actions">
-                      <Button
-                        onClick={() => handleApproveUser(user._id)}
-                        variant="success"
-                        fullWidth
-                      >
-                        ✓ Approve User
-                      </Button>
-                      <Button
-                        onClick={() => handleRejectUser(user._id)}
-                        variant="danger"
-                        fullWidth
-                      >
-                        ✗ Reject User
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Seller Product Approvals Section */}
-          <div className="approval-section">
-            <div className="section-header-with-count">
-              <h3>🛒 Seller Product Approvals</h3>
-              {sellerProducts.length > 0 && (
-                <span className="count-badge">{sellerProducts.length} Pending</span>
-              )}
-            </div>
-            {sellerProducts.length === 0 ? (
-              <div className="no-data-card">
-                <span className="no-data-icon">✅</span>
-                <p className="no-data-text">No pending product approvals</p>
-              </div>
-            ) : (
-              <div className="approvals-grid">
-                {sellerProducts.map(product => (
-                  <Card key={product._id} className="approval-card product-approval-card">
-                    <div className="product-status-badge pending-approval">⏳ Awaiting Approval</div>
-                    {product.images && product.images.length > 0 && (
-                      <div className="product-image">
-                        <img src={product.images[0].url} alt={product.productName} />
-                      </div>
-                    )}
-                    <h3>{product.productName}</h3>
-                    <p className="product-category">📂 {product.category}</p>
-                    <p className="product-description">{product.description}</p>
-                    <div className="product-details">
-                      <p><strong>👤 Seller:</strong> {product.sellerName}</p>
-                      {product.sellerContact?.email && (
-                        <p><strong>📧 Email:</strong> {product.sellerContact.email}</p>
-                      )}
-                      {product.sellerContact?.mobile && (
-                        <p><strong>📱 Mobile:</strong> {product.sellerContact.mobile}</p>
-                      )}
-                      <p><strong>💰 Base Price:</strong> ₹{product.basePrice} + GST ({product.gstPercentage}%)</p>
-                      <p><strong>💳 Final Price:</strong> ₹{product.finalPrice?.toFixed(2)}</p>
-                      <p><strong>📦 Quantity:</strong> {product.quantity} {product.unit}</p>
-                      <p><strong>📅 Submitted:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div className="approval-actions">
-                      <Button
-                        onClick={() => handleApproveProduct(product._id)}
-                        variant="success"
-                      >
-                        ✓ Approve & Publish
-                      </Button>
-                      <Button
-                        onClick={() => handleRejectProduct(product._id)}
-                        variant="danger"
-                      >
-                        ✗ Reject
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
     </div>
   );
 
@@ -802,92 +683,6 @@ const AdminPanel = () => {
     </div>
   );
 
-  const handleOrderStatusChange = async (orderId, newStatus) => {
-    try {
-      await adminService.updateOrderStatus(orderId, newStatus);
-      showToast(`🔄 Order status updated to ${newStatus}`, 'success');
-      loadData();
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      showToast('Failed to update order status', 'error');
-    }
-  };
-
-  const [selectedOrder, setSelectedOrder] = useState(null);
-
-  const renderOrderDetails = (order) => {
-    return (
-      <div className="order-details-modal">
-        <div className="modal-content-large">
-          <div className="modal-header">
-            <h2>📦 Order Details</h2>
-            <button 
-              className="modal-close-btn"
-              onClick={() => setSelectedOrder(null)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="order-info-grid">
-              <div className="info-section">
-                <h3>📋 Order Information</h3>
-                <p><strong>Order ID:</strong> #{order._id}</p>
-                <p><strong>Status:</strong> 
-                  <span className={`status-badge order-status-${order.status}`}>
-                    {order.status}
-                  </span>
-                </p>
-                <p><strong>Payment Status:</strong> 
-                  <span className={`payment-badge payment-${order.paymentStatus}`}>
-                    {order.paymentStatus || 'N/A'}
-                  </span>
-                </p>
-                <p><strong>Order Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
-              </div>
-              <div className="info-section">
-                <h3>👤 Customer Information</h3>
-                <p><strong>Name:</strong> {order.userId?.name || 'Guest'}</p>
-                <p><strong>Email:</strong> {order.userId?.email || 'N/A'}</p>
-                <p><strong>Mobile:</strong> {order.userId?.mobile || 'N/A'}</p>
-              </div>
-            </div>
-            {order.items && order.items.length > 0 && (
-              <div className="order-items-section">
-                <h3>🛒 Order Items</h3>
-                <table className="items-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Quantity</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.items.map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.name || 'Unknown Product'}</td>
-                        <td>{item.category || 'N/A'}</td>
-                        <td>₹{item.price?.toFixed(2) || '0.00'}</td>
-                        <td>{item.quantity}</td>
-                        <td>₹{item.totalPrice?.toFixed(2) || '0.00'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="order-total">
-                  <strong>Total Amount: ₹{order.totalAmount?.toFixed(2) || '0.00'}</strong>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const renderOrders = () => (
     <div className="admin-orders">
       <div className="section-header">
@@ -916,321 +711,134 @@ const AdminPanel = () => {
           <p>Orders will appear here once customers start placing them</p>
         </div>
       ) : (
-        <>
-          <div className="table-container">
-            <table className="admin-table orders-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total Amount</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+        <div className="table-container">
+          <table className="admin-table orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+                <th>Items</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(order => (
+                <tr key={order._id}>
+                  <td>
+                    <div className="order-id-cell">
+                      <span className="order-icon">📦</span>
+                      <code>#{order._id.substring(0, 8)}</code>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="customer-cell">
+                      <span className="customer-name">{order.userId?.name || 'Guest'}</span>
+                      <span className="customer-contact">{order.userId?.email || order.userId?.mobile || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="items-badge">{order.items?.length || 0} items</span>
+                  </td>
+                  <td>
+                    <div className="amount-cell">
+                      <span className="currency">₹</span>
+                      <span className="amount">{order.totalAmount?.toFixed(2) || '0.00'}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`status-badge order-status-${order.status}`}>
+                      {order.status === 'pending' && '⏳'}
+                      {order.status === 'confirmed' && '✓'}
+                      {order.status === 'processing' && '📦'}
+                      {order.status === 'delivered' && '✅'}
+                      {order.status === 'cancelled' && '✗'}
+                      {' '}{order.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`payment-badge payment-${order.paymentStatus}`}>
+                      {order.paymentStatus === 'paid' && '✅'}
+                      {order.paymentStatus === 'pending' && '⏳'}
+                      {order.paymentStatus === 'failed' && '✗'}
+                      {' '}{order.paymentStatus || 'N/A'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="date-cell">
+                      {new Date(order.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </td>
+                  <td className="actions-col">
+                    <button
+                      className="action-btn view-btn"
+                      onClick={() => alert('Order details coming soon!')}
+                      title="View Order Details"
+                    >
+                      👁️
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr key={order._id}>
-                    <td>
-                      <div className="order-id-cell">
-                        <span className="order-icon">📦</span>
-                        <code>#{order._id.substring(0, 8)}</code>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="customer-cell">
-                        <span className="customer-name">{order.userId?.name || 'Guest'}</span>
-                        <span className="customer-contact">{order.userId?.email || order.userId?.mobile || 'N/A'}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="items-badge">{order.items?.length || 0} items</span>
-                    </td>
-                    <td>
-                      <div className="amount-cell">
-                        <span className="currency">₹</span>
-                        <span className="amount">{order.totalAmount?.toFixed(2) || '0.00'}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <select
-                        value={order.status}
-                        onChange={(e) => {
-                          if (window.confirm(`Change order status to ${e.target.value}?`)) {
-                            handleOrderStatusChange(order._id, e.target.value);
-                          }
-                        }}
-                        className="status-select"
-                      >
-                        <option value="pending">⏳ Pending</option>
-                        <option value="confirmed">✓ Confirmed</option>
-                        <option value="processing">📦 Processing</option>
-                        <option value="shipped">🚚 Shipped</option>
-                        <option value="delivered">✅ Delivered</option>
-                        <option value="cancelled">✗ Cancelled</option>
-                      </select>
-                    </td>
-                    <td>
-                      <span className={`payment-badge payment-${order.paymentStatus}`}>
-                        {order.paymentStatus === 'paid' && '✅'}
-                        {order.paymentStatus === 'pending' && '⏳'}
-                        {order.paymentStatus === 'failed' && '✗'}
-                        {' '}{order.paymentStatus || 'N/A'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="date-cell">
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </div>
-                    </td>
-                    <td className="actions-col">
-                      <button
-                        className="action-btn view-btn"
-                        onClick={() => setSelectedOrder(order)}
-                        title="View Order Details"
-                      >
-                        👁️
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {selectedOrder && renderOrderDetails(selectedOrder)}
-        </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 
-  const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
-  const [inventoryEditForm, setInventoryEditForm] = useState(null);
-
-  const handleUpdateInventory = async (itemId, data) => {
-    try {
-      await adminService.updateInventory(itemId, data);
-      setSelectedInventoryItem(null);
-      setInventoryEditForm(null);
-      showToast('✅ Inventory updated successfully!', 'success');
-      loadData();
-    } catch (error) {
-      console.error('Error updating inventory:', error);
-      showToast('Failed to update inventory: ' + (error.message || 'Unknown error'), 'error');
-    }
-  };
-
-  const openInventoryEditModal = (item) => {
-    setSelectedInventoryItem(item);
-    setInventoryEditForm({
-      name: item.name,
-      category: item.category,
-      price: item.price,
-      quantity: item.quantity,
-      unit: item.unit,
-      description: item.description || '',
-    });
-  };
-
-  const renderInventoryEditModal = () => {
-    if (!selectedInventoryItem || !inventoryEditForm) return null;
-    
-    return (
-      <div className="inventory-edit-modal">
-        <div className="modal-overlay" onClick={() => setSelectedInventoryItem(null)}></div>
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>✏️ Edit Inventory Item</h2>
-            <button 
-              className="modal-close-btn"
-              onClick={() => setSelectedInventoryItem(null)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleUpdateInventory(selectedInventoryItem._id, inventoryEditForm);
-            }}>
-              <div className="form-group">
-                <label>Product Name</label>
-                <input
-                  type="text"
-                  value={inventoryEditForm.name}
-                  onChange={(e) => setInventoryEditForm({...inventoryEditForm, name: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <input
-                  type="text"
-                  value={inventoryEditForm.category}
-                  onChange={(e) => setInventoryEditForm({...inventoryEditForm, category: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Price (₹)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inventoryEditForm.price}
-                    onChange={(e) => setInventoryEditForm({...inventoryEditForm, price: parseFloat(e.target.value)})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Quantity</label>
-                  <input
-                    type="number"
-                    value={inventoryEditForm.quantity}
-                    onChange={(e) => setInventoryEditForm({...inventoryEditForm, quantity: parseInt(e.target.value)})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Unit</label>
-                  <input
-                    type="text"
-                    value={inventoryEditForm.unit}
-                    onChange={(e) => setInventoryEditForm({...inventoryEditForm, unit: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Description (Optional)</label>
-                <textarea
-                  value={inventoryEditForm.description}
-                  onChange={(e) => setInventoryEditForm({...inventoryEditForm, description: e.target.value})}
-                  rows="3"
-                />
-              </div>
-              <div className="modal-actions">
-                <Button type="submit" variant="primary">
-                  💾 Save Changes
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="secondary"
-                  onClick={() => setSelectedInventoryItem(null)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const renderInventory = () => (
     <div className="admin-inventory">
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">📦 Inventory Management</h2>
-          <p className="section-subtitle">Monitor and manage product inventory</p>
-        </div>
-        <button 
-          className="refresh-btn"
-          onClick={loadData}
-          title="Refresh Inventory"
-        >
-          🔄 Refresh
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading inventory...</p>
-        </div>
-      ) : inventory.length === 0 ? (
-        <div className="no-data-card">
-          <span className="no-data-icon">📦</span>
-          <h3>No Inventory Items</h3>
-          <p>Inventory items will appear here once they are added</p>
-        </div>
+      <h2>Inventory Management</h2>
+      {inventory.length === 0 ? (
+        <p className="no-data">No inventory items found</p>
       ) : (
-        <>
-          <div className="table-container">
-            <table className="admin-table inventory-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Unit</th>
-                  <th>Status</th>
-                  <th>Last Updated</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventory.map(item => (
-                  <tr key={item._id} className={item.quantity < 10 ? 'low-stock-row' : ''}>
-                    <td>
-                      <div className="product-cell">
-                        <span className="product-icon">{item.icon || '📦'}</span>
-                        <span className="product-name">{item.name}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="category-badge">{item.category}</span>
-                    </td>
-                    <td>
-                      <div className="price-cell">
-                        <span className="currency">₹</span>
-                        <span className="price-value">{item.price.toFixed(2)}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`quantity-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
-                        {item.quantity}
-                      </span>
-                    </td>
-                    <td>{item.unit}</td>
-                    <td>
-                      <span className={`stock-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
-                        {item.quantity === 0 ? '🔴 Out of Stock' : item.quantity < 10 ? '⚠️ Low Stock' : '✅ In Stock'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="date-cell">
-                        {new Date(item.updatedAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </div>
-                    </td>
-                    <td className="actions-col">
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => openInventoryEditModal(item)}
-                        title="Edit Item"
-                      >
-                        ✏️
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {renderInventoryEditModal()}
-        </>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Unit</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inventory.map(item => (
+              <tr key={item._id}>
+                <td>
+                  <div className="product-cell">
+                    <span className="product-icon">{item.icon || '📦'}</span>
+                    {item.name}
+                  </div>
+                </td>
+                <td>{item.category}</td>
+                <td>₹{item.price.toFixed(2)}</td>
+                <td>
+                  <span className={item.quantity < 10 ? 'low-stock' : ''}>
+                    {item.quantity}
+                  </span>
+                </td>
+                <td>{item.unit}</td>
+                <td>
+                  <span className={`stock-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
+                    {item.quantity === 0 ? 'Out of Stock' : item.quantity < 10 ? 'Low Stock' : 'In Stock'}
+                  </span>
+                </td>
+                <td>{new Date(item.updatedAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
@@ -1348,18 +956,6 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel-wrapper">
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`admin-toast toast-${toast.type}`}>
-          <span className="toast-icon">
-            {toast.type === 'success' && '✅'}
-            {toast.type === 'error' && '❌'}
-            {toast.type === 'warning' && '⚠️'}
-          </span>
-          <span className="toast-message">{toast.message}</span>
-        </div>
-      )}
-
       {/* Admin Navbar */}
       <nav className="admin-navbar">
         <div className="admin-navbar-content">
