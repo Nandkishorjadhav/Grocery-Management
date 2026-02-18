@@ -210,11 +210,11 @@
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .header-right {
@@ -372,8 +372,8 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
   padding: 0.5rem 0;
 }
 
@@ -431,7 +431,7 @@
 
 .product-image {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: cover;
   transition: all var(--transition-slow);
   background: var(--bg-tertiary);
@@ -439,11 +439,11 @@
 
 .product-emoji {
   width: 100%;
-  height: 200px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 5rem;
+  font-size: 5.5rem;
   background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
   transition: all var(--transition-slow);
 }
@@ -531,12 +531,12 @@
 }
 
 .product-name {
-  font-size: 1.0625rem;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  line-height: 1.4;
-  height: 2.8em;
+  line-height: 1.45;
+  height: 2.9em;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -554,15 +554,15 @@
 
 .product-category {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--success);
   background: var(--success-light);
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 12px;
   align-self: flex-start;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   border: 1px solid rgba(16, 185, 129, 0.2);
   transition: all var(--transition-base);
 }
@@ -578,7 +578,7 @@
 }
 
 .product-quantity {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--text-tertiary);
   display: flex;
   justify-content: space-between;
@@ -586,7 +586,7 @@
 }
 
 .quantity-value {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
@@ -622,8 +622,8 @@
 }
 
 .price-current {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.375rem;
+  font-weight: 800;
   color: var(--text-primary);
   transition: all var(--transition-base);
 }
@@ -638,9 +638,10 @@
 }
 
 .price-original {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--text-tertiary);
   text-decoration: line-through;
+  font-weight: 500;
 }
 
 /* Add to Cart Button - Premium Interactive */
@@ -648,13 +649,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.875rem 1.5rem;
   background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: white;
   border: none;
   border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.875rem;
+  font-weight: 800;
+  font-size: 0.9375rem;
   cursor: pointer;
   transition: all var(--transition-base);
   box-shadow: var(--shadow-md), 0 0 0 0 rgba(249, 115, 22, 0.4);
@@ -763,16 +764,17 @@
 }
 
 .empty-state h3 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .empty-state p {
   color: var(--text-tertiary);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.6;
+  font-weight: 500;
 }
 
 /* ========================================
@@ -804,25 +806,27 @@
   }
   
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem;
   }
   
   .product-image,
   .product-emoji {
-    height: 160px;
+    height: 180px;
   }
   
   .product-emoji {
-    font-size: 3.5rem;
+    font-size: 4rem;
   }
   
   .product-name {
-    font-size: 0.9375rem;
+    font-size: 1rem;
+    font-weight: 700;
   }
   
   .price-current {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+    font-weight: 800;
   }
   
   .add-to-cart-btn {
@@ -833,7 +837,8 @@
 
 @media (max-width: 480px) {
   .section-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 800;
   }
   
   .category-dropdown {
@@ -847,6 +852,7 @@
   
   .products-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
