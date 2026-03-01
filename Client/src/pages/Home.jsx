@@ -204,20 +204,66 @@ const Home = ({ searchQuery = '' }) => {
 
   return (
     <div className="home-page">
-      {/* Filter Buttons */}
-        <div className="filter-buttons">
-          {filterButtons.map(button => (
-            <button
-              key={button.id}
-              className={`filter-btn ${selectedFilter === button.id ? 'active' : ''}`}
-              onClick={() => setSelectedFilter(button.id)}
-            >
-              <span className="filter-icon">{button.icon}</span>
-              {button.label}
-            </button>
-          ))}
+      {/* Hero Banner Section */}
+      <div className="hero-banner">
+        <div className="hero-content">
+          <div className="hero-badge">🎉 Welcome to Fresh Market</div>
+          <h1 className="hero-title">
+            Fresh Groceries
+            <span className="hero-highlight"> Delivered Daily</span>
+          </h1>
+          <p className="hero-description">
+            Discover premium quality groceries at unbeatable prices. Farm-fresh produce, 
+            daily essentials, and exclusive deals - all in one place!
+          </p>
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <div className="stat-value">{inventory.length + sellerProducts.length}+</div>
+              <div className="stat-label">Products</div>
+            </div>
+            <div className="hero-stat">
+              <div className="stat-value">24/7</div>
+              <div className="stat-label">Available</div>
+            </div>
+            <div className="hero-stat">
+              <div className="stat-value">100%</div>
+              <div className="stat-label">Fresh</div>
+            </div>
+          </div>
+          <div className="hero-actions">
+            <Link to="/products" className="hero-btn primary">
+              <span>Shop Now</span>
+              <span>🛒</span>
+            </Link>
+            <Link to="/about" className="hero-btn secondary">
+              <span>Learn More</span>
+              <span>→</span>
+            </Link>
+          </div>
         </div>
-     <br></br>
+        <div className="hero-decoration">
+          <div className="floating-item item-1">🥬</div>
+          <div className="floating-item item-2">🍎</div>
+          <div className="floating-item item-3">🥛</div>
+          <div className="floating-item item-4">🍞</div>
+          <div className="floating-item item-5">🥕</div>
+        </div>
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="filter-buttons">
+        {filterButtons.map(button => (
+          <button
+            key={button.id}
+            className={`filter-btn ${selectedFilter === button.id ? 'active' : ''}`}
+            onClick={() => setSelectedFilter(button.id)}
+          >
+            <span className="filter-icon">{button.icon}</span>
+            {button.label}
+          </button>
+        ))}
+      </div>
+
       {/* Products Grid */}
       <div className="products-section">
         <div className="section-header">
