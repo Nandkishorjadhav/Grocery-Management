@@ -54,6 +54,16 @@
   --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+body{
+background:#fafafa;
+}
+
+.category-dropdown{
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 15px 40px rgba(0,0,0,0.15);
+}
+
 [data-theme="dark"] {
   /* Dark Mode Colors */
   --bg-primary: #0f0f14;
@@ -81,7 +91,7 @@
 .home-page {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1.25rem 1rem 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   color: var(--text-primary);
   background: var(--bg-primary);
@@ -92,15 +102,13 @@
    HERO BANNER - Modern & Engaging
    ======================================== */
 
-.hero-banner {
+.hero-banner{
+  border-radius: 24px;
+  padding: 60px 50px;
+  background: linear-gradient(120deg,#ff7a18,#ffb347);
+  color: white;
   position: relative;
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%);
-  border-radius: 32px;
-  padding: 4rem 3rem;
-  margin-bottom: 3rem;
   overflow: hidden;
-  box-shadow: var(--shadow-2xl), 0 0 60px rgba(249, 115, 22, 0.3);
-  animation: heroFadeIn 0.8s ease-out;
 }
 
 [data-theme="dark"] .hero-banner {
@@ -363,103 +371,80 @@
 .filter-buttons {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 3rem;
+  gap: 0.625rem;
+  margin-bottom: 1.75rem;
   flex-wrap: wrap;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0 0.75rem;
 }
 
 .filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: var(--bg-secondary);
-  border: 1.5px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  opacity: 1;
-}
-
-/* Subtle background shimmer on hover */
-.filter-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.08), transparent);
-  transition: left var(--transition-slow);
-}
-
-.filter-btn:hover::before {
-  left: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  /* Use 2px border always so changing color never shifts layout */
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* No transform — transforms cause visual jiggle when siblings are hovered */
+  transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+  white-space: nowrap;
 }
 
 .filter-btn:hover {
-  transform: translateY(-2px);
-  border-color: var(--primary-300);
+  border-color: var(--primary-400);
+  background: var(--primary-50);
   color: var(--primary-600);
-  box-shadow: var(--shadow-lg), var(--glow-primary);
-  opacity: 0.95;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.18);
 }
 
 [data-theme="dark"] .filter-btn:hover {
+  background: rgba(249, 115, 22, 0.1);
   border-color: var(--primary-500);
   color: var(--primary-400);
 }
 
 .filter-btn:active {
-  transform: translateY(0);
   opacity: 0.85;
   box-shadow: var(--shadow-sm);
 }
 
-/* Active state - Bold and confident */
+/* Active state — no transform so adjacent buttons never jiggle */
 .filter-btn.active {
   background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: white;
-  border-color: transparent;
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(249, 115, 22, 0.35);
-  transform: translateY(-1px);
-  opacity: 1;
+  border-color: var(--primary-600);
+  box-shadow: 0 4px 18px rgba(249, 115, 22, 0.4);
 }
 
 .filter-btn.active:hover {
   background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-  box-shadow: var(--shadow-xl), 0 0 40px rgba(249, 115, 22, 0.45);
-  opacity: 0.95;
+  border-color: var(--primary-700);
+  box-shadow: 0 6px 22px rgba(249, 115, 22, 0.5);
 }
 
 .filter-btn.active:active {
   opacity: 0.9;
-  transform: translateY(0);
 }
 
 .filter-icon {
-  font-size: 1.125rem;
-  transition: transform var(--transition-base);
-}
-
-.filter-btn:hover .filter-icon {
-  transform: scale(1.1) rotate(5deg);
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .filter-btn.active .filter-icon {
-  animation: iconPulse 2s ease-in-out infinite;
+  animation: iconPulse 2.5s ease-in-out infinite;
 }
 
 @keyframes iconPulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+  50% { transform: scale(1.12); }
 }
 
 /* ========================================
@@ -470,19 +455,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.875rem;
   border-bottom: 2px solid var(--border-color);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: 1.875rem;
   font-weight: 800;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 .header-right {
@@ -527,20 +512,19 @@
 }
 
 .category-dropdown-btn:hover {
-  border-color: var(--primary-300);
+  border-color: var(--primary-400);
   background: var(--primary-50);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md), var(--glow-primary);
-  opacity: 0.95;
+  box-shadow: var(--shadow-md), 0 0 12px rgba(249, 115, 22, 0.18);
+  color: var(--primary-600);
 }
 
 [data-theme="dark"] .category-dropdown-btn:hover {
-  background: var(--bg-tertiary);
+  background: rgba(249, 115, 22, 0.1);
   border-color: var(--primary-500);
+  color: var(--primary-400);
 }
 
 .category-dropdown-btn:active {
-  transform: translateY(0);
   opacity: 0.85;
 }
 
@@ -640,25 +624,29 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  padding: 0.5rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.6rem;
+  padding-top: 10px;
 }
 
 .home-product-card {
   background: var(--bg-secondary);
-  border-radius: 20px;
+  border-radius: 18px;
   text-decoration: none;
   color: inherit;
-  transition: all var(--transition-spring);
-  border: 1.5px solid var(--border-color);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  animation: cardFadeIn 0.5s ease-out backwards;
-  opacity: 1;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  position: relative;
+}
+
+.home-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+  border-color: var(--primary-300);
 }
 
 @keyframes cardFadeIn {
@@ -699,10 +687,13 @@
 
 .product-image {
   width: 100%;
-  height: 220px;
+  height: 210px;
   object-fit: cover;
-  transition: all var(--transition-slow);
-  background: var(--bg-tertiary);
+  transition: transform .35s ease;
+}
+
+.home-product-card:hover .product-image {
+  transform: scale(1.05);
 }
 
 .product-emoji {
@@ -914,22 +905,24 @@
 
 /* Add to Cart Button - Premium Interactive */
 .add-to-cart-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
   border: none;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 0.9375rem;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-md), 0 0 0 0 rgba(249, 115, 22, 0.4);
-  position: relative;
-  overflow: hidden;
-  opacity: 1;
+  background: linear-gradient(135deg,#ff7a18,#ffb347);
+  color: white;
+  transition: all .25s ease;
+}
+
+.add-to-cart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(255,122,24,0.35);
+}
+
+.add-to-cart-btn.added {
+  background: linear-gradient(135deg,#22c55e,#16a34a);
 }
 
 /* Shimmer effect on button */
@@ -1045,62 +1038,27 @@
   font-weight: 500;
 }
 
+
+
 /* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
-@media (max-width: 768px) {
-  .home-page {
-    padding: 1rem;
-  }
-  
-  .filter-buttons {
-    gap: 0.5rem;
-  }
-  
-  .filter-btn {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.25rem;
-  }
-  
-  .product-image,
-  .product-emoji {
-    height: 180px;
-  }
-  
-  .product-emoji {
-    font-size: 4rem;
-  }
-  
-  .product-name {
-    font-size: 1rem;
-    font-weight: 700;
-  }
-  
-  .price-current {
-    font-size: 1.25rem;
-    font-weight: 800;
-  }
-  
-  .add-to-cart-btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.8125rem;
-  }
+@media (max-width:768px){
+
+.products-grid{
+grid-template-columns:repeat(2,1fr);
+gap:1rem;
+}
+
+.hero-title{
+font-size:2.2rem;
+}
+
+.hero-banner{
+padding:40px 25px;
+}
+
 }
 
 @media (max-width: 480px) {

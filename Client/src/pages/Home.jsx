@@ -205,7 +205,7 @@ const Home = ({ searchQuery = '' }) => {
   return (
     <div className="home-page">
       {/* Hero Banner Section */}
-      <div className="hero-banner">
+      {/* <div className="hero-banner">
         <div className="hero-content">
           <div className="hero-badge">🎉 Welcome to Fresh Market</div>
           <h1 className="hero-title">
@@ -248,7 +248,7 @@ const Home = ({ searchQuery = '' }) => {
           <div className="floating-item item-4">🍞</div>
           <div className="floating-item item-5">🥕</div>
         </div>
-      </div>
+      </div> */}
 
       {/* Filter Buttons */}
       <div className="filter-buttons">
