@@ -36,16 +36,6 @@ const Profile = () => {
       navigate('/');
       return;
     }
-    // Debug: Check user object for admin status
-    console.log('========== PROFILE DEBUG ==========');
-    console.log('📋 Full user object:', user);
-    console.log('📋 user.isAdmin:', user?.isAdmin, '(type:', typeof user?.isAdmin, ')');
-    console.log('📋 user.role:', user?.role, '(type:', typeof user?.role, ')');
-    console.log('📋 Condition check: user?.isAdmin =', user?.isAdmin);
-    console.log('📋 Condition check: user?.role === "admin" =', user?.role === 'admin');
-    console.log('📋 Button should show:', (user?.isAdmin || user?.role === 'admin'));
-    console.log('📋 LocalStorage user:', JSON.parse(localStorage.getItem('user') || '{}'));
-    console.log('===================================');
     fetchOrders();
     fetchMyProducts();
   }, []);
@@ -105,9 +95,6 @@ const Profile = () => {
 
   const handleSellProduct = async (productData) => {
     try {
-      console.log('📤 Submitting product data:', productData);
-      
-      // Convert images to base64 for now (you can implement proper file upload later)
       const imagePromises = productData.images.map(file => {
         return new Promise((resolve) => {
           const reader = new FileReader();
@@ -136,18 +123,16 @@ const Profile = () => {
         images: images
       };
 
-      console.log('📤 Sending payload:', payload);
       const response = await sellerProductService.createProduct(payload);
       
       if (response && response.success) {
         alert('Product listed successfully! Waiting for admin approval.');
         setShowSellForm(false);
-        fetchMyProducts(); // Refresh product list
+        fetchMyProducts();
       } else {
         alert('Failed to list product: ' + (response.message || response.error));
       }
     } catch (error) {
-      console.error('Error listing product:', error);
       alert('Failed to list product. Please try again.');
     }
   };
@@ -262,26 +247,17 @@ const Profile = () => {
     setUpdateMessage({ type: '', text: '' });
 
     try {
-      console.log('Sending update request with:', editForm);
       const response = await authService.updateProfile(editForm);
-      console.log('Update profile response:', response);
       
       if (response && response.success) {
-        // Update user in context and localStorage
         updateUser(response.user);
-        
         setUpdateMessage({ type: 'success', text: 'Profile updated successfully!' });
         setIsEditing(false);
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setUpdateMessage({ type: '', text: '' });
-        }, 3000);
+        setTimeout(() => setUpdateMessage({ type: '', text: '' }), 3000);
       } else {
         setUpdateMessage({ type: 'error', text: response?.error || 'Failed to update profile' });
       }
     } catch (error) {
-      console.error('Update profile error:', error);
       const errorMessage = error.message || 'Failed to update profile. Please check your connection and try again.';
       setUpdateMessage({ type: 'error', text: errorMessage });
     } finally {

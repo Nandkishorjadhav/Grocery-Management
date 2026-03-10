@@ -13,14 +13,11 @@ const Home = ({ searchQuery = '' }) => {
   const [addedItems, setAddedItems] = useState(new Set());
   const [sellerProducts, setSellerProducts] = useState([]);
 
-  // Fetch approved seller products
   useEffect(() => {
     const fetchSellerProducts = async () => {
       try {
         const response = await sellerProductService.getMarketplaceProducts({ status: 'approved' });
         if (response && response.success) {
-          // Transform seller products to match inventory format
-          // Filter out products with 0 quantity or sold status
           const transformedProducts = response.products
             .filter(sp => sp.quantity > 0 && sp.status === 'approved')
             .map(sp => ({
@@ -34,34 +31,26 @@ const Home = ({ searchQuery = '' }) => {
               images: sp.images,
               isSellerProduct: true,
               sellerName: sp.sellerName,
-              minStock: 0 // Seller products don't have minStock
+              minStock: 0
             }));
           setSellerProducts(transformedProducts);
-          console.log('✅ Fetched seller products:', transformedProducts.length);
         }
       } catch (error) {
-        console.error('Failed to fetch seller products:', error);
         setSellerProducts([]);
       }
     };
 
     fetchSellerProducts();
-    
-    // Refresh seller products every 30 seconds to reflect any deletions
     const interval = setInterval(fetchSellerProducts, 30000);
-    
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Combine inventory and approved seller products
-    // Filter out products with 0 quantity
     let products = [
       ...inventory.filter(item => item.quantity > 0),
       ...sellerProducts.filter(item => item.quantity > 0)
     ];
 
-    // Apply search filter
     if (searchQuery) {
       products = products.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,19 +58,15 @@ const Home = ({ searchQuery = '' }) => {
       );
     }
 
-    // Apply category filter first
     if (selectedCategory !== 'all') {
       products = products.filter(item => item.category === selectedCategory);
     }
 
-    // Apply category filter
     switch (selectedFilter) {
       case 'popular':
-        // Sort by quantity (assuming higher quantity = more popular)
         products = products.sort((a, b) => b.quantity - a.quantity);
         break;
       case 'special':
-        // Show items with low stock or expiring soon
         const today = new Date();
         products = products.filter(item => {
           if (item.expiryDate) {
@@ -93,11 +78,9 @@ const Home = ({ searchQuery = '' }) => {
         });
         break;
       case 'bestsellers':
-        // Show items above minimum stock level
         products = products.filter(item => item.quantity >= item.minStock * 2);
         break;
       default:
-        // Show all products
         break;
     }
 
@@ -105,12 +88,6 @@ const Home = ({ searchQuery = '' }) => {
   }, [inventory, sellerProducts, searchQuery, selectedFilter, selectedCategory]);
 
   const categories = [...new Set([...inventory, ...sellerProducts].map(item => item.category))];
-
-  const getDiscountBadge = (item) => {
-    // Mock discount calculation
-    const randomDiscount = [10, 15, 20, 24, 30];
-    return randomDiscount[Math.floor(Math.random() * randomDiscount.length)];
-  };
 
   const getCategoryEmoji = (category) => {
     const emojiMap = {
@@ -128,12 +105,10 @@ const Home = ({ searchQuery = '' }) => {
   };
 
   const getProductImage = (category, itemName = '') => {
-    // When filtering by category, show emoji
     if (selectedCategory !== 'all') {
-      return null; // Will show emoji instead
+      return null;
     }
 
-    // Real product image URLs from reliable sources
     const productImages = {
       'Fresh Red Apples': 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
       'Organic Bananas': 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400',
@@ -150,12 +125,10 @@ const Home = ({ searchQuery = '' }) => {
       'Almond Nuts': 'https://images.unsplash.com/photo-1508736793122-f516e3ba5569?w=400',
     };
     
-    // Return specific image if available, otherwise category default
     if (productImages[itemName]) {
       return productImages[itemName];
     }
     
-    // Category defaults
     const categoryImages = {
       'Vegetables': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400',
       'Fruits': 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400',
@@ -171,17 +144,12 @@ const Home = ({ searchQuery = '' }) => {
   };
 
   const handleAddToCart = async (e, item) => {
-    e.preventDefault(); // Prevent Link navigation
-    e.stopPropagation(); // Stop event from bubbling to Link
+    e.preventDefault();
+    e.stopPropagation();
     
     try {
-      // Add item to cart via API
       await addToCart(item);
-      
-      // Mark item as added
       setAddedItems(prev => new Set([...prev, item._id || item.id]));
-      
-      // Remove the "added" state after 2 seconds
       setTimeout(() => {
         setAddedItems(prev => {
           const newSet = new Set(prev);
@@ -190,8 +158,7 @@ const Home = ({ searchQuery = '' }) => {
         });
       }, 2000);
     } catch (error) {
-      console.error('Failed to add to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
+      // silently handle
     }
   };
 
@@ -204,52 +171,6 @@ const Home = ({ searchQuery = '' }) => {
 
   return (
     <div className="home-page">
-      {/* Hero Banner Section */}
-      {/* <div className="hero-banner">
-        <div className="hero-content">
-          <div className="hero-badge">🎉 Welcome to Fresh Market</div>
-          <h1 className="hero-title">
-            Fresh Groceries
-            <span className="hero-highlight"> Delivered Daily</span>
-          </h1>
-          <p className="hero-description">
-            Discover premium quality groceries at unbeatable prices. Farm-fresh produce, 
-            daily essentials, and exclusive deals - all in one place!
-          </p>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <div className="stat-value">{inventory.length + sellerProducts.length}+</div>
-              <div className="stat-label">Products</div>
-            </div>
-            <div className="hero-stat">
-              <div className="stat-value">24/7</div>
-              <div className="stat-label">Available</div>
-            </div>
-            <div className="hero-stat">
-              <div className="stat-value">100%</div>
-              <div className="stat-label">Fresh</div>
-            </div>
-          </div>
-          <div className="hero-actions">
-            <Link to="/products" className="hero-btn primary">
-              <span>Shop Now</span>
-              <span>🛒</span>
-            </Link>
-            <Link to="/about" className="hero-btn secondary">
-              <span>Learn More</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-        <div className="hero-decoration">
-          <div className="floating-item item-1">🥬</div>
-          <div className="floating-item item-2">🍎</div>
-          <div className="floating-item item-3">🥛</div>
-          <div className="floating-item item-4">🍞</div>
-          <div className="floating-item item-5">🥕</div>
-        </div>
-      </div> */}
-
       {/* Filter Buttons */}
       <div className="filter-buttons">
         {filterButtons.map(button => (
@@ -347,7 +268,7 @@ const Home = ({ searchQuery = '' }) => {
                 ) : (
                   <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
                 )}
-                <span className="discount-badge">{getDiscountBadge(item)}% OFF</span>
+
                 {item.isSellerProduct && (
                   <span className="seller-badge">👤 Seller</span>
                 )}

@@ -43,9 +43,7 @@ const AuthModal = () => {
         mobile: method === 'mobile' ? formData.mobile.trim() : undefined
       };
 
-      console.log('Sending auth request with payload:', payload);
       const response = await authService.initiateAuth(payload);
-      console.log('Auth response received:', response);
 
       if (response && response.success) {
         setUserId(response.userId);

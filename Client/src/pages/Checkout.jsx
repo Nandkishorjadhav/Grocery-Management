@@ -45,12 +45,12 @@ const Checkout = () => {
       try {
         const parsedAddress = JSON.parse(savedAddress);
         setDeliveryAddress(parsedAddress);
-        setIsEditingAddress(false); // Address is already saved, no need to edit
-      } catch (error) {
-        console.error('Error loading saved address:', error);
+        setIsEditingAddress(false);
+      } catch (e) {
+        setIsEditingAddress(true);
       }
     } else {
-      setIsEditingAddress(true); // No saved address, enable edit mode
+      setIsEditingAddress(true);
     }
   }, []);
 
@@ -139,67 +139,13 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
-    
-    // Simulate processing delay
     setTimeout(() => {
-      // Generate order ID for display
       const newOrderId = 'ORD' + Date.now();
       setOrderId(newOrderId);
-      
-      // Move to confirmation step (maintenance message)
       setStep(3);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setIsProcessing(false);
     }, 1000);
-
-    /* Temporarily disabled order creation
-    try {
-      // Generate order ID
-      const newOrderId = 'ORD' + Date.now();
-      
-      console.log('User data:', user);
-      console.log('User ID:', user._id);
-      
-      // Prepare order data
-      const orderData = {
-        orderId: newOrderId,
-        user: user._id,
-        items: cart.map(item => ({
-          productId: item._id,
-          name: item.name,
-          category: item.category,
-          price: item.price,
-          quantity: item.quantity,
-          unit: item.unit,
-          totalPrice: item.totalPrice
-        })),
-        deliveryAddress,
-        paymentMethod: 'cod',
-        totalAmount,
-        deliveryCharges,
-        finalAmount
-      };
-      
-      console.log('Order data being sent:', orderData);
-      
-      // Save order to database
-      await orderService.createOrder(orderData);
-      
-      setOrderId(newOrderId);
-      
-      // Clear cart
-      await clearCart();
-      
-      // Move to confirmation step
-      setStep(3);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error('Order placement failed:', error);
-      alert('Failed to place order. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-    */
   };
 
   const renderStepIndicator = () => (

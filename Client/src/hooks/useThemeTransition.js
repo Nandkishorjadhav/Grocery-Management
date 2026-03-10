@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 export const useThemeTransition = () => {
-  const animationRef = useRef(null);
 
   const animateThemeTransition = (event, callback) => {
     // Check if browser supports View Transitions API

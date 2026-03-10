@@ -3,9 +3,7 @@ import api from './api.js';
 const authService = {
   // Initiate authentication (send OTP)
   initiateAuth: async (data) => {
-    console.log('authService.initiateAuth called with:', data);
     const response = await api.post('/auth/initiate', data);
-    console.log('authService.initiateAuth response:', response);
     return response;
   },
 
@@ -61,11 +59,7 @@ const authService = {
 
   // Store user
   storeUser: (user) => {
-    console.log('💾 Storing user in localStorage:', user);
-    console.log('💾 Admin fields - isAdmin:', user?.isAdmin, 'role:', user?.role);
     localStorage.setItem('user', JSON.stringify(user));
-    const stored = localStorage.getItem('user');
-    console.log('💾 Verification - stored user:', JSON.parse(stored));
   },
 
   // Clear auth data

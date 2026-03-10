@@ -17,13 +17,10 @@ const ProductDetail = () => {
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
 
   useEffect(() => {
-    // Scroll to top when product changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Find the product by ID - handle both _id and id, both string and numeric
     const foundProduct = inventory.find(item => {
       const itemId = item._id || item.id;
-      // Try both string and numeric comparison
       return itemId == id || String(itemId) === String(id) || Number(itemId) === Number(id);
     });
     
@@ -104,29 +101,15 @@ const ProductDetail = () => {
     return categoryImages[category] || categoryImages['default'];
   };
 
-  // Generate multiple image variants for gallery
   const getProductImages = (category, name, productImages) => {
-    // If seller product with uploaded images, use those
     if (productImages && productImages.length > 0) {
       return productImages.map(img => img.url);
     }
-    
-    // Otherwise use stock images
-    const mainImage = getProductImage(category, name);
-    return [
-      mainImage,
-      mainImage + '&sat=-20', // Slightly different variant
-      mainImage + '&hue=20',
-      mainImage + '&con=10'
-    ];
-  };
-
-  const getDiscount = () => {
-    return Math.floor(Math.random() * 30) + 10; // 10-40% discount
+    return [getProductImage(category, name)];
   };
 
   const originalPrice = Math.round(product.price * 1.3);
-  const discount = getDiscount();
+  const discount = Math.round(((originalPrice - product.price) / originalPrice) * 100);
   const isLowStock = product.quantity <= (product.minStock || 5);
   const productImages = getProductImages(product.category, product.name, product.images);
 
@@ -135,23 +118,13 @@ const ProductDetail = () => {
     
     try {
       setIsAddingToCart(true);
-      
-      // Add item to cart with selected quantity
       for (let i = 0; i < selectedQuantity; i++) {
         await addToCart(product);
       }
-      
-      // Show success feedback
       setAddToCartSuccess(true);
-      
-      // Reset success state after 2 seconds
-      setTimeout(() => {
-        setAddToCartSuccess(false);
-      }, 2000);
-      
+      setTimeout(() => setAddToCartSuccess(false), 2000);
     } catch (error) {
-      console.error('Failed to add to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
+      // silently handle
     } finally {
       setIsAddingToCart(false);
     }
@@ -159,29 +132,22 @@ const ProductDetail = () => {
 
   const handleBuyNow = async () => {
     try {
-      // Add to cart first
       for (let i = 0; i < selectedQuantity; i++) {
         await addToCart(product);
       }
-      // Navigate to cart page
       navigate('/cart');
     } catch (error) {
-      console.error('Failed to add to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
+      // silently handle
     }
   };
 
   const handleRelatedProductAddToCart = async (e, item) => {
-    e.preventDefault(); // Prevent Link navigation
+    e.preventDefault();
     e.stopPropagation();
-    
     try {
       await addToCart(item);
-      // Could add visual feedback here
-      alert(`${item.name} added to cart!`);
     } catch (error) {
-      console.error('Failed to add to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
+      // silently handle
     }
   };
 
@@ -234,12 +200,6 @@ const ProductDetail = () => {
 
             <h1 className="product-detail-title">{product.name}</h1>
             
-            <div className="product-rating">
-              <div className="stars">
-                ⭐⭐⭐⭐⭐
-              </div>
-              <span className="rating-text">4.5 (128 reviews)</span>
-            </div>
 
             <div className="product-pricing">
               <div className="current-price">₹{product.price}</div>
@@ -247,18 +207,6 @@ const ProductDetail = () => {
               <div className="discount-text">{discount}% off</div>
             </div>
 
-            <div className="product-highlights">
-              <h3>Product Highlights</h3>
-              <ul>
-                <li>✓ Premium quality {product.category.toLowerCase()}</li>
-                <li>✓ Fresh and handpicked</li>
-                <li>✓ Delivered in 30 minutes</li>
-                <li>✓ 100% quality guarantee</li>
-                {product.expiryDate && (
-                  <li>✓ Best before: {new Date(product.expiryDate).toLocaleDateString()}</li>
-                )}
-              </ul>
-            </div>
 
             <div className="product-quantity-section">
               <label>Quantity ({product.unit})</label>
@@ -335,12 +283,8 @@ const ProductDetail = () => {
 
         {/* Product Description */}
         <div className="product-description-section">
-          <h2>Product Description</h2>
-          <p>
-            {product.name} is a premium quality product from the {product.category} category. 
-            We ensure the freshest produce delivered straight to your doorstep. Each item is 
-            carefully selected and quality-checked to meet our high standards.
-          </p>
+          <h2>Product Details</h2>
+          {product.description && <p>{product.description}</p>}
           <div className="product-specs">
             <div className="spec-item">
               <span className="spec-label">Category:</span>
@@ -384,7 +328,7 @@ const ProductDetail = () => {
                         alt={item.name}
                         loading="lazy"
                       />
-                      <div className="related-discount">{Math.floor(Math.random() * 30) + 10}% OFF</div>
+                      <div className="related-discount">{Math.round(((Math.round(item.price * 1.3) - item.price) / Math.round(item.price * 1.3)) * 100)}% OFF</div>
                     </div>
                     <div className="related-product-info">
                       <h3 className="related-product-name">{item.name}</h3>

@@ -14,8 +14,6 @@ export const useGrocery = () => {
   return context;
 };
 
-const STORAGE_KEY = 'grocery_data';
-
 const initialData = {
   inventory: [
     { id: 1, name: 'Fresh Red Apples', category: 'Fruits', quantity: 25, unit: 'kg', price: 120, expiryDate: '2025-12-15', minStock: 5 },
@@ -72,9 +70,6 @@ export const GroceryProvider = ({ children }) => {
       let approvedSellerProducts = [];
       try {
         const sellerResponse = await sellerProductService.getMarketplaceProducts();
-        console.log('✅ Approved seller products:', sellerResponse);
-        
-        // Transform seller products to match inventory format
         approvedSellerProducts = (sellerResponse.products || []).map(product => ({
           _id: product._id,
           id: product._id,
@@ -88,24 +83,17 @@ export const GroceryProvider = ({ children }) => {
           images: product.images,
           seller: product.sellerName,
           minStock: 5,
-          isSellerProduct: true // Flag to identify seller products
+          isSellerProduct: true
         }));
-        console.log('🔄 Transformed seller products:', approvedSellerProducts.length);
       } catch (sellerError) {
-        console.log('No seller products available:', sellerError.message);
+        // no seller products available
       }
       
-      // Combine regular inventory with approved seller products
       const combinedInventory = [...inventoryResponse, ...approvedSellerProducts];
-      console.log('📦 Combined inventory count:', combinedInventory.length);
-      
       setInventory(combinedInventory);
       setError(null);
     } catch (error) {
-      console.error('Error fetching inventory:', error);
       setError(error.message);
-      // Keep using initialData as fallback
-      console.log('Using local dummy data as fallback');
     } finally {
       setLoading(false);
     }
@@ -149,15 +137,14 @@ export const GroceryProvider = ({ children }) => {
 
   // Load data on mount
   useEffect(() => {
-    // Try to fetch from API, but don't block rendering
-    fetchInventory().catch(err => console.log('Failed to fetch inventory, using local data'));
-    fetchShoppingList().catch(err => console.log('Failed to fetch shopping list, using local data'));
+    fetchInventory().catch(() => {});
+    fetchShoppingList().catch(() => {});
   }, []);
 
   // Fetch cart when auth state changes
   useEffect(() => {
     if (!auth?.loading) {
-      fetchCart().catch(err => console.log('Failed to fetch cart, starting with empty cart'));
+      fetchCart().catch(() => {});
     }
   }, [auth?.user, auth?.loading]);
 

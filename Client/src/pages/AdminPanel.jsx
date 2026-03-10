@@ -55,23 +55,17 @@ const AdminPanel = () => {
         });
         setUsers(data.users);
       } else if (activeTab === 'approvals') {
-        // Load pending user approvals
         try {
           const data = await adminService.getPendingApprovals();
           setPendingApprovals(data.pendingUsers || []);
         } catch (err) {
-          console.error('Error loading pending user approvals:', err);
           setPendingApprovals([]);
         }
         
-        // Load pending seller products
         try {
-          console.log('🔍 Fetching seller products with status: pending');
           const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
-          console.log('📦 Received products data:', productsData);
           setSellerProducts(productsData.products || []);
         } catch (err) {
-          console.error('Error loading pending seller products:', err);
           setSellerProducts([]);
         }
       } else if (activeTab === 'activity') {
@@ -161,40 +155,23 @@ const AdminPanel = () => {
     );
   };
 
-  // Seller Product Handlers
   const handleApproveProduct = async (productId) => {
     try {
-      const response = await sellerProductService.approveProduct(productId);
-      if (response && response.success) {
-        alert(`✅ Product "${response.product?.productName || 'Product'}" has been approved successfully!\\n\\nThe product is now live in the marketplace and visible to all customers on the home page.`);
-      } else {
-        alert('Product approved successfully!');
-      }
+      await sellerProductService.approveProduct(productId);
       loadData();
     } catch (error) {
       console.error('Error approving product:', error);
-      alert('Failed to approve product: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleRejectProduct = async (productId) => {
-    const reason = prompt('Enter rejection reason (will be shown to the seller):');
-    if (!reason) {
-      alert('Rejection cancelled. Please provide a reason to reject the product.');
-      return;
-    }
-    
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) return;
     try {
-      const response = await sellerProductService.rejectProduct(productId, reason);
-      if (response && response.success) {
-        alert(`❌ Product "${response.product?.productName || 'Product'}" has been rejected.\\n\\nThe seller will be notified with the reason: "${reason}"`);
-      } else {
-        alert('Product rejected');
-      }
+      await sellerProductService.rejectProduct(productId, reason);
       loadData();
     } catch (error) {
       console.error('Error rejecting product:', error);
-      alert('Failed to reject product: ' + (error.message || 'Unknown error'));
     }
   };
 

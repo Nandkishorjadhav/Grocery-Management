@@ -12,53 +12,32 @@ const generateToken = (userId) => {
 
 // Display OTP prominently in terminal
 const displayOTPInTerminal = (method, contact, otp) => {
-  console.log('\n' + '='.repeat(60));
-  console.log('║' + ' '.repeat(58) + '║');
-  console.log('║' + '           🔐 YOUR OTP CODE (COPY THIS!)'.padEnd(58) + '║');
-  console.log('║' + ' '.repeat(58) + '║');
-  console.log('║' + `           Method: ${method.toUpperCase()}`.padEnd(58) + '║');
-  console.log('║' + `           ${method === 'email' ? 'Email' : 'Mobile'}: ${contact}`.padEnd(58) + '║');
-  console.log('║' + ' '.repeat(58) + '║');
-  console.log('║' + `                    OTP: ${otp}`.padEnd(58) + '║');
-  console.log('║' + ' '.repeat(58) + '║');
-  console.log('║' + '           Valid for: 10 minutes'.padEnd(58) + '║');
-  console.log('║' + ' '.repeat(58) + '║');
-  console.log('='.repeat(60) + '\n');
+  console.log(`\n[OTP] ${method.toUpperCase()} | ${contact} | Code: ${otp} | Valid: 10 minutes\n`);
 };
 
 // Send OTP via Email or SMS
 const sendOTP = async (method, contact, otp, userName = 'User') => {
   try {
-    console.log(`\n📤 Sending OTP via ${method} to ${contact}`);
-    
     if (method === 'email') {
       const result = await emailService.sendOTP(contact, otp, userName);
       if (result.success) {
-        console.log(`✅ Email OTP sent successfully${result.mode === 'development' ? ' (DEV MODE)' : ''}`);
-        // Always show OTP in terminal for easy access
         displayOTPInTerminal(method, contact, otp);
         return true;
       }
     } else if (method === 'mobile') {
       const result = await smsService.sendOTP(contact, otp);
       if (result.success) {
-        console.log(`✅ SMS OTP sent successfully${result.mode === 'development' ? ' (DEV MODE)' : ''}`);
-        // Always show OTP in terminal for easy access
         displayOTPInTerminal(method, contact, otp);
         return true;
       }
     }
-    
     return false;
   } catch (error) {
-    console.error(`❌ Failed to send OTP via ${method}:`, error.message);
-    
-    // In development, log OTP to console as fallback
+    console.error(`Failed to send OTP via ${method}:`, error.message);
     if (process.env.NODE_ENV === 'development') {
       displayOTPInTerminal(method, contact, otp);
       return true;
     }
-    
     throw error;
   }
 };
@@ -118,10 +97,6 @@ export const initiateAuth = async (req, res) => {
 
     // Send OTP via SMS or Email
     const contact = method === 'email' ? email : mobile;
-    
-    console.log(`\n🎯 Initiating authentication for: ${contact}`);
-    console.log(`🔢 Generated OTP: ${otp}`);
-    
     const otpSent = await sendOTP(method, contact, otp, name || user.name);
     
     if (!otpSent) {
@@ -236,10 +211,6 @@ export const resendOTP = async (req, res) => {
 
     // Send OTP
     const contact = user.email || user.mobile;
-    
-    console.log(`\n🔄 Resending OTP for: ${contact}`);
-    console.log(`🔢 New OTP: ${otp}`);
-    
     const otpSent = await sendOTP(user.loginMethod, contact, otp, user.name);
     
     if (!otpSent) {
