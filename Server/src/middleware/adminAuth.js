@@ -9,8 +9,8 @@ const adminAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'Access denied. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
@@ -25,6 +25,7 @@ const adminAuth = async (req, res, next) => {
   }
   
   catch (error) {
+    console.error('Admin auth error:', error);
     res.status(401).json({ error: 'Invalid token.' });
   }
 };

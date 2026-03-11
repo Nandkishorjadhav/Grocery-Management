@@ -111,7 +111,7 @@ const orderSchema = new mongoose.Schema({
 
 // Index for faster queries
 orderSchema.index({ user: 1, orderDate: -1 });
-orderSchema.index({ orderId: 1 });
+// Note: orderId already has an index from unique: true, so no need for duplicate
 
 const Order = mongoose.model('Order', orderSchema);
 

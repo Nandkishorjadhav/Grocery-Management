@@ -713,8 +713,8 @@ const AdminPanel = () => {
                   </td>
                   <td>
                     <div className="customer-cell">
-                      <span className="customer-name">{order.userId?.name || 'Guest'}</span>
-                      <span className="customer-contact">{order.userId?.email || order.userId?.mobile || 'N/A'}</span>
+                      <span className="customer-name">{order.user?.name || 'Guest'}</span>
+                      <span className="customer-contact">{order.user?.email || order.user?.mobile || 'N/A'}</span>
                     </div>
                   </td>
                   <td>

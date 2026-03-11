@@ -282,7 +282,7 @@ export const getAllOrders = async (req, res) => {
     if (status) query.status = status;
 
     const orders = await Order.find(query)
-      .populate('userId', 'name email mobile')
+      .populate('user', 'name email mobile')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -310,7 +310,7 @@ export const updateOrderStatus = async (req, res) => {
       orderId,
       { status, updatedAt: Date.now() },
       { new: true }
-    ).populate('userId', 'name email mobile');
+    ).populate('user', 'name email mobile');
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
