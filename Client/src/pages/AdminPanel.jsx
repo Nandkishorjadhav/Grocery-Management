@@ -25,6 +25,33 @@ const AdminPanel = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ── Skeleton Components ─────────────────────────────
+  const StatSkeleton = () => (
+    <div className="stat-card sk-card">
+      <div className="sk-circle sk-pulse" style={{ width: 52, height: 52 }}></div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="sk-line sk-pulse" style={{ width: '55%', height: 11 }}></div>
+        <div className="sk-line sk-pulse" style={{ width: '38%', height: 28 }}></div>
+        <div className="sk-line sk-pulse" style={{ width: '60%', height: 11 }}></div>
+      </div>
+    </div>
+  );
+
+  const SkRows = ({ rows = 6, cells = [140, 180, 100, 90, 110, 130] }) => (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <tr key={i} className="sk-row">
+          {cells.map((w, j) => (
+            <td key={j}>
+              <div className="sk-line sk-pulse" style={{ width: w, height: 13 }}></div>
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+  // ────────────────────────────────────────────────────
+
   useEffect(() => {
     // Check if user is admin
     if (!user || (!user.isAdmin && user.role !== 'admin')) {
@@ -191,12 +218,20 @@ const AdminPanel = () => {
         </button>
       </div>
       
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading dashboard data...</p>
-        </div>
-      ) : dashboardStats && (
+      {!dashboardStats ? (
+        <>
+          <div className="stats-grid">
+            {[0, 1, 2, 3, 4].map(i => <StatSkeleton key={i} />)}
+          </div>
+          <div className="recent-users">
+            <h3>Recent Users</h3>
+            <table className="admin-table">
+              <thead><tr><th>Name</th><th>Email/Mobile</th><th>Status</th><th>Role</th><th>Joined</th></tr></thead>
+              <tbody><SkRows rows={5} cells={[140, 180, 90, 70, 110]} /></tbody>
+            </table>
+          </div>
+        </>
+      ) : (
         <>
           <div className="stats-grid">
             <Card className="stat-card users-card">
@@ -397,9 +432,14 @@ const AdminPanel = () => {
       </div>
 
       {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading users...</p>
+        <div className="table-container">
+          <table className="admin-table">
+            <thead><tr>
+              <th className="checkbox-col"></th>
+              <th>Name</th><th>Contact</th><th>Status</th><th>Role</th><th>Joined</th><th>Actions</th>
+            </tr></thead>
+            <tbody><SkRows rows={7} cells={[30, 160, 180, 100, 100, 110, 70]} /></tbody>
+          </table>
         </div>
       ) : users.length === 0 ? (
         <div className="no-data-card">
@@ -604,59 +644,84 @@ const AdminPanel = () => {
   const renderActivity = () => (
     <div className="admin-activity">
       <h2>Activity Logs</h2>
-      {activityLogs && (
+      {loading ? (
         <>
           <div className="activity-section">
             <h3>Recent Logins</h3>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Contact</th>
-                  <th>Last Login</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activityLogs.recentLogins.map(user => (
-                  <tr key={user._id}>
-                    <td>{user.name}</td>
-                    <td>{user.email || user.mobile}</td>
-                    <td>{new Date(user.lastLogin).toLocaleString()}</td>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead><tr><th>User</th><th>Contact</th><th>Last Login</th></tr></thead>
+                <tbody><SkRows rows={5} cells={[150, 190, 200]} /></tbody>
+              </table>
+            </div>
+          </div>
+          <div className="activity-section">
+            <h3>Recent Registrations</h3>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead><tr><th>User</th><th>Contact</th><th>Status</th><th>Registered</th></tr></thead>
+                <tbody><SkRows rows={5} cells={[150, 190, 90, 180]} /></tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : activityLogs ? (
+        <>
+          <div className="activity-section">
+            <h3>Recent Logins</h3>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Last Login</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {activityLogs.recentLogins.map(user => (
+                    <tr key={user._id}>
+                      <td>{user.name}</td>
+                      <td>{user.email || user.mobile}</td>
+                      <td>{new Date(user.lastLogin).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="activity-section">
             <h3>Recent Registrations</h3>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Registered</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activityLogs.recentRegistrations.map(user => (
-                  <tr key={user._id}>
-                    <td>{user.name}</td>
-                    <td>{user.email || user.mobile}</td>
-                    <td>
-                      <span className={`status-badge ${user.status}`}>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td>{new Date(user.createdAt).toLocaleString()}</td>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Registered</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {activityLogs.recentRegistrations.map(user => (
+                    <tr key={user._id}>
+                      <td>{user.name}</td>
+                      <td>{user.email || user.mobile}</td>
+                      <td>
+                        <span className={`status-badge ${user.status}`}>
+                          {user.status}
+                        </span>
+                      </td>
+                      <td>{new Date(user.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 
@@ -677,9 +742,13 @@ const AdminPanel = () => {
       </div>
       
       {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading orders...</p>
+        <div className="table-container">
+          <table className="admin-table orders-table">
+            <thead><tr>
+              <th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th><th>Date</th><th>Actions</th>
+            </tr></thead>
+            <tbody><SkRows rows={6} cells={[100, 140, 60, 100, 100, 90, 100, 34]} /></tbody>
+          </table>
         </div>
       ) : orders.length === 0 ? (
         <div className="no-data-card">
@@ -774,48 +843,63 @@ const AdminPanel = () => {
   const renderInventory = () => (
     <div className="admin-inventory">
       <h2>Inventory Management</h2>
-      {inventory.length === 0 ? (
-        <p className="no-data">No inventory items found</p>
+      {loading ? (
+        <div className="table-container">
+          <table className="admin-table">
+            <thead><tr>
+              <th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Unit</th><th>Status</th><th>Last Updated</th>
+            </tr></thead>
+            <tbody><SkRows rows={8} cells={[160, 110, 80, 60, 60, 90, 110]} /></tbody>
+          </table>
+        </div>
+      ) : inventory.length === 0 ? (
+        <div className="no-data-card">
+          <span className="no-data-icon">📦</span>
+          <h3>No Inventory Items</h3>
+          <p>Add products to get started</p>
+        </div>
       ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Unit</th>
-              <th>Status</th>
-              <th>Last Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventory.map(item => (
-              <tr key={item._id}>
-                <td>
-                  <div className="product-cell">
-                    <span className="product-icon">{item.icon || '📦'}</span>
-                    {item.name}
-                  </div>
-                </td>
-                <td>{item.category}</td>
-                <td>₹{item.price.toFixed(2)}</td>
-                <td>
-                  <span className={item.quantity < 10 ? 'low-stock' : ''}>
-                    {item.quantity}
-                  </span>
-                </td>
-                <td>{item.unit}</td>
-                <td>
-                  <span className={`stock-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
-                    {item.quantity === 0 ? 'Out of Stock' : item.quantity < 10 ? 'Low Stock' : 'In Stock'}
-                  </span>
-                </td>
-                <td>{new Date(item.updatedAt).toLocaleDateString()}</td>
+        <div className="table-container">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Unit</th>
+                <th>Status</th>
+                <th>Last Updated</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {inventory.map(item => (
+                <tr key={item._id}>
+                  <td>
+                    <div className="product-cell">
+                      <span className="product-icon">{item.icon || '📦'}</span>
+                      {item.name}
+                    </div>
+                  </td>
+                  <td>{item.category}</td>
+                  <td>₹{item.price.toFixed(2)}</td>
+                  <td>
+                    <span className={item.quantity < 10 ? 'low-stock' : ''}>
+                      {item.quantity}
+                    </span>
+                  </td>
+                  <td>{item.unit}</td>
+                  <td>
+                    <span className={`stock-badge ${item.quantity === 0 ? 'out' : item.quantity < 10 ? 'low' : 'good'}`}>
+                      {item.quantity === 0 ? 'Out of Stock' : item.quantity < 10 ? 'Low Stock' : 'In Stock'}
+                    </span>
+                  </td>
+                  <td>{new Date(item.updatedAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -823,7 +907,21 @@ const AdminPanel = () => {
   const renderReports = () => (
     <div className="admin-reports">
       <h2>Analytics & Reports</h2>
-      {reports && (
+      {loading ? (
+        <div className="reports-grid">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="report-card-sk">
+              <div className="sk-line sk-pulse" style={{ width: '60%', height: 18, marginBottom: '1.5rem' }}></div>
+              {[0, 1, 2].map(j => (
+                <div key={j} className="stat-item" style={{ marginBottom: '0.75rem' }}>
+                  <div className="sk-line sk-pulse" style={{ width: '45%', height: 13 }}></div>
+                  <div className="sk-line sk-pulse" style={{ width: '25%', height: 13 }}></div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : reports ? (
         <>
           <div className="reports-grid">
             <Card className="report-card">
@@ -927,7 +1025,7 @@ const AdminPanel = () => {
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 
