@@ -23,7 +23,11 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [usersPage, setUsersPage] = useState(1);
+  const [usersTotalPages, setUsersTotalPages] = useState(1);
+  const [usersTotalCount, setUsersTotalCount] = useState(0);
+  const USERS_PER_PAGE = 20;
 
   // ── Skeleton Components ─────────────────────────────
   const StatSkeleton = () => (
@@ -61,6 +65,10 @@ const AdminPanel = () => {
     loadData();
   }, [user, navigate, activeTab]);
 
+  useEffect(() => {
+    if (activeTab === 'users') loadData();
+  }, [usersPage]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -78,9 +86,13 @@ const AdminPanel = () => {
       } else if (activeTab === 'users') {
         const data = await adminService.getAllUsers({ 
           status: filterStatus, 
-          search: searchQuery 
+          search: searchQuery,
+          page: usersPage,
+          limit: USERS_PER_PAGE
         });
         setUsers(data.users);
+        setUsersTotalPages(data.totalPages || 1);
+        setUsersTotalCount(data.totalUsers || data.users.length);
       } else if (activeTab === 'approvals') {
         try {
           const data = await adminService.getPendingApprovals();
@@ -378,13 +390,13 @@ const AdminPanel = () => {
               placeholder="Search by name, email, or mobile..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && loadData()}
+              onKeyPress={(e) => { if (e.key === 'Enter') { setUsersPage(1); loadData(); } }}
               className="search-input"
             />
             {searchQuery && (
               <button 
                 className="clear-search-btn"
-                onClick={() => { setSearchQuery(''); loadData(); }}
+                onClick={() => { setSearchQuery(''); setUsersPage(1); loadData(); }}
                 title="Clear search"
               >
                 ✕
@@ -394,7 +406,7 @@ const AdminPanel = () => {
           
           <select
             value={filterStatus}
-            onChange={(e) => { setFilterStatus(e.target.value); }}
+            onChange={(e) => { setFilterStatus(e.target.value); setUsersPage(1); }}
             className="filter-select"
           >
             <option value="">All Status</option>
@@ -403,7 +415,7 @@ const AdminPanel = () => {
             <option value="rejected">Rejected</option>
           </select>
           
-          <Button onClick={loadData} className="search-btn">
+          <Button onClick={() => { setUsersPage(1); loadData(); }} className="search-btn">
             <span>🔍</span> Search
           </Button>
         </div>
@@ -576,64 +588,95 @@ const AdminPanel = () => {
           </table>
         </div>
       )}
+
+      {!loading && usersTotalPages > 1 && (
+        <div className="pagination-bar">
+          <span className="pagination-info">
+            Showing {((usersPage - 1) * USERS_PER_PAGE) + 1}–{Math.min(usersPage * USERS_PER_PAGE, usersTotalCount)} of {usersTotalCount} users
+          </span>
+          <div className="pagination-controls">
+            <button
+              className="page-btn"
+              onClick={() => setUsersPage(p => Math.max(1, p - 1))}
+              disabled={usersPage === 1}
+            >
+              ‹ Prev
+            </button>
+            {Array.from({ length: Math.min(usersTotalPages, 7) }, (_, i) => {
+              const startPage = Math.max(1, Math.min(usersPage - 3, usersTotalPages - 6));
+              const page = startPage + i;
+              return page <= usersTotalPages ? (
+                <button
+                  key={page}
+                  className={`page-btn ${page === usersPage ? 'active' : ''}`}
+                  onClick={() => setUsersPage(page)}
+                >
+                  {page}
+                </button>
+              ) : null;
+            })}
+            <button
+              className="page-btn"
+              onClick={() => setUsersPage(p => Math.min(usersTotalPages, p + 1))}
+              disabled={usersPage === usersTotalPages}
+            >
+              Next ›
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
   const renderApprovals = () => (
     <div className="admin-approvals">
-      <h2>Pending Approvals</h2>
-      
-      {/* Seller Product Approvals - Show First for Priority */}
+      <div className="section-header">
+        <div>
+          <h2 className="section-title">✅ Pending Approvals</h2>
+          <p className="section-subtitle">Review and approve seller product submissions</p>
+        </div>
+        {sellerProducts.length > 0 && (
+          <span className="count-badge">{sellerProducts.length} Pending</span>
+        )}
+      </div>
+
       <div className="approval-section">
         <div className="section-header-with-count">
           <h3>🛒 Seller Product Approvals</h3>
-          {sellerProducts.length > 0 && (
-            <span className="count-badge">{sellerProducts.length} Pending</span>
-          )}
         </div>
+
         {sellerProducts.length === 0 ? (
-          <p className="no-data">✅ No pending product approvals</p>
+          <div className="no-data-card">
+            <span className="no-data-icon">🛒</span>
+            <h3>No Pending Product Approvals</h3>
+            <p>All seller product submissions have been reviewed</p>
+          </div>
         ) : (
-          <div className="approvals-grid">
+          <div className="approvals-row">
             {sellerProducts.map(product => (
-              <Card key={product._id} className="approval-card product-approval-card">
-                <div className="product-status-badge pending-approval">⏳ Awaiting Approval</div>
-                {product.images && product.images.length > 0 && (
-                  <div className="product-image">
-                    <img src={product.images[0].url} alt={product.productName} />
-                  </div>
-                )}
-                <h3>{product.productName}</h3>
-                <p className="product-category">📂 {product.category}</p>
-                <p className="product-description">{product.description}</p>
-                <div className="product-details">
-                  <p><strong>👤 Seller:</strong> {product.sellerName}</p>
-                  {product.sellerContact?.email && (
-                    <p><strong>📧 Email:</strong> {product.sellerContact.email}</p>
-                  )}
-                  {product.sellerContact?.mobile && (
-                    <p><strong>📱 Mobile:</strong> {product.sellerContact.mobile}</p>
-                  )}
-                  <p><strong>💰 Base Price:</strong> ₹{product.basePrice} + GST ({product.gstPercentage}%)</p>
-                  <p><strong>💳 Final Price:</strong> ₹{product.finalPrice?.toFixed(2)}</p>
-                  <p><strong>📦 Quantity:</strong> {product.quantity} {product.unit}</p>
-                  <p><strong>📅 Submitted:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
+              <div key={product._id} className="apc">
+                <div className="apc-image">
+                  {product.images && product.images.length > 0
+                    ? <img src={product.images[0].url} alt={product.productName} />
+                    : <span className="apc-placeholder">📦</span>
+                  }
                 </div>
-                <div className="approval-actions">
-                  <Button
-                    onClick={() => handleApproveProduct(product._id)}
-                    variant="success"
-                  >
-                    ✓ Approve & Publish
-                  </Button>
-                  <Button
-                    onClick={() => handleRejectProduct(product._id)}
-                    variant="danger"
-                  >
-                    ✗ Reject
-                  </Button>
+                <div className="apc-body">
+                  <span className="apc-status">⏳ Pending</span>
+                  <h4 className="apc-name">{product.productName}</h4>
+                  <p className="apc-meta">📂 {product.category}</p>
+                  <p className="apc-price">💳 ₹{product.finalPrice?.toFixed(2)}
+                    <span className="apc-gst"> (incl. {product.gstPercentage}% GST)</span>
+                  </p>
+                  <p className="apc-seller">👤 {product.sellerName}</p>
+                  <p className="apc-qty">📦 {product.quantity} {product.unit}</p>
+                  <p className="apc-date">📅 {new Date(product.createdAt).toLocaleDateString()}</p>
                 </div>
-              </Card>
+                <div className="apc-actions">
+                  <button className="apc-approve-btn" onClick={() => handleApproveProduct(product._id)}>✓ Approve</button>
+                  <button className="apc-reject-btn" onClick={() => handleRejectProduct(product._id)}>✗ Reject</button>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -1041,7 +1084,7 @@ const AdminPanel = () => {
               aria-label="Toggle Menu"
               type="button"
             >
-              <span className="hamburger-icon">{sidebarOpen ? '✕' : '☰'}</span>
+              <span className="hamburger-icon">{sidebarOpen ? '❮' : '☰'}</span>
             </button>
             <span className="admin-brand-icon">⚙️</span>
             <div className="admin-brand-text">
@@ -1065,31 +1108,26 @@ const AdminPanel = () => {
               type="button"
             >
               <span className="exit-icon">🚪</span>
-              Exit Admin Panel
+              <span className="exit-text">Exit Admin Panel</span>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
       {/* Admin Content Layout */}
       <div className="admin-layout">
+        {/* Overlay — only active/visible on mobile via CSS */}
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
+
         {/* Sidebar */}
         <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('dashboard');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }}
+            data-label="Dashboard"
           >
             <span className="sidebar-icon">📊</span>
             <span className="sidebar-text">Dashboard</span>
@@ -1097,10 +1135,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('users');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('users'); setSidebarOpen(false); }}
+            data-label="Users"
           >
             <span className="sidebar-icon">👥</span>
             <span className="sidebar-text">Users</span>
@@ -1108,10 +1144,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('orders');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('orders'); setSidebarOpen(false); }}
+            data-label="Orders"
           >
             <span className="sidebar-icon">🛒</span>
             <span className="sidebar-text">Orders</span>
@@ -1119,10 +1153,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'inventory' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('inventory');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('inventory'); setSidebarOpen(false); }}
+            data-label="Inventory"
           >
             <span className="sidebar-icon">📦</span>
             <span className="sidebar-text">Inventory</span>
@@ -1130,10 +1162,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'approvals' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('approvals');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('approvals'); setSidebarOpen(false); }}
+            data-label="Approvals"
           >
             <span className="sidebar-icon">✓</span>
             <span className="sidebar-text">Approvals</span>
@@ -1144,10 +1174,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('reports');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('reports'); setSidebarOpen(false); }}
+            data-label="Reports"
           >
             <span className="sidebar-icon">📈</span>
             <span className="sidebar-text">Reports</span>
@@ -1155,10 +1183,8 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('activity');
-              setSidebarOpen(false);
-            }}
+            onClick={() => { setActiveTab('activity'); setSidebarOpen(false); }}
+            data-label="Activity"
           >
             <span className="sidebar-icon">📝</span>
             <span className="sidebar-text">Activity</span>

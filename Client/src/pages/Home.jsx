@@ -163,10 +163,10 @@ const Home = ({ searchQuery = '' }) => {
   };
 
   const filterButtons = [
-    { id: 'all', label: 'All Products', icon: '🛒' },
-    { id: 'popular', label: 'Most Popular', icon: '⭐' },
-    { id: 'special', label: "Today's Special", icon: '🔥' },
-    { id: 'bestsellers', label: 'Best Sellers', icon: '👑' },
+    { id: 'all', label: 'All Products', icon: '' },
+    { id: 'popular', label: 'Most Popular', icon: '' },
+    { id: 'special', label: "Today's Special", icon: '' },
+    { id: 'bestsellers', label: 'Best Sellers', icon: '7' },
   ];
 
   return (
