@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import { Link } from 'react-router-dom';
 import sellerProductService from '../services/sellerProductService';
 import './Home.css';
 
 const Home = ({ searchQuery = '' }) => {
-  const { inventory, addToCart } = useGrocery();
+  const { inventory, addToCart, loading } = useGrocery();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [addedItems, setAddedItems] = useState(new Set());
   const [sellerProducts, setSellerProducts] = useState([]);
+  const [imageErrors, setImageErrors] = useState(new Set());
 
   useEffect(() => {
     const fetchSellerProducts = async () => {
@@ -64,7 +65,7 @@ const Home = ({ searchQuery = '' }) => {
 
     switch (selectedFilter) {
       case 'popular':
-        products = products.sort((a, b) => b.quantity - a.quantity);
+        products = [...products].sort((a, b) => b.quantity - a.quantity);
         break;
       case 'special':
         const today = new Date();
@@ -87,7 +88,19 @@ const Home = ({ searchQuery = '' }) => {
     setFilteredProducts(products);
   }, [inventory, sellerProducts, searchQuery, selectedFilter, selectedCategory]);
 
-  const categories = [...new Set([...inventory, ...sellerProducts].map(item => item.category))];
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.category-dropdown-wrapper')) {
+        setShowCategoryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const allProducts = [...inventory, ...sellerProducts];
+  const categories = [...new Set(allProducts.map(item => item.category))];
 
   const getCategoryEmoji = (category) => {
     const emojiMap = {
@@ -104,57 +117,35 @@ const Home = ({ searchQuery = '' }) => {
     return emojiMap[category] || emojiMap['default'];
   };
 
-  const getProductImage = (category, itemName = '') => {
-    if (selectedCategory !== 'all') {
-      return null;
+  const getItemImageUrl = (item) => {
+    if (item.isSellerProduct) {
+      return item.images && item.images.length > 0 ? item.images[0].url : null;
     }
-
-    const productImages = {
-      'Fresh Red Apples': 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
-      'Organic Bananas': 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400',
-      'Sweet Oranges': 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=400',
-      'Green Grapes': 'https://images.unsplash.com/photo-1599819177333-612e79d4a0f7?w=400',
-      'Strawberries': 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400',
-      'Brown Rice': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
-      'Whole Wheat Bread': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
-      'Fresh Milk': 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400',
-      'Cheddar Cheese': 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=400',
-      'Greek Yogurt': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
-      'Chicken Breast': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400',
-      'Salmon Fillet': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400',
-      'Almond Nuts': 'https://images.unsplash.com/photo-1508736793122-f516e3ba5569?w=400',
-    };
-    
-    if (productImages[itemName]) {
-      return productImages[itemName];
+    if (item.image && item.image !== 'https://via.placeholder.com/150') {
+      return item.image;
     }
-    
-    const categoryImages = {
-      'Vegetables': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400',
-      'Fruits': 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400',
-      'Dairy': 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400',
-      'Bakery': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
-      'Snacks': 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400',
-      'Beverages': 'https://images.unsplash.com/photo-1546548970-71785318a17b?w=400',
-      'Meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400',
-      'Grains': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
-    };
-    
-    return categoryImages[category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400';
+    if (item.images && item.images.length > 0) {
+      return typeof item.images[0] === 'string' ? item.images[0] : item.images[0].url;
+    }
+    return null;
   };
+
+  const handleImageError = useCallback((itemId) => {
+    setImageErrors(prev => new Set([...prev, itemId]));
+  }, []);
 
   const handleAddToCart = async (e, item) => {
     e.preventDefault();
     e.stopPropagation();
-    
     try {
       await addToCart(item);
-      setAddedItems(prev => new Set([...prev, item._id || item.id]));
+      const id = item._id || item.id;
+      setAddedItems(prev => new Set([...prev, id]));
       setTimeout(() => {
         setAddedItems(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(item._id || item.id);
-          return newSet;
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
         });
       }, 2000);
     } catch (error) {
@@ -163,71 +154,118 @@ const Home = ({ searchQuery = '' }) => {
   };
 
   const filterButtons = [
-    { id: 'all', label: 'All Products', icon: '' },
-    { id: 'popular', label: 'Most Popular', icon: '' },
-    { id: 'special', label: "Today's Special", icon: '' },
-    { id: 'bestsellers', label: 'Best Sellers', icon: '7' },
+    { id: 'all',         label: 'All Products',    icon: '🛍️' },
+    { id: 'popular',     label: 'Most Popular',    icon: '🔥' },
+    { id: 'special',     label: "Today's Special", icon: '⚡' },
+    { id: 'bestsellers', label: 'Best Sellers',    icon: '⭐' },
   ];
+
+  const sectionTitles = {
+    all:         'All Products',
+    popular:     'Most Popular Items',
+    special:     "Today's Special Deals",
+    bestsellers: 'Best Selling Products',
+  };
 
   return (
     <div className="home-page">
-      {/* Filter Buttons */}
+
+      {/* ── Hero Banner ── */}
+      <div className="hero-banner">
+        <div className="hero-content">
+          <span className="hero-badge">🌿 Fresh &amp; Organic</span>
+          <h1 className="hero-title">
+            Your Daily
+            <span className="hero-highlight">Fresh Grocery</span>
+            Delivered Fast
+          </h1>
+          <p className="hero-description">
+            Shop from hundreds of fresh, locally-sourced products. Same-day delivery, competitive prices, and quality you can trust.
+          </p>
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <div className="stat-value">500+</div>
+              <div className="stat-label">Products</div>
+            </div>
+            <div className="hero-stat">
+              <div className="stat-value">2hr</div>
+              <div className="stat-label">Delivery</div>
+            </div>
+            <div className="hero-stat">
+              <div className="stat-value">4.9★</div>
+              <div className="stat-label">Rating</div>
+            </div>
+          </div>
+          <div className="hero-actions">
+            <Link to="/products" className="hero-btn primary">
+              <span>🛒</span> Shop Now
+            </Link>
+            <Link to="/offers" className="hero-btn secondary">
+              <span>🏷️</span> View Offers
+            </Link>
+          </div>
+        </div>
+        <div className="hero-decoration" aria-hidden="true">
+          <span className="floating-item item-1">🍅</span>
+          <span className="floating-item item-2">🥑</span>
+          <span className="floating-item item-3">🍋</span>
+          <span className="floating-item item-4">🥕</span>
+          <span className="floating-item item-5">🫐</span>
+        </div>
+      </div>
+
+      {/* ── Filter Buttons ── */}
       <div className="filter-buttons">
-        {filterButtons.map(button => (
+        {filterButtons.map(btn => (
           <button
-            key={button.id}
-            className={`filter-btn ${selectedFilter === button.id ? 'active' : ''}`}
-            onClick={() => setSelectedFilter(button.id)}
+            key={btn.id}
+            className={`filter-btn ${selectedFilter === btn.id ? 'active' : ''}`}
+            onClick={() => setSelectedFilter(btn.id)}
           >
-            <span className="filter-icon">{button.icon}</span>
-            {button.label}
+            <span className="filter-icon">{btn.icon}</span>
+            {btn.label}
           </button>
         ))}
       </div>
 
-      {/* Products Grid */}
+      {/* ── Products Section ── */}
       <div className="products-section">
         <div className="section-header">
-          <h2 className="section-title">
-            {selectedFilter === 'all' && 'All Products'}
-            {selectedFilter === 'popular' && 'Most Popular Items'}
-            {selectedFilter === 'special' && "Today's Special Deals"}
-            {selectedFilter === 'bestsellers' && 'Best Selling Products'}
-          </h2>
+          <h2 className="section-title">{sectionTitles[selectedFilter]}</h2>
+
           <div className="header-right">
             <span className="product-count">{filteredProducts.length} items</span>
+
             <div className="category-dropdown-wrapper">
-              <button 
+              <button
                 className="category-dropdown-btn"
-                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                onClick={() => setShowCategoryDropdown(v => !v)}
+                aria-expanded={showCategoryDropdown}
               >
                 <span>📁 Shop by Category</span>
                 <span className={`dropdown-arrow ${showCategoryDropdown ? 'open' : ''}`}>▼</span>
               </button>
+
               {showCategoryDropdown && (
                 <div className="category-dropdown">
-                  <div 
+                  <div
                     className={`category-option ${selectedCategory === 'all' ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedCategory('all');
-                      setShowCategoryDropdown(false);
-                    }}
+                    onClick={() => { setSelectedCategory('all'); setShowCategoryDropdown(false); }}
                   >
-                    🛒 All Categories
+                    <span>🛒</span>
+                    <span>All Categories</span>
+                    <span className="category-item-count">{allProducts.length}</span>
                   </div>
-                  {categories.map(category => (
+                  {categories.map(cat => (
                     <div
-                      key={category}
-                      className={`category-option ${selectedCategory === category ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setShowCategoryDropdown(false);
-                      }}
+                      key={cat}
+                      className={`category-option ${selectedCategory === cat ? 'active' : ''}`}
+                      onClick={() => { setSelectedCategory(cat); setShowCategoryDropdown(false); }}
                     >
-                      <span>{getCategoryEmoji(category)}</span>
-                      <span>{category}</span>
+                      <span>{getCategoryEmoji(cat)}</span>
+                      <span>{cat}</span>
                       <span className="category-item-count">
-                        {[...inventory, ...sellerProducts].filter(item => item.category === category).length}
+                        {allProducts.filter(i => i.category === cat).length}
                       </span>
                     </div>
                   ))}
@@ -237,72 +275,97 @@ const Home = ({ searchQuery = '' }) => {
           </div>
         </div>
 
-        {filteredProducts.length === 0 ? (
+        {/* ── Loading Skeletons ── */}
+        {loading ? (
+          <div className="products-grid">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="product-skeleton">
+                <div className="skeleton-image" />
+                <div className="skeleton-details">
+                  <div className="skeleton-line skeleton-title" />
+                  <div className="skeleton-line skeleton-category" />
+                  <div className="skeleton-line skeleton-meta" />
+                  <div className="skeleton-footer">
+                    <div className="skeleton-line skeleton-price" />
+                    <div className="skeleton-line skeleton-btn" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        /* ── Empty State ── */
+        ) : filteredProducts.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🔍</div>
             <h3>No products found</h3>
             <p>Try adjusting your search or filters</p>
           </div>
+
+        /* ── Product Cards ── */
         ) : (
           <div className="products-grid">
-            {filteredProducts.map(item => (
-              <Link
-                key={item._id || item.id}
-                to={`/product/${item._id || item.id}`}
-                className="home-product-card"
-              >
-                {item.isSellerProduct && item.images && item.images.length > 0 ? (
-                  <img 
-                    src={item.images[0].url} 
-                    alt={item.name}
-                    className="product-image"
-                    loading="lazy"
-                  />
-                ) : getProductImage(item.category, item.name) ? (
-                  <img 
-                    src={getProductImage(item.category, item.name)} 
-                    alt={item.name}
-                    className="product-image"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="product-emoji">{getCategoryEmoji(item.category)}</div>
-                )}
+            {filteredProducts.map((item, index) => {
+              const itemId = item._id || item.id;
+              const imageUrl = getItemImageUrl(item);
+              const showImage = imageUrl && !imageErrors.has(itemId);
+              const isAdded = addedItems.has(itemId);
+              const originalPrice = Math.round(item.price * 1.25);
+              const discount = Math.round(((originalPrice - item.price) / originalPrice) * 100);
 
-                {item.isSellerProduct && (
-                  <span className="seller-badge">👤 Seller</span>
-                )}
-                {!item.isSellerProduct && item.quantity <= item.minStock && (
-                  <span className="stock-badge low">Low Stock</span>
-                )}
-                
-                <div className="product-details">
-                  <h3 className="product-name">{item.name}</h3>
-                  <span className="product-category">{item.category}</span>
-                  
-                  <div className="product-meta">
-                    <div className="product-quantity">
-                      <span className="quantity-label">Available:</span>
-                      <span className="quantity-value">{item.quantity} {item.unit}</span>
-                    </div>
+              return (
+                <Link
+                  key={itemId}
+                  to={`/product/${itemId}`}
+                  className="pc"
+                  style={{ animationDelay: `${Math.min(index * 60, 400)}ms` }}
+                >
+                  {/* ── Image / Emoji ── */}
+                  <div className="pc-img">
+                    {showImage ? (
+                      <img
+                        src={imageUrl}
+                        alt={item.name}
+                        className="pc-photo"
+                        loading="lazy"
+                        onError={() => handleImageError(itemId)}
+                      />
+                    ) : (
+                      <div className="pc-emoji">
+                        <span className="pc-emoji-icon">{getCategoryEmoji(item.category)}</span>
+                        <span className="pc-emoji-cat">{item.category}</span>
+                      </div>
+                    )}
+                    <span className="pc-disc">-{discount}%</span>
+                    {item.isSellerProduct && <span className="pc-seller">👤 Seller</span>}
+                    {!item.isSellerProduct && item.quantity <= item.minStock && (
+                      <span className="pc-lowstock">⚠ Low</span>
+                    )}
                   </div>
 
-                  <div className="product-footer">
-                    <div className="product-price">
-                      <span className="price-current">₹{item.price}</span>
-                      <span className="price-original">₹{Math.round(item.price * 1.25)}</span>
+                  {/* ── Body ── */}
+                  <div className="pc-body">
+                    <span className="pc-cat">{getCategoryEmoji(item.category)} {item.category}</span>
+                    <h3 className="pc-name">{item.name}</h3>
+                    <p className="pc-qty">📦 {item.quantity} {item.unit} available</p>
+                  </div>
+
+                  {/* ── Footer ── */}
+                  <div className="pc-foot">
+                    <div className="pc-price">
+                      <span className="pc-now">₹{item.price}</span>
+                      <span className="pc-was">₹{originalPrice}</span>
                     </div>
-                    <button 
-                      className={`add-to-cart-btn ${addedItems.has(item._id || item.id) ? 'added' : ''}`}
+                    <button
+                      className={`pc-btn${isAdded ? ' pc-btn-ok' : ''}`}
                       onClick={(e) => handleAddToCart(e, item)}
                     >
-                      <span>{addedItems.has(item._id || item.id) ? 'Added' : 'Add'}</span>
-                      <span className="product-cart-icon">{addedItems.has(item._id || item.id) ? '✓' : '🛒'}</span>
+                      {isAdded ? '✓ Added' : '🛒 Add'}
                     </button>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
