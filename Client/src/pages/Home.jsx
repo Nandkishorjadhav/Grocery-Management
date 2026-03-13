@@ -118,14 +118,27 @@ const Home = ({ searchQuery = '' }) => {
   };
 
   const getItemImageUrl = (item) => {
+    // Seller products: images stored as { url: 'data:image/...', filename, uploadedAt }
     if (item.isSellerProduct) {
-      return item.images && item.images.length > 0 ? item.images[0].url : null;
+      if (item.images && item.images.length > 0) {
+        const img = item.images[0];
+        const url = typeof img === 'string' ? img : img?.url;
+        if (url && url.length > 10) return url;
+      }
+      return null;
     }
-    if (item.image && item.image !== 'https://via.placeholder.com/150') {
+    // Inventory items: use any real URL — only skip bare placeholder stubs
+    const isBlank = (url) =>
+      !url ||
+      url === 'https://via.placeholder.com/150' ||
+      url.trim() === '';
+
+    if (item.image && !isBlank(item.image)) {
       return item.image;
     }
     if (item.images && item.images.length > 0) {
-      return typeof item.images[0] === 'string' ? item.images[0] : item.images[0].url;
+      const url = typeof item.images[0] === 'string' ? item.images[0] : item.images[0]?.url;
+      if (url && !isBlank(url)) return url;
     }
     return null;
   };
@@ -171,7 +184,7 @@ const Home = ({ searchQuery = '' }) => {
     <div className="home-page">
 
       {/* ── Hero Banner ── */}
-      <div className="hero-banner">
+      {/* <div className="hero-banner">
         <div className="hero-content">
           <span className="hero-badge">🌿 Fresh &amp; Organic</span>
           <h1 className="hero-title">
@@ -212,7 +225,7 @@ const Home = ({ searchQuery = '' }) => {
           <span className="floating-item item-4">🥕</span>
           <span className="floating-item item-5">🫐</span>
         </div>
-      </div>
+      </div> */}
 
       {/* ── Filter Buttons ── */}
       <div className="filter-buttons">
@@ -331,9 +344,13 @@ const Home = ({ searchQuery = '' }) => {
                         onError={() => handleImageError(itemId)}
                       />
                     ) : (
-                      <div className="pc-emoji">
-                        <span className="pc-emoji-icon">{getCategoryEmoji(item.category)}</span>
-                        <span className="pc-emoji-cat">{item.category}</span>
+                      <div className="pc-no-img">
+                        <svg className="pc-no-img-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3">
+                          <rect x="3" y="3" width="18" height="18" rx="3"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span className="pc-no-img-label">{item.category}</span>
                       </div>
                     )}
                     <span className="pc-disc">-{discount}%</span>

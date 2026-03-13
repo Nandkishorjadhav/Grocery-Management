@@ -499,8 +499,8 @@ body { background: var(--bg-primary); }
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
   padding-top: .5rem;
 }
 
@@ -927,7 +927,7 @@ body { background: var(--bg-primary); }
   .filter-buttons { gap: .5rem; margin-bottom: 1.25rem; }
   .filter-btn { padding: .55rem 1rem; font-size: .82rem; }
 
-  .products-grid        { grid-template-columns: repeat(2, 1fr); gap: .875rem; }
+  .products-grid        { grid-template-columns: repeat(3, 1fr); gap: .75rem; }
   .product-image-wrapper { height: 155px; }
 
   .product-details  { padding: .8rem .95rem .1rem; }
@@ -944,7 +944,7 @@ body { background: var(--bg-primary); }
   .hero-btn                { justify-content: center; }
   .section-title           { font-size: 1.5rem; }
   .category-dropdown       { width: 240px; }
-  .products-grid           { grid-template-columns: repeat(2, 1fr); gap: .65rem; }
+  .products-grid           { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
   .product-image-wrapper   { height: 130px; }
   .emoji-icon              { font-size: 2.8rem; }
   .product-name            { font-size: .82rem; }
@@ -1040,38 +1040,42 @@ body { background: var(--bg-primary); }
   transform: scale(1.07);
 }
 
-.pc-emoji {
+.pc-no-img {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 55%, #fed7aa 100%);
+  gap: 10px;
+  background: #f1f3f5;
 }
 
-[data-theme="dark"] .pc-emoji {
-  background: linear-gradient(145deg, #2c1b0e 0%, #3d2510 55%, #4a2e12 100%);
+[data-theme="dark"] .pc-no-img {
+  background: #2a2a38;
 }
 
-.pc-emoji-icon {
-  font-size: 3.6rem;
-  line-height: 1;
-  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
-  transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+.pc-no-img-icon {
+  width: 44px;
+  height: 44px;
+  color: #c0c4cc;
+  flex-shrink: 0;
 }
 
-.pc:hover .pc-emoji-icon {
-  transform: scale(1.14) rotate(5deg);
+[data-theme="dark"] .pc-no-img-icon {
+  color: #4b5060;
 }
 
-.pc-emoji-cat {
-  font-size: 0.62rem;
-  font-weight: 800;
+.pc-no-img-label {
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #ea580c;
+  letter-spacing: 1.2px;
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .pc-no-img-label {
+  color: #555a6e;
 }
 
 /* ── Badges ── */
