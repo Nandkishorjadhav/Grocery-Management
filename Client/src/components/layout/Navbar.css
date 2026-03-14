@@ -1,6 +1,7 @@
 /* ========== NAVBAR ========== */
 .navbar {
-  background: rgba(255, 111, 0, 0.6);
+  background:
+    linear-gradient(135deg, rgba(30, 64, 175, 0.78) 0%, rgba(59, 130, 246, 0.68) 34%, rgba(249, 115, 22, 0.62) 100%);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1391,4 +1392,70 @@
 
 [data-theme="dark"] .login-btn:hover {
   background: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 560px) {
+  .navbar-container {
+    padding: 0 0.45rem;
+  }
+
+  .brand-title {
+    display: none;
+  }
+
+  .navbar-brand {
+    gap: 0.25rem;
+    padding-inline: 0.15rem;
+  }
+
+  .brand-icon {
+    font-size: 1.55rem;
+  }
+
+  .navbar-actions {
+    gap: 0.35rem;
+  }
+
+  .profile-icon-link,
+  .mobile-search-btn,
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .login-btn {
+    padding: 0.4rem 0.68rem;
+    font-size: 0.76rem;
+  }
+
+  .mobile-search-container {
+    padding: 0.75rem;
+  }
+
+  .search-input {
+    font-size: 0.8125rem;
+    padding-left: 2.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar-content {
+    height: 56px;
+  }
+
+  .profile-icon-link,
+  .mobile-search-btn,
+  .mobile-menu-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .profile-avatar-icon {
+    font-size: 1.2rem;
+  }
+
+  .login-btn {
+    padding: 0.38rem 0.58rem;
+    font-size: 0.72rem;
+  }
 }
