@@ -56,13 +56,6 @@ const Dashboard = () => {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const stats = [
-    { label: 'Total Items', value: inventory.length, icon: '📦', color: 'blue' },
-    { label: 'Inventory Value', value: `$${totalInventoryValue.toFixed(2)}`, icon: '💰', color: 'green' },
-    { label: 'Low Stock', value: lowStockItems.length, icon: '⚠️', color: 'yellow' },
-    { label: 'Shopping List', value: pendingShoppingItems, icon: '🛒', color: 'purple' },
-  ];
-
   return (
     <div className="fade-in">
       {successMessage && (
@@ -92,24 +85,6 @@ const Dashboard = () => {
         </div>
       )}
       
-      {/* Stats Grid */}
-      <div className="stats-grid">
-        {stats.map((stat, index) => (
-          <div 
-            key={index} 
-            className="stat-card"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="stat-info">
-              <p className="stat-label">{stat.label}</p>
-              <p className="stat-value">{stat.value}</p>
-            </div>
-            <div className={`stat-icon stat-icon-${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </div>
 
       {/* Alerts */}
       <div className="alerts-grid">

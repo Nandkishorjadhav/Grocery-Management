@@ -266,6 +266,11 @@
   align-items: stretch;
 }
 
+.home-storefront__grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+  justify-content: start;
+}
+
 .home-storefront__grid--list {
   grid-template-columns: 1fr;
 }
@@ -714,6 +719,10 @@
   }
 
   .home-storefront__grid--grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-storefront__grid--compact {
     grid-template-columns: 1fr;
   }
 

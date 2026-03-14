@@ -3,90 +3,74 @@ import api from './api';
 const adminService = {
   // Dashboard
   getDashboardStats: async () => {
-    const response = await api.get('/admin/dashboard');
-    return response.data;
+    return await api.get('/admin/dashboard');
   },
 
   getSystemOverview: async () => {
-    const response = await api.get('/admin/system-overview');
-    return response.data;
+    return await api.get('/admin/system-overview');
   },
 
   // User management
   getAllUsers: async (params = {}) => {
-    const response = await api.get('/admin/users', { params });
-    return response.data;
+    return await api.get('/admin/users', { params });
   },
 
   approveUser: async (userId) => {
-    const response = await api.put(`/admin/users/${userId}/approve`);
-    return response.data;
+    return await api.put(`/admin/users/${userId}/approve`);
   },
 
   rejectUser: async (userId) => {
-    const response = await api.put(`/admin/users/${userId}/reject`);
-    return response.data;
+    return await api.put(`/admin/users/${userId}/reject`);
   },
 
   updateUserRole: async (userId, role) => {
-    const response = await api.put(`/admin/users/${userId}/role`, { role });
-    return response.data;
+    return await api.put(`/admin/users/${userId}/role`, { role });
   },
 
   deleteUser: async (userId) => {
-    const response = await api.delete(`/admin/users/${userId}`);
-    return response.data;
+    return await api.delete(`/admin/users/${userId}`);
   },
 
   // Bulk operations
   bulkApproveUsers: async (userIds) => {
-    const response = await api.post('/admin/users/bulk-approve', { userIds });
-    return response.data;
+    return await api.post('/admin/users/bulk-approve', { userIds });
   },
 
   bulkRejectUsers: async (userIds) => {
-    const response = await api.post('/admin/users/bulk-reject', { userIds });
-    return response.data;
+    return await api.post('/admin/users/bulk-reject', { userIds });
   },
 
   // Activity logs
   getActivityLogs: async (params = {}) => {
-    const response = await api.get('/admin/activity-logs', { params });
-    return response.data;
+    return await api.get('/admin/activity-logs', { params });
   },
 
   // Pending approvals
   getPendingApprovals: async () => {
-    const response = await api.get('/admin/pending-approvals');
-    return response.data;
+    return await api.get('/admin/pending-approvals');
   },
 
   // Orders management
   getAllOrders: async (params = {}) => {
-    const response = await api.get('/admin/orders', { params });
-    return response.data;
+    return await api.get('/admin/orders', { params });
   },
 
   updateOrderStatus: async (orderId, status) => {
-    const response = await api.put(`/admin/orders/${orderId}/status`, { status });
-    return response.data;
+    return await api.put(`/admin/orders/${orderId}/status`, { status });
   },
 
   // Inventory management
   getInventoryData: async (params = {}) => {
-    const response = await api.get('/admin/inventory', { params });
-    return response.data;
+    return await api.get('/admin/inventory', { params });
   },
 
   updateInventory: async (itemId, data) => {
-    const response = await api.put(`/admin/inventory/${itemId}`, data);
-    return response.data;
+    return await api.put(`/admin/inventory/${itemId}`, data);
   },
 
   // Reports and analytics
   getReports: async (params = {}) => {
-    const response = await api.get('/admin/reports', { params });
-    return response.data;
+    return await api.get('/admin/reports', { params });
   },
 };
 

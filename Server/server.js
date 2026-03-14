@@ -47,6 +47,25 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Grocery Management API is running' });
 });
 
+// Root status route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Grocery Management backend is running',
+    health: '/api/health',
+    routes: [
+      '/api/auth',
+      '/api/inventory',
+      '/api/shopping-list',
+      '/api/cart',
+      '/api/admin',
+      '/api/orders',
+      '/api/products',
+      '/api/seller-products'
+    ]
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

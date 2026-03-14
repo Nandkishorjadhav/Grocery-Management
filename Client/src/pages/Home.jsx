@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGrocery } from '../context/GroceryContext';
-import sellerProductService from '../services/sellerProductService';
+import { getProductPrimaryImage } from '../utils/imageUtils';
 import './Home.css';
 
 const priceRanges = [
@@ -35,40 +35,7 @@ const Home = ({ searchQuery = '' }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [addedItems, setAddedItems] = useState(new Set());
-  const [sellerProducts, setSellerProducts] = useState([]);
   const [imageErrors, setImageErrors] = useState(new Set());
-  useEffect(() => {
-    const fetchSellerProducts = async () => {
-      try {
-        const response = await sellerProductService.getMarketplaceProducts({ status: 'approved' });
-        if (response?.success) {
-          const transformedProducts = response.products
-            .filter((product) => product.quantity > 0 && product.status === 'approved')
-            .map((product) => ({
-              _id: product._id,
-              name: product.productName,
-              category: product.category,
-              price: product.finalPrice,
-              quantity: product.quantity,
-              unit: product.unit,
-              description: product.description,
-              images: product.images,
-              isSellerProduct: true,
-              sellerName: product.sellerName,
-              minStock: 0
-            }));
-
-          setSellerProducts(transformedProducts);
-        }
-      } catch (error) {
-        setSellerProducts([]);
-      }
-    };
-
-    fetchSellerProducts();
-    const interval = setInterval(fetchSellerProducts, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -82,10 +49,7 @@ const Home = ({ searchQuery = '' }) => {
   }, []);
 
   useEffect(() => {
-    let products = [
-      ...inventory.filter((item) => item.quantity > 0),
-      ...sellerProducts.filter((item) => item.quantity > 0)
-    ];
+    let products = [...inventory.filter((item) => item.quantity > 0)];
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -133,9 +97,9 @@ const Home = ({ searchQuery = '' }) => {
     }
 
     setFilteredProducts(products);
-  }, [inventory, searchQuery, selectedCategory, selectedPriceRange, sellerProducts, sortBy]);
+  }, [inventory, searchQuery, selectedCategory, selectedPriceRange, sortBy]);
 
-  const allProducts = [...inventory, ...sellerProducts];
+  const allProducts = [...inventory];
   const categories = ['all', ...new Set(allProducts.map((item) => item.category).filter(Boolean))];
   const selectedCategoryLabel = categories.find((category) => category === selectedCategory);
   const selectedPriceOption = priceRanges.find((range) => range.value === selectedPriceRange) || priceRanges[0];
@@ -157,35 +121,11 @@ const Home = ({ searchQuery = '' }) => {
     return emojiMap[category] || emojiMap.default;
   };
 
-  const getItemImageUrl = (item) => {
-    if (item.isSellerProduct) {
-      if (item.images?.length) {
-        const firstImage = item.images[0];
-        const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url;
-        if (imageUrl && imageUrl.length > 10) {
-          return imageUrl;
-        }
-      }
+  const getItemImageUrl = (item) => getProductPrimaryImage(item);
 
-      return null;
-    }
-
-    const isBlank = (url) => !url || url === 'https://via.placeholder.com/150' || url.trim() === '';
-
-    if (item.image && !isBlank(item.image)) {
-      return item.image;
-    }
-
-    if (item.images?.length) {
-      const firstImage = item.images[0];
-      const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url;
-      if (imageUrl && !isBlank(imageUrl)) {
-        return imageUrl;
-      }
-    }
-
-    return null;
-  };
+  const compactGridClass = searchQuery && viewMode === 'grid' && filteredProducts.length > 0 && filteredProducts.length <= 3
+    ? 'home-storefront__grid--compact'
+    : '';
 
   const handleImageError = useCallback((itemId) => {
     setImageErrors((current) => new Set([...current, itemId]));
@@ -196,7 +136,11 @@ const Home = ({ searchQuery = '' }) => {
     event.stopPropagation();
 
     try {
-      await addToCart(item);
+      const result = await addToCart(item);
+      if (!result) {
+        return;
+      }
+
       const itemId = item._id || item.id;
       setAddedItems((current) => new Set([...current, itemId]));
 
@@ -394,7 +338,7 @@ const Home = ({ searchQuery = '' }) => {
           <p>Try adjusting the category, price range, or search term.</p>
         </div>
       ) : (
-        <div className={`home-storefront__grid home-storefront__grid--${viewMode}`}>
+        <div className={`home-storefront__grid home-storefront__grid--${viewMode} ${compactGridClass}`.trim()}>
           {filteredProducts.map((item, index) => {
             const itemId = item._id || item.id;
             const imageUrl = getItemImageUrl(item);

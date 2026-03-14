@@ -36,7 +36,7 @@ export const getDashboardStats = async (req, res) => {
 // Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const { status, role, search, page = 1, limit = 10 } = req.query;
+    const { status, role, search, page = 1, limit = 10, all } = req.query;
     const query = {};
 
     if (status) query.status = status;
@@ -49,18 +49,28 @@ export const getAllUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query)
+    const shouldReturnAll = all === 'true' || all === true;
+    const parsedLimit = Number(limit);
+    const parsedPage = Number(page);
+
+    let usersQuery = User.find(query)
       .select('-password -otp')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .sort({ createdAt: -1 });
+
+    if (!shouldReturnAll) {
+      usersQuery = usersQuery
+        .limit(parsedLimit * 1)
+        .skip((parsedPage - 1) * parsedLimit);
+    }
+
+    const users = await usersQuery;
 
     const count = await User.countDocuments(query);
 
     res.json({
       users,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      totalPages: shouldReturnAll ? 1 : Math.ceil(count / parsedLimit),
+      currentPage: shouldReturnAll ? 1 : parsedPage,
       totalUsers: count
     });
   } catch (error) {
@@ -164,12 +174,14 @@ export const deleteUser = async (req, res) => {
 export const getActivityLogs = async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
+    const parsedLimit = Number(limit);
+    const parsedPage = Number(page);
 
     // Get recent user logins
     const recentLogins = await User.find({ lastLogin: { $exists: true } })
       .sort({ lastLogin: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
+      .limit(parsedLimit * 1)
+      .skip((parsedPage - 1) * parsedLimit)
       .select('name email mobile lastLogin');
 
     // Get recent registrations
@@ -178,9 +190,61 @@ export const getActivityLogs = async (req, res) => {
       .limit(10)
       .select('name email mobile createdAt status');
 
+    const recentOrders = await Order.find()
+      .populate('user', 'name email mobile')
+      .sort({ createdAt: -1 })
+      .limit(15)
+      .select('orderId user totalAmount status createdAt updatedAt');
+
+    const recentlyUpdatedInventory = await Inventory.find({ updatedAt: { $exists: true } })
+      .sort({ updatedAt: -1 })
+      .limit(15)
+      .select('name category quantity unit updatedAt');
+
+    const activityTimeline = [
+      ...recentLogins.map((item) => ({
+        type: 'LOGIN',
+        label: 'User Login',
+        actorName: item.name,
+        actorContact: item.email || item.mobile || 'N/A',
+        details: `${item.name} logged in`,
+        timestamp: item.lastLogin
+      })),
+      ...recentRegistrations.map((item) => ({
+        type: 'REGISTER',
+        label: 'New Registration',
+        actorName: item.name,
+        actorContact: item.email || item.mobile || 'N/A',
+        details: `${item.name} registered (${item.status})`,
+        timestamp: item.createdAt
+      })),
+      ...recentOrders.map((item) => ({
+        type: item.status === 'delivered' ? 'ORDER_COMPLETED' : 'ORDER',
+        label: item.status === 'delivered' ? 'Order Completed' : 'Order Activity',
+        actorName: item.user?.name || 'Guest',
+        actorContact: item.user?.email || item.user?.mobile || 'N/A',
+        details: `Order #${(item.orderId || item._id.toString()).slice(-8)} - ${item.status} - ₹${Number(item.totalAmount || 0).toFixed(2)}`,
+        timestamp: item.updatedAt || item.createdAt
+      })),
+      ...recentlyUpdatedInventory.map((item) => ({
+        type: 'INVENTORY',
+        label: 'Inventory Updated',
+        actorName: item.name,
+        actorContact: item.category,
+        details: `${item.name}: ${item.quantity} ${item.unit} in stock`,
+        timestamp: item.updatedAt
+      }))
+    ]
+      .filter((item) => item.timestamp)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 40);
+
     res.json({
       recentLogins,
-      recentRegistrations
+      recentRegistrations,
+      recentOrders,
+      recentlyUpdatedInventory,
+      activityTimeline
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -277,22 +341,32 @@ export const getSystemOverview = async (req, res) => {
 // Get all orders
 export const getAllOrders = async (req, res) => {
   try {
-    const { status, page = 1, limit = 50 } = req.query;
+    const { status, page = 1, limit = 50, all } = req.query;
     const query = {};
     if (status) query.status = status;
 
-    const orders = await Order.find(query)
+    const shouldReturnAll = all === 'true' || all === true;
+    const parsedLimit = Number(limit);
+    const parsedPage = Number(page);
+
+    let ordersQuery = Order.find(query)
       .populate('user', 'name email mobile')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .sort({ createdAt: -1 });
+
+    if (!shouldReturnAll) {
+      ordersQuery = ordersQuery
+        .limit(parsedLimit * 1)
+        .skip((parsedPage - 1) * parsedLimit);
+    }
+
+    const orders = await ordersQuery;
 
     const count = await Order.countDocuments(query);
 
     res.json({
       orders,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      totalPages: shouldReturnAll ? 1 : Math.ceil(count / parsedLimit),
+      currentPage: shouldReturnAll ? 1 : parsedPage,
       totalOrders: count
     });
   } catch (error) {
@@ -325,7 +399,7 @@ export const updateOrderStatus = async (req, res) => {
 // Get inventory data
 export const getInventoryData = async (req, res) => {
   try {
-    const { category, search, page = 1, limit = 100 } = req.query;
+    const { category, search, page = 1, limit = 100, all } = req.query;
     const query = {};
 
     if (category) query.category = category;
@@ -333,17 +407,26 @@ export const getInventoryData = async (req, res) => {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    const inventory = await Inventory.find(query)
-      .sort({ name: 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+    const shouldReturnAll = all === 'true' || all === true;
+    const parsedLimit = Number(limit);
+    const parsedPage = Number(page);
+
+    let inventoryQuery = Inventory.find(query).sort({ name: 1 });
+
+    if (!shouldReturnAll) {
+      inventoryQuery = inventoryQuery
+        .limit(parsedLimit * 1)
+        .skip((parsedPage - 1) * parsedLimit);
+    }
+
+    const inventory = await inventoryQuery;
 
     const count = await Inventory.countDocuments(query);
 
     res.json({
       inventory,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      totalPages: shouldReturnAll ? 1 : Math.ceil(count / parsedLimit),
+      currentPage: shouldReturnAll ? 1 : parsedPage,
       totalItems: count
     });
   } catch (error) {
@@ -412,6 +495,30 @@ export const getReports = async (req, res) => {
     const processingOrders = await Order.countDocuments({ status: 'processing' });
     const completedOrders = await Order.countDocuments({ status: 'delivered' });
 
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weeklyOrderStats = await Order.aggregate([
+      { $match: { createdAt: { $gte: weekStart } } },
+      {
+        $group: {
+          _id: null,
+          weeklyRevenue: { $sum: '$totalAmount' },
+          weeklyOrders: { $sum: 1 },
+          weeklyCompletedOrders: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0]
+            }
+          }
+        }
+      }
+    ]);
+
+    const weeklyNewUsers = await User.countDocuments({
+      createdAt: { $gte: weekStart }
+    });
+
     // Top selling products
     const topProducts = await Order.aggregate([
       { $unwind: '$items' },
@@ -441,7 +548,16 @@ export const getReports = async (req, res) => {
       pendingOrders,
       processingOrders,
       completedOrders,
-      topProducts
+      topProducts,
+      weeklyReport: {
+        from: weekStart,
+        to: new Date(),
+        weeklyRevenue: weeklyOrderStats[0]?.weeklyRevenue || 0,
+        weeklyOrders: weeklyOrderStats[0]?.weeklyOrders || 0,
+        weeklyCompletedOrders: weeklyOrderStats[0]?.weeklyCompletedOrders || 0,
+        weeklyNewUsers
+      },
+      generatedAt: new Date()
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

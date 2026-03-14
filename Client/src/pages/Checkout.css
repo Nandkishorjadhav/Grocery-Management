@@ -595,7 +595,7 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff9800 0%, #ffa726 100%);
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
   color: white;
   font-size: 3rem;
   display: flex;
@@ -603,13 +603,13 @@
   justify-content: center;
   margin: 0 auto;
   animation: scaleIn 0.5s ease;
-  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
 }
 
 /* Maintenance Message */
 .maintenance-message {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-left: 4px solid #ff9800;
+  background: linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%);
+  border-left: 4px solid #16a34a;
   padding: 1.5rem;
   border-radius: 8px;
   margin: 2rem 0;
@@ -619,7 +619,7 @@
 .maintenance-message p {
   margin: 0.75rem 0;
   font-size: 1rem;
-  color: #555;
+  color: #14532d;
   line-height: 1.6;
 }
 
@@ -632,12 +632,12 @@
 }
 
 [data-theme="dark"] .maintenance-message {
-  background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
-  border-left-color: #ffa726;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+  border-left-color: #22c55e;
 }
 
 [data-theme="dark"] .maintenance-message p {
-  color: #b0b0b0;
+  color: #bbf7d0;
 }
 
 @keyframes scaleIn {

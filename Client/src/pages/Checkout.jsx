@@ -15,6 +15,7 @@ const Checkout = () => {
   const [step, setStep] = useState(1); // 1: Address, 2: Review, 3: Confirmation
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [placedOrderSummary, setPlacedOrderSummary] = useState(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
 
   const [deliveryAddress, setDeliveryAddress] = useState({
@@ -34,7 +35,7 @@ const Checkout = () => {
 
   useEffect(() => {
     // Redirect if cart is empty
-    if (!cart || cart.length === 0) {
+    if ((!cart || cart.length === 0) && step !== 3) {
       navigate('/cart');
     }
     fetchCart();
@@ -52,7 +53,7 @@ const Checkout = () => {
     } else {
       setIsEditingAddress(true);
     }
-  }, []);
+  }, [cart, step, navigate]);
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -139,13 +140,45 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
-    setTimeout(() => {
-      const newOrderId = 'ORD' + Date.now();
-      setOrderId(newOrderId);
+
+    try {
+      const generatedOrderId = `ORD${Date.now()}`;
+      const payload = {
+        orderId: generatedOrderId,
+        items: cart.map((item) => ({
+          productId: item.productId || item._id || item.id,
+          name: item.name,
+          category: item.category,
+          price: Number(item.price || 0),
+          quantity: Number(item.quantity || 1),
+          unit: item.unit,
+          totalPrice: Number(item.totalPrice || (item.price * item.quantity) || 0)
+        })),
+        deliveryAddress,
+        paymentMethod: 'cod',
+        totalAmount,
+        deliveryCharges,
+        finalAmount
+      };
+
+      const response = await orderService.createOrder(payload);
+      if (!response?.success) {
+        throw new Error(response?.message || 'Failed to place order');
+      }
+
+      setPlacedOrderSummary({ totalItems, finalAmount });
+      setOrderId(response.order?.orderId || generatedOrderId);
+
+      await clearCart();
+      await fetchCart();
+
       setStep(3);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      alert(error.message || 'Failed to place order. Please try again.');
+    } finally {
       setIsProcessing(false);
-    }, 1000);
+    }
   };
 
   const renderStepIndicator = () => (
@@ -539,14 +572,37 @@ const Checkout = () => {
       <Card>
         <div className="confirmation-content">
           <div className="success-animation">
-            <div className="maintenance-icon">🔧</div>
+            <div className="maintenance-icon">✅</div>
           </div>
-          <h1 className="confirmation-title">Under Maintenance</h1>
-          <p className="confirmation-subtitle">We're working on improving your experience</p>
+          <h1 className="confirmation-title">Order Placed Successfully</h1>
+          <p className="confirmation-subtitle">Your order has been confirmed and will be processed shortly.</p>
+
+          {orderId && (
+            <div className="confirmation-details">
+              <div className="detail-item">
+                <div>
+                  <div className="detail-title">Order ID</div>
+                  <div className="detail-value">{orderId}</div>
+                </div>
+              </div>
+              <div className="detail-item">
+                <div>
+                  <div className="detail-title">Items</div>
+                  <div className="detail-value">{placedOrderSummary?.totalItems ?? totalItems}</div>
+                </div>
+              </div>
+              <div className="detail-item">
+                <div>
+                  <div className="detail-title">Total Paid</div>
+                  <div className="detail-value">₹{(placedOrderSummary?.finalAmount ?? finalAmount).toFixed(2)}</div>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="maintenance-message">
-            <p>🛠️ Our order confirmation system is currently under maintenance.</p>
-            <p>✅ Your order has been received and will be processed shortly.</p>
+            <p>🎉 Thank you! Your order has been placed successfully.</p>
+            <p>📦 We are preparing your products for dispatch.</p>
             <p>📱 You will receive updates via SMS and email.</p>
           </div>
 
@@ -568,14 +624,14 @@ const Checkout = () => {
           </div>
 
           <div className="confirmation-note">
-            <p>Thank you for your patience. We'll be back soon!</p>
+            <p>Need help? Contact support with your Order ID.</p>
           </div>
         </div>
       </Card>
     </div>
   );
 
-  if (!cart || cart.length === 0) {
+  if ((!cart || cart.length === 0) && step !== 3) {
     return null; // Will redirect in useEffect
   }
 

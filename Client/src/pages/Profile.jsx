@@ -303,6 +303,10 @@ const Profile = () => {
                     <button className="profile-edit-btn" onClick={handleEditToggle}>
                       ✏️ Edit Profile
                     </button>
+                    <button className="profile-logout-btn-corner" onClick={handleLogout}>
+                      <span>🚪</span>
+                      <span>Logout</span>
+                    </button>
                   </div>
                 </div>
                 <div className="profile-user-details">
@@ -409,12 +413,6 @@ const Profile = () => {
                 </div>
               </form>
             )}
-          </div>
-          <div className="profile-header-actions">
-            <button className="profile-logout-btn-corner" onClick={handleLogout}>
-              <span>🚪</span>
-              <span>Logout</span>
-            </button>
           </div>
         </div>
 

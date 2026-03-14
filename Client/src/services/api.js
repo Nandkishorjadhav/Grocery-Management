@@ -1,8 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const RAW_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+const API_URL = RAW_API_URL.replace(/\/$/, '');
 
 class ApiService {
   async request(endpoint, options = {}) {
-    const url = `${API_URL}${endpoint}`;
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${API_URL}${normalizedEndpoint}`;
     
     // Get token from localStorage
     const token = localStorage.getItem('token');

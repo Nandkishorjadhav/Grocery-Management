@@ -23,7 +23,6 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [usersPage, setUsersPage] = useState(1);
   const [usersTotalPages, setUsersTotalPages] = useState(1);
   const [usersTotalCount, setUsersTotalCount] = useState(0);
@@ -87,8 +86,7 @@ const AdminPanel = () => {
         const data = await adminService.getAllUsers({ 
           status: filterStatus, 
           search: searchQuery,
-          page: usersPage,
-          limit: USERS_PER_PAGE
+          all: true
         });
         setUsers(data.users);
         setUsersTotalPages(data.totalPages || 1);
@@ -111,10 +109,10 @@ const AdminPanel = () => {
         const data = await adminService.getActivityLogs();
         setActivityLogs(data);
       } else if (activeTab === 'orders') {
-        const data = await adminService.getAllOrders();
+        const data = await adminService.getAllOrders({ status: 'delivered', all: true, limit: 1000 });
         setOrders(data.orders || []);
       } else if (activeTab === 'inventory') {
-        const data = await adminService.getInventoryData();
+        const data = await adminService.getInventoryData({ all: true });
         setInventory(data.inventory || []);
       } else if (activeTab === 'reports') {
         const data = await adminService.getReports();
@@ -318,9 +316,9 @@ const AdminPanel = () => {
             {sellerProducts.length > 0 && (
               <Card 
                 className="stat-card attention-card" 
+                hover
                 onClick={() => setActiveTab('approvals')} 
-                style={{cursor: 'pointer'}}
-                title="Click to view pending products"
+                style={{ cursor: 'pointer' }}
               >
                 <div className="stat-icon-wrapper">
                   <span className="stat-icon">🛍️</span>
@@ -328,7 +326,7 @@ const AdminPanel = () => {
                 <div className="stat-content">
                   <p className="stat-label">Pending Products</p>
                   <h3 className="stat-number warning">{sellerProducts.length}</h3>
-                  <p className="stat-action-text">Click to approve →</p>
+                  <p className="stat-action-text">Review Now →</p>
                 </div>
               </Card>
             )}
@@ -690,6 +688,15 @@ const AdminPanel = () => {
       {loading ? (
         <>
           <div className="activity-section">
+            <h3>Recent Activity Timeline</h3>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead><tr><th>Type</th><th>Actor</th><th>Details</th><th>Time</th></tr></thead>
+                <tbody><SkRows rows={6} cells={[120, 180, 260, 180]} /></tbody>
+              </table>
+            </div>
+          </div>
+          <div className="activity-section">
             <h3>Recent Logins</h3>
             <div className="table-container">
               <table className="admin-table">
@@ -711,6 +718,41 @@ const AdminPanel = () => {
       ) : activityLogs ? (
         <>
           <div className="activity-section">
+            <h3>Recent Activity Timeline</h3>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Actor</th>
+                    <th>Details</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(activityLogs.activityTimeline || []).map((activity, index) => (
+                    <tr key={`${activity.type}-${index}-${activity.timestamp}`}>
+                      <td>
+                        <span className={`status-badge status-${activity.type?.toLowerCase()}`}>
+                          {activity.label}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="customer-cell">
+                          <span className="customer-name">{activity.actorName}</span>
+                          <span className="customer-contact">{activity.actorContact}</span>
+                        </div>
+                      </td>
+                      <td>{activity.details}</td>
+                      <td>{new Date(activity.timestamp).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="activity-section">
             <h3>Recent Logins</h3>
             <div className="table-container">
               <table className="admin-table">
@@ -722,7 +764,7 @@ const AdminPanel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {activityLogs.recentLogins.map(user => (
+                  {(activityLogs.recentLogins || []).map(user => (
                     <tr key={user._id}>
                       <td>{user.name}</td>
                       <td>{user.email || user.mobile}</td>
@@ -747,7 +789,7 @@ const AdminPanel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {activityLogs.recentRegistrations.map(user => (
+                  {(activityLogs.recentRegistrations || []).map(user => (
                     <tr key={user._id}>
                       <td>{user.name}</td>
                       <td>{user.email || user.mobile}</td>
@@ -772,8 +814,8 @@ const AdminPanel = () => {
     <div className="admin-orders">
       <div className="section-header">
         <div>
-          <h2 className="section-title">🛍️ All Orders</h2>
-          <p className="section-subtitle">Track and manage customer orders</p>
+          <h2 className="section-title">✅ Completed Orders</h2>
+          <p className="section-subtitle">All delivered orders in the website</p>
         </div>
         <button 
           className="refresh-btn"
@@ -796,8 +838,8 @@ const AdminPanel = () => {
       ) : orders.length === 0 ? (
         <div className="no-data-card">
           <span className="no-data-icon">📫</span>
-          <h3>No Orders Yet</h3>
-          <p>Orders will appear here once customers start placing them</p>
+          <h3>No Completed Orders Yet</h3>
+          <p>Delivered orders will appear here</p>
         </div>
       ) : (
         <div className="table-container">
@@ -885,7 +927,7 @@ const AdminPanel = () => {
 
   const renderInventory = () => (
     <div className="admin-inventory">
-      <h2>Inventory Management</h2>
+      <h2>All Inventory</h2>
       {loading ? (
         <div className="table-container">
           <table className="admin-table">
@@ -950,6 +992,9 @@ const AdminPanel = () => {
   const renderReports = () => (
     <div className="admin-reports">
       <h2>Analytics & Reports</h2>
+      {reports?.generatedAt && (
+        <p className="section-subtitle">Last updated: {new Date(reports.generatedAt).toLocaleString()}</p>
+      )}
       {loading ? (
         <div className="reports-grid">
           {[0, 1, 2, 3].map(i => (
@@ -1038,6 +1083,36 @@ const AdminPanel = () => {
                 </div>
               </div>
             </Card>
+
+            <Card className="report-card">
+              <h3>🗓️ Weekly Report</h3>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">From</span>
+                  <span className="stat-value-small">{reports.weeklyReport?.from ? new Date(reports.weeklyReport.from).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">To</span>
+                  <span className="stat-value-small">{reports.weeklyReport?.to ? new Date(reports.weeklyReport.to).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Weekly Revenue</span>
+                  <span className="stat-value">₹{reports.weeklyReport?.weeklyRevenue?.toFixed(2) || '0.00'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Weekly Orders</span>
+                  <span className="stat-value">{reports.weeklyReport?.weeklyOrders || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Completed Orders</span>
+                  <span className="stat-value success">{reports.weeklyReport?.weeklyCompletedOrders || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">New Users</span>
+                  <span className="stat-value">{reports.weeklyReport?.weeklyNewUsers || 0}</span>
+                </div>
+              </div>
+            </Card>
           </div>
 
           {reports.topProducts && reports.topProducts.length > 0 && (
@@ -1074,59 +1149,14 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel-wrapper">
-      {/* Admin Navbar */}
-      <nav className="admin-navbar">
-        <div className="admin-navbar-content">
-          <div className="admin-brand">
-            <button 
-              className="menu-toggle-btn" 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle Menu"
-              type="button"
-            >
-              <span className="hamburger-icon">{sidebarOpen ? '❮' : '☰'}</span>
-            </button>
-            <span className="admin-brand-icon">⚙️</span>
-            <div className="admin-brand-text">
-              <h1 className="admin-brand-title">Admin Dashboard</h1>
-              <p className="admin-brand-subtitle">GroceryHub Management</p>
-            </div>
-          </div>
-          
-          <div className="admin-navbar-actions">
-            <div className="admin-user-info">
-              <span className="admin-user-avatar">👤</span>
-              <div className="admin-user-details">
-                <span className="admin-user-name">{user?.name}</span>
-                <span className="admin-user-role">Administrator</span>
-              </div>
-            </div>
-            <button 
-              className="admin-exit-btn" 
-              onClick={() => navigate('/dashboard')}
-              title="Exit Admin Panel"
-              type="button"
-            >
-              <span className="exit-icon">🚪</span>
-              <span className="exit-text">Exit Admin Panel</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
       {/* Admin Content Layout */}
       <div className="admin-layout">
-        {/* Overlay — only active/visible on mobile via CSS */}
-        {sidebarOpen && (
-          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-        )}
-
         {/* Sidebar */}
-        <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <aside className="admin-sidebar open">
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('dashboard')}
             data-label="Dashboard"
           >
             <span className="sidebar-icon">📊</span>
@@ -1135,7 +1165,7 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('users'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('users')}
             data-label="Users"
           >
             <span className="sidebar-icon">👥</span>
@@ -1144,7 +1174,7 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('orders'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('orders')}
             data-label="Orders"
           >
             <span className="sidebar-icon">🛒</span>
@@ -1153,7 +1183,7 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'inventory' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('inventory'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('inventory')}
             data-label="Inventory"
           >
             <span className="sidebar-icon">📦</span>
@@ -1162,7 +1192,7 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'approvals' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('approvals'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('approvals')}
             data-label="Approvals"
           >
             <span className="sidebar-icon">✓</span>
@@ -1174,7 +1204,7 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('reports'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('reports')}
             data-label="Reports"
           >
             <span className="sidebar-icon">📈</span>
@@ -1183,12 +1213,24 @@ const AdminPanel = () => {
           <button
             type="button"
             className={`sidebar-button ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('activity'); setSidebarOpen(false); }}
+            onClick={() => setActiveTab('activity')}
             data-label="Activity"
           >
             <span className="sidebar-icon">📝</span>
             <span className="sidebar-text">Activity</span>
           </button>
+
+          <div className="sidebar-bottom-actions">
+            <button
+              type="button"
+              className="sidebar-exit-btn"
+              onClick={() => navigate('/dashboard')}
+              title="Exit Admin Panel"
+            >
+              <span className="sidebar-icon">🚪</span>
+              <span className="sidebar-text">Exit Admin Panel</span>
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}

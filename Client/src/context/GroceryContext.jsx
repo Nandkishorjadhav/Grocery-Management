@@ -90,7 +90,21 @@ export const GroceryProvider = ({ children }) => {
       }
       
       const combinedInventory = [...inventoryResponse, ...approvedSellerProducts];
-      setInventory(combinedInventory);
+      const seen = new Set();
+      const dedupedInventory = combinedInventory.filter((item) => {
+        const idKey = item._id || item.id;
+        const nameKey = `${String(item.name || '').trim().toLowerCase()}|${String(item.category || '').trim().toLowerCase()}|${Number(item.price || 0)}|${String(item.unit || '').trim().toLowerCase()}|${String(item.seller || item.sellerName || '').trim().toLowerCase()}`;
+        const uniqueKey = idKey ? `id:${idKey}` : `meta:${nameKey}`;
+
+        if (seen.has(uniqueKey)) {
+          return false;
+        }
+
+        seen.add(uniqueKey);
+        return true;
+      });
+
+      setInventory(dedupedInventory);
       setError(null);
     } catch (error) {
       setError(error.message);

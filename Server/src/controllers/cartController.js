@@ -1,5 +1,6 @@
 import Cart from '../models/Cart.js';
 import Inventory from '../models/Inventory.js';
+import SellerProduct from '../models/SellerProduct.js';
 
 // Get all cart items
 export const getCartItems = async (req, res) => {
@@ -51,12 +52,16 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Check if product exists in inventory
-    const product = await Inventory.findById(productId);
-    if (!product) {
+    // Check if product exists either in inventory or approved seller marketplace
+    const inventoryProduct = await Inventory.findById(productId);
+    const sellerProduct = inventoryProduct
+      ? null
+      : await SellerProduct.findOne({ _id: productId, status: 'approved' });
+
+    if (!inventoryProduct && !sellerProduct) {
       return res.status(404).json({ 
         success: false, 
-        error: 'Product not found in inventory' 
+        error: 'Product not found' 
       });
     }
 
