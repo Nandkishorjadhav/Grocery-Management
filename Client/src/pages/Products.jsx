@@ -55,24 +55,24 @@ const Products = () => {
     <div className="products-page">
       {/* Header Section */}
       <div className="products-header">
-        <div className="header-content">
-          <div className="header-text">
-            <h1 className="page-title">Our Products</h1>
-            <p className="page-subtitle">Browse our wide selection of quality grocery items</p>
+        <div className="products-header-content">
+          <div className="products-header-text">
+            <h1 className="products-page-title">Our Products</h1>
+            <p className="products-page-subtitle">Browse our wide selection of quality grocery items</p>
           </div>
-          <div className="header-stats">
-            <div className="stat-card">
-              <span className="stat-emoji">📦</span>
+          <div className="products-header-stats">
+            <div className="products-stat-card">
+              <span className="products-stat-emoji">📦</span>
               <div>
-                <div className="stat-value">{inventory.length}</div>
-                <div className="stat-label">Total Products</div>
+                <div className="products-stat-value">{inventory.length}</div>
+                <div className="products-stat-label">Total Products</div>
               </div>
             </div>
-            <div className="stat-card">
-              <span className="stat-emoji">📂</span>
+            <div className="products-stat-card">
+              <span className="products-stat-emoji">📂</span>
               <div>
-                <div className="stat-value">{categories.length - 1}</div>
-                <div className="stat-label">Categories</div>
+                <div className="products-stat-value">{categories.length - 1}</div>
+                <div className="products-stat-label">Categories</div>
               </div>
             </div>
           </div>
@@ -81,39 +81,39 @@ const Products = () => {
 
       {/* Filters Section */}
       <div className="products-filters">
-        <div className="search-box">
-          <span className="search-icon">🔍</span>
+        <div className="products-search-box">
+          <span className="products-search-icon">🔍</span>
           <input
             type="text"
             placeholder="Search products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
+            className="products-search-input"
           />
         </div>
 
-        <div className="filter-group">
-          <label className="filter-label">Category:</label>
-          <div className="category-buttons">
+        <div className="products-filter-group">
+          <label className="products-filter-label">Category:</label>
+          <div className="products-category-buttons">
             {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+                className={`products-category-btn ${selectedCategory === category ? 'active' : ''}`}
               >
-                <span className="category-emoji">{getCategoryEmoji(category)}</span>
+                <span className="products-category-emoji">{getCategoryEmoji(category)}</span>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="sort-group">
-          <label className="filter-label">Sort by:</label>
+        <div className="products-sort-group">
+          <label className="products-filter-label">Sort by:</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="sort-select"
+            className="products-sort-select"
           >
             <option value="name">Name (A-Z)</option>
             <option value="price-low">Price (Low to High)</option>
@@ -125,27 +125,27 @@ const Products = () => {
 
       {/* Results Count */}
       {searchQuery && (
-        <div className="results-info">
+        <div className="products-results-info">
           Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} matching "{searchQuery}"
         </div>
       )}
 
       {/* Products Grid */}
       {filteredProducts.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-emoji">
+        <div className="products-empty-state">
+          <span className="products-empty-emoji">
             {inventory.length === 0 ? '📦' : '🔍'}
           </span>
-          <h3 className="empty-title">
+          <h3 className="products-empty-title">
             {inventory.length === 0 ? 'No Products Available' : 'No Products Found'}
           </h3>
-          <p className="empty-text">
+          <p className="products-empty-text">
             {inventory.length === 0 
               ? 'Start adding products to your inventory from the dashboard.'
               : 'Try adjusting your search or filter criteria.'}
           </p>
           {inventory.length === 0 && (
-            <Link to="/dashboard" className="btn-primary">
+            <Link to="/dashboard" className="products-btn-primary">
               <span>➕</span> Add Products
             </Link>
           )}
@@ -153,45 +153,45 @@ const Products = () => {
       ) : (
         <div className="products-grid">
           {filteredProducts.map((item) => (
-            <div key={item.id} className="product-card">
-              <div className="product-image">
+            <div key={item._id || item.id} className="products-card">
+              <div className="products-card-media">
                 <img 
                   src={item.image || 'https://via.placeholder.com/300x200?text=No+Image'} 
                   alt={item.name}
-                  className="product-img"
+                  className="products-card-image"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
                   }}
                 />
                 {item.quantity <= item.minStock && (
-                  <span className="badge-low-stock">Low Stock</span>
+                  <span className="products-badge-low-stock">Low Stock</span>
                 )}
               </div>
               
-              <div className="product-content">
-                <div className="product-category">{item.category}</div>
-                <h3 className="product-name">{item.name}</h3>
+              <div className="products-card-content">
+                <div className="products-card-category">{item.category}</div>
+                <h3 className="products-card-name">{item.name}</h3>
                 
-                <div className="product-details">
-                  <div className="detail-row">
-                    <span className="detail-label">💰 Price:</span>
-                    <span className="detail-value price">${item.price.toFixed(2)}</span>
+                <div className="products-card-details">
+                  <div className="products-detail-row">
+                    <span className="products-detail-label">💰 Price:</span>
+                    <span className="products-detail-value products-detail-price">₹{item.price.toFixed(2)}</span>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">📦 Stock:</span>
-                    <span className={`detail-value ${item.quantity <= item.minStock ? 'low-stock' : ''}`}>
+                  <div className="products-detail-row">
+                    <span className="products-detail-label">📦 Stock:</span>
+                    <span className={`products-detail-value ${item.quantity <= item.minStock ? 'products-detail-low-stock' : ''}`}>
                       {item.quantity} {item.unit}
                     </span>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">📊 Min Stock:</span>
-                    <span className="detail-value">{item.minStock} {item.unit}</span>
+                  <div className="products-detail-row">
+                    <span className="products-detail-label">📊 Min Stock:</span>
+                    <span className="products-detail-value">{item.minStock} {item.unit}</span>
                   </div>
                   {item.expiryDate && (
-                    <div className="detail-row">
-                      <span className="detail-label">📅 Expiry:</span>
-                      <span className="detail-value expiry">
+                    <div className="products-detail-row">
+                      <span className="products-detail-label">📅 Expiry:</span>
+                      <span className="products-detail-value products-detail-expiry">
                         {new Date(item.expiryDate).toLocaleDateString()}
                       </span>
                     </div>
@@ -199,8 +199,8 @@ const Products = () => {
                 </div>
               </div>
 
-              <div className="product-footer">
-                <Link to={`/#product-${item.id}`} className="btn-view-details">
+              <div className="products-card-footer">
+                <Link to={`/product/${item._id || item.id}`} className="products-btn-view-details">
                   View Details
                 </Link>
               </div>

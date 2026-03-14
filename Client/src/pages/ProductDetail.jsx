@@ -103,8 +103,15 @@ const ProductDetail = () => {
 
   const getProductImages = (category, name, productImages) => {
     if (productImages && productImages.length > 0) {
-      return productImages.map(img => img.url);
+      const urls = productImages
+        .map((img) => (typeof img === 'string' ? img : img?.url))
+        .filter(Boolean);
+
+      if (urls.length) {
+        return urls;
+      }
     }
+
     return [getProductImage(category, name)];
   };
 
@@ -112,6 +119,13 @@ const ProductDetail = () => {
   const discount = Math.round(((originalPrice - product.price) / originalPrice) * 100);
   const isLowStock = product.quantity <= (product.minStock || 5);
   const productImages = getProductImages(product.category, product.name, product.images);
+  const detailBullets = product.description
+    ? product.description
+        .split(/[,.]/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .slice(0, 4)
+    : [`Fresh ${product.category.toLowerCase()} product`, `Sold in ${product.unit}`, 'Quality checked before delivery'];
 
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
@@ -156,57 +170,78 @@ const ProductDetail = () => {
       <Breadcrumb />
       
       <div className="product-detail-container">
-        {/* Product Main Section */}
         <div className="product-detail-grid">
-          {/* Left - Product Image */}
           <div className="product-image-section">
-            <div className="product-main-image">
-              <img 
-                src={productImages[selectedImage]} 
-                alt={product.name}
-                className="product-large-image"
-              />
-              {discount > 0 && (
-                <div className="product-discount-badge">{discount}% OFF</div>
-              )}
-              {isLowStock && (
-                <div className="product-stock-badge">Only {product.quantity} left!</div>
-              )}
+            <div className="product-gallery-shell">
+              <div className="product-thumbnails" role="tablist" aria-label="Product image gallery">
+                {productImages.map((imgUrl, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+                    onClick={() => setSelectedImage(index)}
+                    aria-selected={selectedImage === index}
+                    aria-label={`Show image ${index + 1}`}
+                  >
+                    <img src={imgUrl} alt={`${product.name} ${index + 1}`} />
+                  </button>
+                ))}
+              </div>
+
+              <div className="product-main-image">
+                <img
+                  src={productImages[selectedImage]}
+                  alt={product.name}
+                  className="product-large-image"
+                />
+                {discount > 0 && (
+                  <div className="product-discount-badge">{discount}% OFF</div>
+                )}
+                {isLowStock && (
+                  <div className="product-stock-badge">Only {product.quantity} left!</div>
+                )}
+              </div>
             </div>
-            
-            {/* Image Thumbnails */}
-            <div className="product-thumbnails">
-              {productImages.map((imgUrl, index) => (
-                <div 
-                  key={index}
-                  className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
-                  onClick={() => setSelectedImage(index)}
-                >
-                  <img src={imgUrl} alt={`${product.name} ${index + 1}`} />
-                </div>
-              ))}
+
+            <div className="product-gallery-cart-action">
+              <Button
+                variant={addToCartSuccess ? 'success' : 'primary'}
+                fullWidth
+                onClick={handleAddToCart}
+                icon={addToCartSuccess ? '✓' : (isAddingToCart ? '⏳' : '🛒')}
+                disabled={isAddingToCart}
+              >
+                {addToCartSuccess ? 'Added to Cart!' : (isAddingToCart ? 'Adding...' : 'Add to Cart')}
+              </Button>
             </div>
           </div>
 
-          {/* Right - Product Details */}
           <div className="product-info-section">
+            <div className="product-brand-row">{(product.sellerName || product.category || 'Grocery Store').toUpperCase()}</div>
+
+            <h1 className="product-detail-title">{product.name}</h1>
+
             <div className="product-breadcrumb-tags">
               <span className="product-tag">{product.category}</span>
-              <span className="product-tag fresh">✓ Fresh</span>
+              <span className="product-tag fresh">Fresh</span>
               {product.quantity > product.minStock * 2 && (
                 <span className="product-tag in-stock">In Stock</span>
               )}
             </div>
 
-            <h1 className="product-detail-title">{product.name}</h1>
-            
-
             <div className="product-pricing">
-              <div className="current-price">₹{product.price}</div>
-              <div className="original-price">₹{originalPrice}</div>
+              <div className="current-price">₹{Number(product.price).toFixed(2)}</div>
               <div className="discount-text">{discount}% off</div>
+              <div className="original-price">M.R.P: ₹{Number(originalPrice).toFixed(2)} (incl. of all taxes)</div>
             </div>
 
+            <div className="product-offers-card">
+              <h3>Offers</h3>
+              <ul>
+                <li>Bank Offer: Flat 5% instant discount on selected cards</li>
+                <li>Coupon: Save ₹75 on orders above ₹399</li>
+              </ul>
+            </div>
 
             <div className="product-quantity-section">
               <label>Quantity ({product.unit})</label>
@@ -236,18 +271,9 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-actions">
-              <Button 
-                variant={addToCartSuccess ? "success" : "primary"}
-                fullWidth 
-                onClick={handleAddToCart}
-                icon={addToCartSuccess ? "✓" : (isAddingToCart ? "⏳" : "🛒")}
-                disabled={isAddingToCart}
-              >
-                {addToCartSuccess ? "Added to Cart!" : (isAddingToCart ? "Adding..." : "Add to Cart")}
-              </Button>
-              <Button 
-                variant="success" 
-                fullWidth 
+              <Button
+                variant="success"
+                fullWidth
                 onClick={handleBuyNow}
                 icon="⚡"
               >
@@ -255,22 +281,49 @@ const ProductDetail = () => {
               </Button>
             </div>
 
+            <div className="product-detail-card">
+              <h3>Deliver to</h3>
+              <p className="product-detail-meta">431606 · Nanded</p>
+              <p className="product-detail-note">In Stock · Delivery between 24th Mar to 25th Mar</p>
+            </div>
+
+            <div className="product-detail-card">
+              <h3>Sold by</h3>
+              <p className="product-detail-meta">{product.sellerName || 'Fresh Grocery Seller'}</p>
+            </div>
+
+            <div className="product-detail-card">
+              <h3>Features & Details</h3>
+              <ul className="product-detail-list">
+                {detailBullets.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="product-detail-card">
+              <h3>Description</h3>
+              <p className="product-detail-note">
+                {product.description || 'Quality-checked grocery product packed fresh for your order.'}
+              </p>
+            </div>
+
             <div className="product-delivery-info">
-              <div className="delivery-item">
+              <div className="delivery-item compact">
                 <span className="delivery-icon">🚚</span>
                 <div>
                   <strong>Free Delivery</strong>
                   <p>Delivery in 30 minutes</p>
                 </div>
               </div>
-              <div className="delivery-item">
+              <div className="delivery-item compact">
                 <span className="delivery-icon">↩️</span>
                 <div>
                   <strong>Easy Returns</strong>
                   <p>7 days return policy</p>
                 </div>
               </div>
-              <div className="delivery-item">
+              <div className="delivery-item compact">
                 <span className="delivery-icon">✓</span>
                 <div>
                   <strong>Quality Assured</strong>
@@ -281,7 +334,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Product Description */}
         <div className="product-description-section">
           <h2>Product Details</h2>
           {product.description && <p>{product.description}</p>}
@@ -307,7 +359,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="related-products-section">
             <h2>Related Products</h2>
