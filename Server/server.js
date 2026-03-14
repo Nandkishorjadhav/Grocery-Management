@@ -47,22 +47,36 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Grocery Management API is running' });
 });
 
+// API docs route
+app.get('/api', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Grocery Management API',
+    health: '/api/health',
+    publicExamples: [
+      { method: 'POST', path: '/api/auth/initiate' },
+      { method: 'POST', path: '/api/auth/verify-otp' },
+      { method: 'GET', path: '/api/inventory' },
+      { method: 'GET', path: '/api/inventory/low-stock' },
+      { method: 'GET', path: '/api/inventory/expiring-soon' }
+    ],
+    protectedExamples: [
+      { method: 'GET', path: '/api/auth/profile', auth: 'Bearer token required' },
+      { method: 'GET', path: '/api/cart', auth: 'Bearer token required' },
+      { method: 'GET', path: '/api/orders', auth: 'Bearer token required' },
+      { method: 'GET', path: '/api/admin/dashboard', auth: 'Admin Bearer token required' }
+    ]
+  });
+});
+
 // Root status route
 app.get('/', (req, res) => {
   res.json({
     status: 'OK',
     message: 'Grocery Management backend is running',
     health: '/api/health',
-    routes: [
-      '/api/auth',
-      '/api/inventory',
-      '/api/shopping-list',
-      '/api/cart',
-      '/api/admin',
-      '/api/orders',
-      '/api/products',
-      '/api/seller-products'
-    ]
+    docs: '/api',
+    note: 'Use exact endpoint + HTTP method. Some routes require Bearer token.'
   });
 });
 
