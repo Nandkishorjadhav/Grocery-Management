@@ -1,5 +1,10 @@
-const RAW_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
-const API_URL = RAW_API_URL.replace(/\/$/, '');
+const RAW_API_URL =
+  import.meta.env.VITE_PROD_BASE_URL ||
+  (import.meta.env.DEV
+    ? "https://grocery-management-lg7u.onrender.com/api"
+    : "/api");
+
+const API_URL = RAW_API_URL.replace(/\/$/, "");
 
 class ApiService {
   async request(endpoint, options = {}) {
