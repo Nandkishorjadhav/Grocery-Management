@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './src/config/database.js';
@@ -44,7 +45,12 @@ app.use('/api/seller-products', sellerProductRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Grocery Management API is running' });
+  const dbConnected = mongoose.connection.readyState === 1;
+  res.json({
+    status: dbConnected ? 'OK' : 'DEGRADED',
+    message: 'Grocery Management API is running',
+    database: dbConnected ? 'connected' : 'disconnected'
+  });
 });
 
 // API docs route
