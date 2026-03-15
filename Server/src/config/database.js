@@ -18,7 +18,7 @@ const connectDB = async () => {
       socketTimeoutMS: 45000
     });
     
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Connected Successfully`);
   } catch (error) {
     const currentUri = process.env.MONGODB_URI ;
     console.error(`❌ MongoDB connection failed: ${error.message}`);
