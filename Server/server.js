@@ -13,6 +13,8 @@ import adminRoutes from './src/routes/adminRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import productRoutes from './src/routes/productRoutes.js';
 import sellerProductRoutes from './src/routes/sellerProductRoutes.js';
+import saveForLaterRoutes from './src/routes/saveForLaterRoutes.js';
+import couponRoutes from './src/routes/couponRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +40,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shopping-list', shoppingListRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/saved-for-later', saveForLaterRoutes);
+app.use('/api/coupons', couponRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);

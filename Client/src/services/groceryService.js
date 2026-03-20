@@ -1,197 +1,49 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://grocery-management-lg7u.onrender.com/api';
-
-const getToken = () => localStorage.getItem('token');
+import api from './api';
 
 const inventoryService = {
   // Get all items
-  getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/inventory`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get inventory');
-    return result;
-  },
+  getAll: () => api.get('/inventory'),
 
   // Get item by ID
-  getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get item');
-    return result;
-  },
+  getById: (id) => api.get(`/inventory/${id}`),
 
   // Create new item
-  create: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/inventory`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to create item');
-    return result;
-  },
+  create: (data) => api.post('/inventory', data),
 
   // Update item
-  update: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to update item');
-    return result;
-  },
+  update: (id, data) => api.put(`/inventory/${id}`, data),
 
   // Delete item
-  delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to delete item');
-    return result;
-  },
+  delete: (id) => api.delete(`/inventory/${id}`),
 
   // Get low stock items
-  getLowStock: async () => {
-    const response = await fetch(`${API_BASE_URL}/inventory/low-stock`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get low stock items');
-    return result;
-  },
+  getLowStock: () => api.get('/inventory/low-stock'),
 
   // Get expiring soon items
-  getExpiringSoon: async () => {
-    const response = await fetch(`${API_BASE_URL}/inventory/expiring-soon`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get expiring soon items');
-    return result;
-  },
+  getExpiringSoon: () => api.get('/inventory/expiring-soon'),
 };
 
 const shoppingListService = {
   // Get all items
-  getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get shopping list');
-    return result;
-  },
+  getAll: () => api.get('/shopping-list'),
 
   // Get item by ID
-  getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get item');
-    return result;
-  },
+  getById: (id) => api.get(`/shopping-list/${id}`),
 
   // Create new item
-  create: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to create item');
-    return result;
-  },
+  create: (data) => api.post('/shopping-list', data),
 
   // Update item
-  update: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to update item');
-    return result;
-  },
+  update: (id, data) => api.put(`/shopping-list/${id}`, data),
 
   // Delete item
-  delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to delete item');
-    return result;
-  },
+  delete: (id) => api.delete(`/shopping-list/${id}`),
 
   // Toggle purchased status
-  togglePurchased: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list/${id}/toggle`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to toggle purchased status');
-    return result;
-  },
+  togglePurchased: (id) => api.patch(`/shopping-list/${id}/toggle`),
 
   // Clear purchased items
-  clearPurchased: async () => {
-    const response = await fetch(`${API_BASE_URL}/shopping-list/purchased/clear`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to clear purchased items');
-    return result;
-  },
+  clearPurchased: () => api.delete('/shopping-list/purchased/clear'),
 };
 
 export default {

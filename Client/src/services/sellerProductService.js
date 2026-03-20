@@ -1,164 +1,76 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://grocery-management-lg7u.onrender.com/api';
-
-const getToken = () => localStorage.getItem('token');
-
-const buildQueryString = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return query ? `?${query}` : '';
-};
+import api from './api';
 
 const sellerProductService = {
   // Create a new seller product
   createProduct: async (productData) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(productData),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to create product');
-    return result;
+    const response = await api.post('/seller-products', productData);
+    return response;
   },
 
   // Get my seller products
   getMyProducts: async (params = {}) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/my/products${buildQueryString(params)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get my products');
-    return result;
+    const response = await api.get('/seller-products/my/products', { params });
+    return response;
   },
 
   // Get all approved products (marketplace)
   getMarketplaceProducts: async (params = {}) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/marketplace${buildQueryString(params)}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get marketplace products');
-    return result;
+    const response = await api.get('/seller-products/marketplace', { params });
+    return response;
   },
 
   // Get single product by ID
   getProductById: async (productId) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/${productId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get product');
-    return result;
+    const response = await api.get(`/seller-products/${productId}`);
+    return response;
   },
 
   // Update seller product
   updateProduct: async (productId, updates) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/${productId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(updates),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to update product');
-    return result;
+    const response = await api.put(`/seller-products/${productId}`, updates);
+    return response;
   },
 
   // Delete seller product
   deleteProduct: async (productId) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/${productId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to delete product');
-    return result;
+    const response = await api.delete(`/seller-products/${productId}`);
+    return response;
   },
 
   // Record inquiry
   recordInquiry: async (productId) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/${productId}/inquiry`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to record inquiry');
-    return result;
+    const response = await api.post(`/seller-products/${productId}/inquiry`);
+    return response;
   },
 
   // Admin: Get all seller products
   getAllProducts: async (params = {}) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/admin/all${buildQueryString(params)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get all products');
-    return result;
+    const response = await api.get('/seller-products/admin/all', { params });
+    return response;
   },
 
   // Admin: Approve product
   approveProduct: async (productId) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/admin/${productId}/approve`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to approve product');
-    return result;
+    const response = await api.put(`/seller-products/admin/${productId}/approve`);
+    return response;
   },
 
   // Admin: Reject product
   rejectProduct: async (productId, reason) => {
-    const response = await fetch(`${API_BASE_URL}/seller-products/admin/${productId}/reject`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify({ reason }),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to reject product');
-    return result;
+    const response = await api.put(`/seller-products/admin/${productId}/reject`, { reason });
+    return response;
   },
 
-  // Upload image
+  // Upload image (if you have a separate upload endpoint)
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('image', file);
-    const response = await fetch(`${API_BASE_URL}/seller-products/upload`, {
-      method: 'POST',
+    const response = await api.post('/seller-products/upload', formData, {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: formData,
+        'Content-Type': 'multipart/form-data'
+      }
     });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to upload image');
-    return result;
+    return response;
   }
 };
 

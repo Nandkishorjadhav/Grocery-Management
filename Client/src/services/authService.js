@@ -1,94 +1,40 @@
 import api from './api.js';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://grocery-management-lg7u.onrender.com/api';
-
 const authService = {
   // Initiate authentication (send OTP)
   initiateAuth: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/auth/initiate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to initiate auth');
-    return result;
+    const response = await api.post('/auth/initiate', data);
+    return response;
   },
 
   // Verify OTP
   verifyOTP: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to verify OTP');
-    return result;
+    const response = await api.post('/auth/verify-otp', data);
+    return response;
   },
 
   // Resend OTP
   resendOTP: async (userId) => {
-    const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId }),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to resend OTP');
-    return result;
+    const response = await api.post('/auth/resend-otp', { userId });
+    return response;
   },
 
   // Get user profile
   getProfile: async () => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get profile');
-    return result;
+    const response = await api.get('/auth/profile');
+    return response;
   },
 
   // Update user profile
   updateProfile: async (data) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to update profile');
-    return result;
+    const response = await api.put('/auth/profile', data);
+    return response;
   },
 
   // Logout
   logout: async () => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to logout');
-    return result;
+    const response = await api.post('/auth/logout');
+    return response;
   },
 
   // Set auth token

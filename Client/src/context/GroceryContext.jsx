@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import groceryService from '../services/groceryService.js';
 import cartService from '../services/cartService.js';
 import sellerProductService from '../services/sellerProductService.js';
+import saveForLaterService from '../services/saveForLaterService.js';
+import couponService from '../services/couponService.js';
 import { useAuth } from './AuthContext';
 
 const GroceryContext = createContext();
@@ -54,6 +56,9 @@ export const GroceryProvider = ({ children }) => {
   const [shoppingList, setShoppingList] = useState(initialData.shoppingList);
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
+  const [saveForLater, setSaveForLater] = useState([]);
+  const [coupons, setCoupons] = useState([]);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [categories, setCategories] = useState(['Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat', 'Snacks', 'Beverages', 'Grains', 'Others']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -336,7 +341,141 @@ export const GroceryProvider = ({ children }) => {
     }
   };
 
-  // Category functions
+  // Save for Later functions
+  const fetchSaveForLater = async () => {
+    if (!auth?.isAuthenticated || !auth.isAuthenticated()) {
+      setSaveForLater([]);
+      return;
+    }
+
+    try {
+      const response = await saveForLaterService.getSaveForLaterItems();
+      if (response && response.success) {
+        setSaveForLater(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching save for later:', error);
+      setSaveForLater([]);
+    }
+  };
+
+  const addToSaveForLater = async (product) => {
+    if (!auth.isAuthenticated()) {
+      auth.openAuthModal();
+      return null;
+    }
+
+    try {
+      const item = {
+        productId: product._id || product.id,
+        name: product.name,
+        category: product.category,
+        quantity: 1,
+        unit: product.unit,
+        price: product.price
+      };
+      
+      const response = await saveForLaterService.addToSaveForLater(item);
+      if (response && response.success) {
+        await fetchSaveForLater();
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding to save for later:', error);
+      throw error;
+    }
+  };
+
+  const removeFromSaveForLater = async (id) => {
+    try {
+      const response = await saveForLaterService.removeFromSaveForLater(id);
+      if (response && response.success) {
+        await fetchSaveForLater();
+      }
+    } catch (error) {
+      console.error('Error removing from save for later:', error);
+      throw error;
+    }
+  };
+
+  const moveFromSaveForLaterToCart = async (id, product) => {
+    try {
+      // Add to cart
+      await addToCart(product);
+      // Remove from save for later
+      await removeFromSaveForLater(id);
+    } catch (error) {
+      console.error('Error moving item to cart:', error);
+      throw error;
+    }
+  };
+
+  const clearSaveForLater = async () => {
+    try {
+      const response = await saveForLaterService.clearSaveForLater();
+      if (response && response.success) {
+        setSaveForLater([]);
+      }
+    } catch (error) {
+      console.error('Error clearing save for later:', error);
+      throw error;
+    }
+  };
+
+  // Coupon functions
+  const fetchActiveCoupons = async () => {
+    try {
+      const response = await couponService.getActiveCoupons();
+      if (response && response.success) {
+        setCoupons(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+      setCoupons([]);
+    }
+  };
+
+  const applyCoupon = async (code, totalAmount) => {
+    try {
+      const response = await couponService.validateCoupon(code, totalAmount);
+      if (response && response.success) {
+        setAppliedCoupon(response.data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error applying coupon:', error);
+      setAppliedCoupon(null);
+      throw error;
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+  };
+
+  const updateCartOrderNotes = async (id, orderNotes) => {
+    try {
+      const response = await cartService.updateOrderNotes(id, orderNotes);
+      if (response && response.success) {
+        await fetchCart();
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error updating order notes:', error);
+      throw error;
+    }
+  };
+
+  const toggleSaveForLater = async (product) => {
+    const isSaved = saveForLater.some(item => item.productId === (product._id || product.id));
+    
+    if (isSaved) {
+      const item = saveForLater.find(item => item.productId === (product._id || product.id));
+      await removeFromSaveForLater(item._id);
+    } else {
+      await addToSaveForLater(product);
+    }
+  };
   const addCategory = (category) => {
     if (!categories.includes(category)) {
       setCategories([...categories, category]);
@@ -365,6 +504,9 @@ export const GroceryProvider = ({ children }) => {
     shoppingList,
     cart,
     cartCount,
+    saveForLater,
+    coupons,
+    appliedCoupon,
     categories,
     loading,
     error,
@@ -381,6 +523,18 @@ export const GroceryProvider = ({ children }) => {
     decrementCartItem,
     clearCart,
     fetchCart,
+    updateCartOrderNotes,
+    // Save for Later methods
+    addToSaveForLater,
+    removeFromSaveForLater,
+    moveFromSaveForLaterToCart,
+    clearSaveForLater,
+    fetchSaveForLater,
+    toggleSaveForLater,
+    // Coupon methods
+    applyCoupon,
+    removeCoupon,
+    fetchActiveCoupons,
     // Shopping list methods
     addShoppingItem,
     updateShoppingItem,

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const cartSchema = new mongoose.Schema({
+const saveForLaterSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Inventory',
@@ -37,18 +37,13 @@ const cartSchema = new mongoose.Schema({
   addedAt: {
     type: Date,
     default: Date.now
-  },
-  orderNotes: {
-    type: String,
-    trim: true,
-    default: ''
   }
 });
 
 // Calculate total price before saving
-cartSchema.pre('save', function(next) {
+saveForLaterSchema.pre('save', function(next) {
   this.totalPrice = this.quantity * this.price;
   next();
 });
 
-export default mongoose.model('Cart', cartSchema);
+export default mongoose.model('SaveForLater', saveForLaterSchema);

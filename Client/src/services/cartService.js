@@ -1,120 +1,49 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://grocery-management-lg7u.onrender.com/api';
-
-const getToken = () => localStorage.getItem('token');
+import api from './api.js';
 
 class CartService {
   // Get all cart items
   async getCartItems() {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get cart items');
-    return result;
+    return await api.get('/cart');
   }
 
   // Get cart count
   async getCartCount() {
-    const response = await fetch(`${API_BASE_URL}/cart/count`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to get cart count');
-    return result;
+    return await api.get('/cart/count');
   }
 
   // Add item to cart
   async addToCart(item) {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(item),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to add to cart');
-    return result;
+    return await api.post('/cart', item);
   }
 
   // Update cart item quantity
   async updateCartItem(id, quantity) {
-    const response = await fetch(`${API_BASE_URL}/cart/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify({ quantity }),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to update cart item');
-    return result;
+    return await api.put(`/cart/${id}`, { quantity });
   }
 
   // Remove item from cart
   async removeFromCart(id) {
-    const response = await fetch(`${API_BASE_URL}/cart/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to remove from cart');
-    return result;
+    return await api.delete(`/cart/${id}`);
   }
 
   // Clear entire cart
   async clearCart() {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to clear cart');
-    return result;
+    return await api.delete('/cart');
   }
 
   // Increment quantity
   async incrementQuantity(id) {
-    const response = await fetch(`${API_BASE_URL}/cart/${id}/increment`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to increment quantity');
-    return result;
+    return await api.patch(`/cart/${id}/increment`);
   }
 
   // Decrement quantity
   async decrementQuantity(id) {
-    const response = await fetch(`${API_BASE_URL}/cart/${id}/decrement`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Failed to decrement quantity');
-    return result;
+    return await api.patch(`/cart/${id}/decrement`);
+  }
+
+  // Update order notes
+  async updateOrderNotes(id, orderNotes) {
+    return await api.patch(`/cart/${id}/notes`, { orderNotes });
   }
 }
 

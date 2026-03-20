@@ -7,7 +7,8 @@ import {
   removeFromCart,
   clearCart,
   incrementQuantity,
-  decrementQuantity
+  decrementQuantity,
+  updateOrderNotes
 } from '../controllers/cartController.js';
 import { authenticate } from '../middleware/auth.js';
 
@@ -24,5 +25,6 @@ router.delete('/:id', removeFromCart);
 router.delete('/', clearCart);
 router.patch('/:id/increment', incrementQuantity);
 router.patch('/:id/decrement', decrementQuantity);
+router.patch('/:id/notes', updateOrderNotes);
 
 export default router;

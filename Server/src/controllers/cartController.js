@@ -237,3 +237,31 @@ export const decrementQuantity = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// Update order notes for a cart item
+export const updateOrderNotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { orderNotes } = req.body;
+
+    const cartItem = await Cart.findById(id);
+    
+    if (!cartItem) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Cart item not found' 
+      });
+    }
+
+    cartItem.orderNotes = orderNotes || '';
+    await cartItem.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Order notes updated successfully',
+      data: cartItem 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
