@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import { Link } from 'react-router-dom';
 import Card from '../components/common/Card';
@@ -24,75 +24,100 @@ const Cart = () => {
   } = useGrocery();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingItems, setLoadingItems] = useState(new Set());
   const [couponCode, setCouponCode] = useState('');
   const [couponError, setCouponError] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
   const [expandedNotes, setExpandedNotes] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const couponInputRef = useRef(null);
 
   useEffect(() => {
     fetchCart();
   }, []);
 
-  const handleRemove = async (id) => {
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  const setItemLoading = useCallback((id, loading) => {
+    setLoadingItems(prev => {
+      const newSet = new Set(prev);
+      if (loading) {
+        newSet.add(id);
+      } else {
+        newSet.delete(id);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleRemove = useCallback(async (id) => {
     if (window.confirm('Are you sure you want to remove this item from cart?')) {
-      setIsLoading(true);
+      setItemLoading(id, true);
       try {
         await removeFromCart(id);
+        setSuccessMessage('Item removed from cart');
       } catch (error) {
         alert('Failed to remove item');
       } finally {
-        setIsLoading(false);
+        setItemLoading(id, false);
       }
     }
-  };
+  }, [removeFromCart, setItemLoading]);
 
-  const handleIncrement = async (id) => {
-    setIsLoading(true);
+  const handleIncrement = useCallback(async (id) => {
+    setItemLoading(id, true);
     try {
       await incrementCartItem(id);
     } catch (error) {
       alert('Failed to update quantity');
     } finally {
-      setIsLoading(false);
+      setItemLoading(id, false);
     }
-  };
+  }, [incrementCartItem, setItemLoading]);
 
-  const handleDecrement = async (id) => {
-    setIsLoading(true);
+  const handleDecrement = useCallback(async (id) => {
+    setItemLoading(id, true);
     try {
       await decrementCartItem(id);
     } catch (error) {
       alert('Failed to update quantity');
     } finally {
-      setIsLoading(false);
+      setItemLoading(id, false);
     }
-  };
+  }, [decrementCartItem, setItemLoading]);
 
-  const handleSaveForLater = async (item) => {
+  const handleSaveForLater = useCallback(async (item) => {
+    setItemLoading(item._id, true);
     try {
-      setIsLoading(true);
       await addToSaveForLater(item);
       await removeFromCart(item._id);
-      alert('Item moved to Save for Later');
+      setSuccessMessage('Item moved to Save for Later');
     } catch (error) {
       alert('Failed to save item for later');
     } finally {
-      setIsLoading(false);
+      setItemLoading(item._id, false);
     }
-  };
+  }, [addToSaveForLater, removeFromCart, setItemLoading]);
 
-  const handleClearCart = async () => {
+  const handleClearCart = useCallback(async () => {
     if (window.confirm('Are you sure you want to clear the entire cart?')) {
       setIsLoading(true);
       try {
         await clearCart();
+        setSuccessMessage('Cart cleared');
       } catch (error) {
         alert('Failed to clear cart');
       } finally {
         setIsLoading(false);
       }
     }
-  };
+  }, [clearCart]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
