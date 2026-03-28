@@ -119,7 +119,7 @@ const Cart = () => {
     }
   }, [clearCart]);
 
-  const handleApplyCoupon = async () => {
+  const handleApplyCoupon = useCallback(async () => {
     if (!couponCode.trim()) {
       setCouponError('Please enter a coupon code');
       return;
@@ -130,30 +130,38 @@ const Cart = () => {
       setCouponError('');
       const result = await applyCoupon(couponCode, totalAmount);
       setCouponCode('');
-      alert(`Coupon applied! Discount: ₹${result.discount.toFixed(2)}`);
+      setSuccessMessage(`Coupon applied! Discount: ₹${result.discount.toFixed(2)}`);
     } catch (error) {
       setCouponError(error.response?.data?.error || 'Invalid coupon code');
       setCouponCode('');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [couponCode, applyCoupon, totalAmount]);
 
-  const handleRemoveCoupon = () => {
+  const handleCouponKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleApplyCoupon();
+    }
+  }, [handleApplyCoupon]);
+
+  const handleRemoveCoupon = useCallback(() => {
     removeCoupon();
     setCouponCode('');
-  };
+    setSuccessMessage('Coupon removed');
+  }, [removeCoupon]);
 
-  const handleUpdateOrderNotes = async (itemId, notes) => {
+  const handleUpdateOrderNotes = useCallback(async (itemId, notes) => {
+    setItemLoading(itemId, true);
     try {
-      setIsLoading(true);
       await updateCartOrderNotes(itemId, notes);
     } catch (error) {
       alert('Failed to update notes');
     } finally {
-      setIsLoading(false);
+      setItemLoading(itemId, false);
     }
-  };
+  }, [updateCartOrderNotes, setItemLoading]);
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -163,6 +171,20 @@ const Cart = () => {
   return (
     <div className="fade-in">
       <Breadcrumb />
+      
+      {successMessage && (
+        <div className="success-message" style={{
+          background: '#d4edda',
+          color: '#155724',
+          border: '1px solid #c3e6cb',
+          borderRadius: '4px',
+          padding: '12px 16px',
+          marginBottom: '16px',
+          animation: 'slideIn 0.3s ease'
+        }}>
+          ✓ {successMessage}
+        </div>
+      )}
       
       <div className="page-header">
         <div>
@@ -251,7 +273,8 @@ const Cart = () => {
                             <button 
                               className="quantity-btn"
                               onClick={() => handleDecrement(item._id)}
-                              disabled={isLoading}
+                              disabled={loadingItems.has(item._id)}
+                              aria-label="Decrease quantity"
                             >
                               −
                             </button>
@@ -259,7 +282,8 @@ const Cart = () => {
                             <button 
                               className="quantity-btn"
                               onClick={() => handleIncrement(item._id)}
-                              disabled={isLoading}
+                              disabled={loadingItems.has(item._id)}
+                              aria-label="Increase quantity"
                             >
                               +
                             </button>
@@ -273,8 +297,9 @@ const Cart = () => {
                           <button 
                             className="save-for-later-btn"
                             onClick={() => handleSaveForLater(item)}
-                            disabled={isLoading}
+                            disabled={loadingItems.has(item._id)}
                             title="Save for later"
+                            aria-label={`Save ${item.name} for later`}
                           >
                             💾
                           </button>
@@ -282,8 +307,9 @@ const Cart = () => {
                           <button 
                             className="remove-btn"
                             onClick={() => handleRemove(item._id)}
-                            disabled={isLoading}
+                            disabled={loadingItems.has(item._id)}
                             title="Remove from cart"
+                            aria-label={`Remove ${item.name} from cart`}
                           >
                             🗑️
                           </button>
@@ -331,6 +357,7 @@ const Cart = () => {
                         className="remove-coupon-btn"
                         onClick={handleRemoveCoupon}
                         disabled={isLoading}
+                        aria-label={`Remove coupon ${appliedCoupon.code}`}
                       >
                         Remove
                       </button>
@@ -338,6 +365,7 @@ const Cart = () => {
                   ) : (
                     <div className="coupon-input-group">
                       <input
+                        ref={couponInputRef}
                         type="text"
                         placeholder="Enter coupon code"
                         value={couponCode}
@@ -345,14 +373,17 @@ const Cart = () => {
                           setCouponCode(e.target.value.toUpperCase());
                           setCouponError('');
                         }}
+                        onKeyPress={handleCouponKeyPress}
                         disabled={isLoading}
                         maxLength="20"
                         className="coupon-input"
+                        aria-label="Coupon code"
                       />
                       <button 
                         className="apply-coupon-btn"
                         onClick={handleApplyCoupon}
                         disabled={isLoading || !couponCode.trim()}
+                        aria-label="Apply coupon code"
                       >
                         Apply
                       </button>
