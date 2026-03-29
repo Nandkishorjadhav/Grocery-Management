@@ -56,6 +56,12 @@ const Cart = () => {
     });
   }, []);
 
+  // Calculate totals early (before useCallback hooks that use them)
+  const totalAmount = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const discountAmount = appliedCoupon ? appliedCoupon.discount : 0;
+  const finalAmount = totalAmount - discountAmount;
+
   const handleRemove = useCallback(async (id) => {
     if (window.confirm('Are you sure you want to remove this item from cart?')) {
       setItemLoading(id, true);
@@ -162,11 +168,6 @@ const Cart = () => {
       setItemLoading(itemId, false);
     }
   }, [updateCartOrderNotes, setItemLoading]);
-
-  const totalAmount = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const discountAmount = appliedCoupon ? appliedCoupon.discount : 0;
-  const finalAmount = totalAmount - discountAmount;
 
   return (
     <div className="fade-in">
