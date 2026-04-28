@@ -1,0 +1,145 @@
+/* ========== MIGRATION GUIDE: Dashboard.css ========== */
+/* This file shows how to refactor Dashboard.css to use the typography system */
+
+/* BEFORE: Hardcoded typography values
+.page-title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+*/
+
+/* AFTER: Using typography system variables */
+.page-title {
+  font-size: var(--h1-size);
+  font-weight: var(--h1-weight);
+  line-height: var(--h1-line-height);
+  letter-spacing: var(--h1-letter-spacing);
+  color: var(--accent-primary);
+}
+
+.page-subtitle {
+  font-size: var(--body-lg-size);
+  font-weight: var(--fw-medium);
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+}
+
+.card-title {
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  line-height: var(--h3-line-height);
+  letter-spacing: var(--h3-letter-spacing);
+  color: var(--text-primary);
+}
+
+.card-subtitle {
+  font-size: var(--body-sm-size);
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
+  letter-spacing: 0.25px;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 2.5rem;  /* Can override if needed for special cases */
+  font-weight: var(--fw-black);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.stat-info {
+  font-size: var(--caption-sm-size);
+  font-weight: var(--caption-sm-weight);
+  text-transform: uppercase;
+  letter-spacing: var(--caption-sm-letter-spacing);
+  color: var(--text-tertiary);
+}
+
+.alert-item-name {
+  font-size: var(--body-md-size);
+  font-weight: var(--fw-bold);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.alert-item-category {
+  font-size: var(--caption-md-size);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.25px;
+  color: var(--text-tertiary);
+}
+
+.action-card-title {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  line-height: var(--h4-line-height);
+  letter-spacing: var(--h4-letter-spacing);
+  color: var(--text-primary);
+}
+
+.action-card-text {
+  font-size: var(--body-md-size);
+  font-weight: var(--fw-medium);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.action-card-cta {
+  font-size: var(--caption-lg-size);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--caption-lg-letter-spacing);
+  color: var(--accent-primary);
+}
+
+/* ========== BENEFITS OF THIS APPROACH ========== */
+/* 
+1. CONSISTENCY: All pages use the same typography values
+2. MAINTAINABILITY: Change a variable in typography.css, updates everywhere
+3. RESPONSIVENESS: Automatic scaling across devices (built into variables)
+4. DARK MODE: Text colors automatically adapt
+5. ACCESSIBILITY: Proper contrast ratios maintained
+6. SCALABILITY: Easy to add new pages with consistent typography
+*/
+
+/* ========== STEP-BY-STEP MIGRATION CHECKLIST ========== */
+/*
+STEP 1: Replace font-size values
+- h1: 3rem → var(--h1-size)
+- h2: 2rem → var(--h2-size)
+- h3: 1.5rem → var(--h3-size)
+- body: 1rem → var(--body-md-size)
+- captions: 0.75rem → var(--caption-sm-size)
+
+STEP 2: Replace font-weight values
+- 900 → var(--fw-black)
+- 800 → var(--fw-extrabold)
+- 700 → var(--fw-bold)
+- 600 → var(--fw-semibold)
+- 500 → var(--fw-medium)
+- 400 → var(--fw-regular)
+
+STEP 3: Replace text colors
+- #111827 → var(--text-primary)
+- #6b7280 → var(--text-secondary)
+- #9ca3af → var(--text-tertiary)
+- #d1d5db → var(--text-disabled)
+
+STEP 4: Replace line-height values
+- 1.1 → var(--h1-line-height)
+- 1.2 → var(--h2-line-height)
+- 1.6 → var(--body-md-line-height)
+
+STEP 5: Keep letter-spacing explicit (it's context-dependent)
+
+STEP 6: Test across devices
+- Desktop (1024px+)
+- Tablet (768px)
+- Mobile (480px)
+*/
