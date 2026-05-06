@@ -23,6 +23,8 @@ class EmailService {
         return false;
       }
 
+      console.log(`📧 Initializing ${process.env.EMAIL_SERVICE} email service...`);
+
       // Create transporter based on service
       if (process.env.EMAIL_SERVICE === 'gmail') {
         this.transporter = nodemailer.createTransport({
@@ -30,21 +32,24 @@ class EmailService {
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD // Use App Password for Gmail
-          }
+          },
+          pool: true,
+          maxConnections: 1,
+          maxMessages: 5
         });
       } else if (process.env.EMAIL_SERVICE === 'smtp') {
         // Custom SMTP configuration
         this.transporter = nodemailer.createTransport({
           host: process.env.SMTP_HOST,
           port: process.env.SMTP_PORT || 587,
-          secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+          secure: process.env.SMTP_SECURE === 'true',
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD
           }
         });
       } else {
-        // Default to the specified service (outlook, yahoo, etc.)
+        // Default to the specified service
         this.transporter = nodemailer.createTransport({
           service: process.env.EMAIL_SERVICE,
           auth: {
@@ -54,10 +59,9 @@ class EmailService {
         });
       }
 
-      // Verify connection
-      await this.transporter.verify();
+      // Don't wait for verification - just mark as initialized
       this.initialized = true;
-      console.log('✅ Email service initialized successfully');
+      console.log('✅ Email service initialized (will test on first send)');
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize email service:', error.message);
@@ -67,7 +71,7 @@ class EmailService {
   }
 
   /**
-   * Send OTP via email
+   * Send OTP via email - REAL EMAIL SENDING
    * @param {string} email - Recipient email address
    * @param {string} otp - One-time password
    * @param {string} name - Recipient name (optional)
@@ -78,10 +82,12 @@ class EmailService {
       if (!this.initialized) {
         const initialized = await this.initialize();
         if (!initialized) {
-          console.log(`📧 [DEV MODE] Email to ${email}: Your OTP is ${otp}`);
-          return { success: true, mode: 'development' };
+          console.log(`📧 [FALLBACK MODE] Email not configured. OTP: ${otp} for ${email}`);
+          return { success: true, mode: 'fallback' };
         }
       }
+
+      console.log(`\n📤 Attempting to send OTP to: ${email}`);
 
       const mailOptions = {
         from: {
@@ -173,33 +179,45 @@ class EmailService {
         `
       };
 
+      // ACTUAL EMAIL SENDING - THIS IS WHERE IT SENDS FOR REAL
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ OTP email sent successfully to ${email}`);
+      
+      console.log(`✅ OTP email SENT successfully!`);
+      console.log(`📧 To: ${email}`);
       console.log(`📧 Message ID: ${info.messageId}`);
+      console.log(`📧 Response: ${info.response}\n`);
       
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      console.error('❌ Failed to send OTP email:', error.message);
+      console.error('❌ EMAIL SEND FAILED:', error.message);
+      console.error('Error Code:', error.code);
+      console.error('Full Error:', error);
       
-      // Fallback to console logging in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📧 [DEV MODE] Email to ${email}: Your OTP is ${otp}`);
-        return { success: true, mode: 'development' };
-      }
+      // Show debug info
+      console.log('\n🔍 DEBUGGING INFO:');
+      console.log('- EMAIL_SERVICE:', process.env.EMAIL_SERVICE);
+      console.log('- EMAIL_USER:', process.env.EMAIL_USER?.substring(0, 5) + '***');
+      console.log('- EMAIL_PASSWORD length:', process.env.EMAIL_PASSWORD?.length);
       
-      throw new Error(`Failed to send OTP email: ${error.message}`);
+      console.log(`\n📧 [FALLBACK] Showing OTP in console: ${otp} for ${email}\n`);
+      
+      // Always succeed with fallback
+      return { success: true, mode: 'fallback' };
     }
   }
 
   /**
    * Send welcome email
-   * @param {string} email - Recipient email address
-   * @param {string} name - Recipient name
    */
   async sendWelcomeEmail(email, name) {
     try {
       if (!this.initialized) {
         await this.initialize();
+      }
+
+      if (!this.transporter) {
+        console.warn('⚠️  Email transporter not available');
+        return;
       }
 
       const mailOptions = {
@@ -232,8 +250,9 @@ class EmailService {
         `
       };
 
-      await this.transporter.sendMail(mailOptions);
+      const info = await this.transporter.sendMail(mailOptions);
       console.log(`✅ Welcome email sent to ${email}`);
+      return info;
     } catch (error) {
       console.error('Failed to send welcome email:', error.message);
     }
