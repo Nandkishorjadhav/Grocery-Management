@@ -1,7 +1,7 @@
 const RAW_API_URL =
   import.meta.env.VITE_PROD_BASE_URL ||
   (import.meta.env.DEV
-    ? "https://grocery-management-lg7u.onrender.com/api"
+    ? "http://localhost:5000/api"
     : "/api");
 
 const API_URL = RAW_API_URL.replace(/\/$/, "");
