@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import adminService from '../services/adminService';
 import sellerProductService from '../services/sellerProductService';
+import { getProductPrimaryImage } from '../utils/imageUtils';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import './AdminPanel.css';
@@ -655,7 +656,7 @@ const AdminPanel = () => {
               <div key={product._id} className="apc">
                 <div className="apc-image">
                   {product.images && product.images.length > 0
-                    ? <img src={product.images[0].url} alt={product.productName} />
+                    ? <img src={getProductPrimaryImage(product)} alt={product.productName} />
                     : <span className="apc-placeholder">📦</span>
                   }
                 </div>

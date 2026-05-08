@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useGrocery } from '../context/GroceryContext';
+import { extractProductImageUrls, getCategoryFallbackImage, getProductPrimaryImage } from '../utils/imageUtils';
 import Button from '../components/common/Button';
 import Breadcrumb from '../components/common/Breadcrumb';
 import './ProductDetail.css';
@@ -102,17 +103,15 @@ const ProductDetail = () => {
   };
 
   const getProductImages = (category, name, productImages) => {
-    if (productImages && productImages.length > 0) {
-      const urls = productImages
-        .map((img) => (typeof img === 'string' ? img : img?.url))
-        .filter(Boolean);
-
-      if (urls.length) {
-        return urls;
-      }
+    // Use the utility function to extract proper image URLs
+    const urls = extractProductImageUrls({ image: productImages, images: productImages });
+    
+    if (urls.length > 0) {
+      return urls;
     }
 
-    return [getProductImage(category, name)];
+    // Fallback to category image
+    return [getCategoryFallbackImage(category)];
   };
 
   const originalPrice = Math.round(product.price * 1.3);
@@ -375,7 +374,7 @@ const ProductDetail = () => {
                   >
                     <div className="related-product-image">
                       <img 
-                        src={getProductImage(item.category, item.name)} 
+                        src={getProductPrimaryImage(item)} 
                         alt={item.name}
                         loading="lazy"
                       />

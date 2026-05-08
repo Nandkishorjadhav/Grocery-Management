@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGrocery } from '../context/GroceryContext';
 import { Link } from 'react-router-dom';
+import { getProductPrimaryImage } from '../utils/imageUtils';
 import './Products.css';
 
 const Products = () => {
@@ -152,11 +153,15 @@ const Products = () => {
         </div>
       ) : (
         <div className="products-grid">
-          {filteredProducts.map((item) => (
+          {filteredProducts.map((item) => {
+            // Get image URL using utility function
+            const imageUrl = getProductPrimaryImage(item);
+            
+            return (
             <div key={item._id || item.id} className="products-card">
               <div className="products-card-media">
                 <img 
-                  src={item.image || 'https://via.placeholder.com/300x200?text=No+Image'} 
+                  src={imageUrl}
                   alt={item.name}
                   className="products-card-image"
                   onError={(e) => {
@@ -205,7 +210,8 @@ const Products = () => {
                 </Link>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
