@@ -14,8 +14,10 @@ const Navbar = ({ onSearch }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef(null);
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
   const { inventory, cartCount } = useGrocery();
-  const { user, isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
@@ -34,8 +36,8 @@ const Navbar = ({ onSearch }) => {
     // Clear search when navigating to different pages
     setSearchQuery('');
     setShowSuggestions(false);
-    if (onSearch) {
-      onSearch('');
+    if (onSearchRef.current) {
+      onSearchRef.current('');
     }
   }, [location.pathname]);
 
@@ -127,22 +129,25 @@ const Navbar = ({ onSearch }) => {
             
             {showSuggestions && suggestions.length > 0 && (
               <div className="search-suggestions">
-                {suggestions.map((product) => (
-                  <div
-                    key={product.id}
-                    className="suggestion-item"
-                    onClick={() => handleSuggestionClick(product.id)}
-                  >
-                    <span className="suggestion-icon">{getProductImage(product.category)}</span>
-                    <div className="suggestion-content">
-                      <div className="suggestion-name">{product.name}</div>
-                      <div className="suggestion-meta">
-                        <span className="suggestion-category">{product.category}</span>
-                        <span className="suggestion-price">₹{product.price}</span>
+                {suggestions.map((product) => {
+                  const pId = product._id || product.id;
+                  return (
+                    <div
+                      key={pId}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionClick(pId)}
+                    >
+                      <span className="suggestion-icon">{getProductImage(product.category)}</span>
+                      <div className="suggestion-content">
+                        <div className="suggestion-name">{product.name}</div>
+                        <div className="suggestion-meta">
+                          <span className="suggestion-category">{product.category}</span>
+                          <span className="suggestion-price">₹{product.price}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -198,22 +203,25 @@ const Navbar = ({ onSearch }) => {
             
             {showSuggestions && suggestions.length > 0 && (
               <div className="search-suggestions">
-                {suggestions.map((product) => (
-                  <div
-                    key={product.id}
-                    className="suggestion-item"
-                    onClick={() => handleSuggestionClick(product.id)}
-                  >
-                    <span className="suggestion-icon">{getProductImage(product.category)}</span>
-                    <div className="suggestion-content">
-                      <div className="suggestion-name">{product.name}</div>
-                      <div className="suggestion-meta">
-                        <span className="suggestion-category">{product.category}</span>
-                        <span className="suggestion-price">₹{product.price}</span>
+                {suggestions.map((product) => {
+                  const pId = product._id || product.id;
+                  return (
+                    <div
+                      key={pId}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionClick(pId)}
+                    >
+                      <span className="suggestion-icon">{getProductImage(product.category)}</span>
+                      <div className="suggestion-content">
+                        <div className="suggestion-name">{product.name}</div>
+                        <div className="suggestion-meta">
+                          <span className="suggestion-category">{product.category}</span>
+                          <span className="suggestion-price">₹{product.price}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

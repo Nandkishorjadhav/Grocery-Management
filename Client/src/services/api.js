@@ -1,4 +1,5 @@
 const RAW_API_URL =
+  import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_PROD_BASE_URL ||
   (import.meta.env.DEV
     ? "http://localhost:5000/api"
@@ -28,14 +29,14 @@ class ApiService {
     try {
       const response = await fetch(url, config);
 
-      // Check if response is JSON
       const contentType = response.headers.get("content-type");
-      if (!response.ok) {
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
         const text = await response.text();
-        throw new Error(text || "Server error");
+        data = { message: text };
       }
-
-      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || data.message || "Something went wrong");

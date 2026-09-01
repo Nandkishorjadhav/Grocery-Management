@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 
 const saveForLaterSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Inventory',

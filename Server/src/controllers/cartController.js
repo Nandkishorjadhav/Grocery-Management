@@ -5,7 +5,12 @@ import SellerProduct from '../models/SellerProduct.js';
 // Get all cart items
 export const getCartItems = async (req, res) => {
   try {
-    const cartItems = await Cart.find().populate('productId').sort({ addedAt: -1 });
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User not authenticated' });
+    }
+
+    const cartItems = await Cart.find({ userId }).populate('productId').sort({ addedAt: -1 });
     
     const total = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     const count = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -25,8 +30,13 @@ export const getCartItems = async (req, res) => {
 // Get cart count
 export const getCartCount = async (req, res) => {
   try {
-    const count = await Cart.countDocuments();
-    const cartItems = await Cart.find();
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User not authenticated' });
+    }
+
+    const cartItems = await Cart.find({ userId });
+    const count = cartItems.length;
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
     res.json({ 
@@ -42,6 +52,11 @@ export const getCartCount = async (req, res) => {
 // Add item to cart
 export const addToCart = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User not authenticated' });
+    }
+
     const { productId, name, category, quantity, unit, price } = req.body;
 
     // Validate required fields
@@ -65,8 +80,8 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Check if product already in cart
-    const existingCartItem = await Cart.findOne({ productId });
+    // Check if product already in user's cart
+    const existingCartItem = await Cart.findOne({ userId, productId });
     
     if (existingCartItem) {
       // Update quantity
@@ -83,6 +98,7 @@ export const addToCart = async (req, res) => {
 
     // Create new cart item
     const cartItem = await Cart.create({
+      userId,
       productId,
       name,
       category,
@@ -105,6 +121,7 @@ export const addToCart = async (req, res) => {
 // Update cart item quantity
 export const updateCartItem = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
     const { quantity } = req.body;
 
@@ -115,7 +132,7 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findOne({ _id: id, userId });
     
     if (!cartItem) {
       return res.status(404).json({ 
@@ -141,9 +158,10 @@ export const updateCartItem = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
 
-    const cartItem = await Cart.findByIdAndDelete(id);
+    const cartItem = await Cart.findOneAndDelete({ _id: id, userId });
     
     if (!cartItem) {
       return res.status(404).json({ 
@@ -164,7 +182,8 @@ export const removeFromCart = async (req, res) => {
 // Clear entire cart
 export const clearCart = async (req, res) => {
   try {
-    await Cart.deleteMany({});
+    const userId = req.user?.id || req.user?._id;
+    await Cart.deleteMany({ userId });
     
     res.json({ 
       success: true, 
@@ -178,9 +197,10 @@ export const clearCart = async (req, res) => {
 // Increment cart item quantity
 export const incrementQuantity = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
     
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findOne({ _id: id, userId });
     
     if (!cartItem) {
       return res.status(404).json({ 
@@ -205,9 +225,10 @@ export const incrementQuantity = async (req, res) => {
 // Decrement cart item quantity
 export const decrementQuantity = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
     
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findOne({ _id: id, userId });
     
     if (!cartItem) {
       return res.status(404).json({ 
@@ -227,7 +248,7 @@ export const decrementQuantity = async (req, res) => {
       });
     } else {
       // If quantity is 1, remove from cart
-      await Cart.findByIdAndDelete(id);
+      await Cart.findOneAndDelete({ _id: id, userId });
       res.json({ 
         success: true, 
         message: 'Item removed from cart' 
@@ -241,10 +262,11 @@ export const decrementQuantity = async (req, res) => {
 // Update order notes for a cart item
 export const updateOrderNotes = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
     const { orderNotes } = req.body;
 
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findOne({ _id: id, userId });
     
     if (!cartItem) {
       return res.status(404).json({ 

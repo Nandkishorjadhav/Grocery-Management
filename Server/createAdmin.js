@@ -20,16 +20,16 @@ const createAdminUser = async () => {
       existingAdmin.isAdmin = true;
       existingAdmin.role = 'admin';
       existingAdmin.status = 'approved';
+      existingAdmin.isVerified = true;
+      existingAdmin.password = 'admin123';
       await existingAdmin.save();
-      console.log('✅ Updated existing user to admin');
+      console.log('✅ Updated existing user to admin with active credentials');
     } else {
-      // Create new admin user
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      
+      // Create new admin user (pre-save hook will hash 'admin123' once)
       const adminUser = new User({
         name: 'Admin User',
         email: 'admin@groceryhub.com',
-        password: hashedPassword,
+        password: 'admin123',
         mobile: '9999999999',
         isVerified: true,
         isAdmin: true,

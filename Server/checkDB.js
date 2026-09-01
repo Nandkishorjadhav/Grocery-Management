@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 
-mongoose.connect('mongodb://localhost:27017/grocery-management').then(async () => {
+import dotenv from 'dotenv';
+dotenv.config();
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/grocery_management').then(async () => {
   const db = mongoose.connection.db;
   const collections = await db.listCollections().toArray();
   

@@ -5,7 +5,12 @@ import SellerProduct from '../models/SellerProduct.js';
 // Get all items in save for later
 export const getSaveForLaterItems = async (req, res) => {
   try {
-    const items = await SaveForLater.find().populate('productId').sort({ addedAt: -1 });
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User not authenticated' });
+    }
+
+    const items = await SaveForLater.find({ userId }).populate('productId').sort({ addedAt: -1 });
     
     const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
     const count = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -25,6 +30,11 @@ export const getSaveForLaterItems = async (req, res) => {
 // Add item to save for later
 export const addToSaveForLater = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User not authenticated' });
+    }
+
     const { productId, name, category, quantity, unit, price } = req.body;
 
     // Validate required fields
@@ -48,8 +58,8 @@ export const addToSaveForLater = async (req, res) => {
       });
     }
 
-    // Check if product already in save for later
-    const existingItem = await SaveForLater.findOne({ productId });
+    // Check if product already in save for later for this user
+    const existingItem = await SaveForLater.findOne({ userId, productId });
     
     if (existingItem) {
       existingItem.quantity += parseInt(quantity);
@@ -65,6 +75,7 @@ export const addToSaveForLater = async (req, res) => {
 
     // Create new save for later item
     const item = await SaveForLater.create({
+      userId,
       productId,
       name,
       category,
@@ -87,9 +98,10 @@ export const addToSaveForLater = async (req, res) => {
 // Remove item from save for later
 export const removeFromSaveForLater = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
 
-    const item = await SaveForLater.findByIdAndDelete(id);
+    const item = await SaveForLater.findOneAndDelete({ _id: id, userId });
     
     if (!item) {
       return res.status(404).json({ 
@@ -110,9 +122,10 @@ export const removeFromSaveForLater = async (req, res) => {
 // Move item from save for later to cart
 export const moveToCart = async (req, res) => {
   try {
+    const userId = req.user?.id || req.user?._id;
     const { id } = req.params;
 
-    const item = await SaveForLater.findByIdAndDelete(id);
+    const item = await SaveForLater.findOneAndDelete({ _id: id, userId });
     
     if (!item) {
       return res.status(404).json({ 
@@ -134,7 +147,8 @@ export const moveToCart = async (req, res) => {
 // Clear all items from save for later
 export const clearSaveForLater = async (req, res) => {
   try {
-    await SaveForLater.deleteMany({});
+    const userId = req.user?.id || req.user?._id;
+    await SaveForLater.deleteMany({ userId });
     
     res.json({ 
       success: true, 
