@@ -64,7 +64,7 @@ export const GroceryProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Fetch inventory from backend
-  const fetchInventory = async () => {
+  const fetchInventory = React.useCallback(async () => {
     try {
       setLoading(true);
       
@@ -90,7 +90,7 @@ export const GroceryProvider = ({ children }) => {
           minStock: 5,
           isSellerProduct: true
         }));
-      } catch (sellerError) {
+      } catch {
         // no seller products available
       }
       
@@ -111,15 +111,15 @@ export const GroceryProvider = ({ children }) => {
 
       setInventory(dedupedInventory);
       setError(null);
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Fetch cart from backend
-  const fetchCart = async () => {
+  const fetchCart = React.useCallback(async () => {
     // Only fetch cart if user is authenticated
     if (!auth?.isAuthenticated || !auth.isAuthenticated()) {
       setCart([]);
@@ -133,39 +133,39 @@ export const GroceryProvider = ({ children }) => {
         setCart(response.data || []);
         setCartCount(response.totalItems || 0);
       }
-    } catch (error) {
+    } catch (err) {
       // Silently handle 401 errors for unauthenticated users
-      if (error.message !== 'Invalid token') {
-        console.error('Error fetching cart:', error);
+      if (err.message !== 'Invalid token') {
+        console.error('Error fetching cart:', err);
       }
       setCart([]);
       setCartCount(0);
     }
-  };
+  }, [auth]);
 
   // Fetch shopping list from backend
-  const fetchShoppingList = async () => {
+  const fetchShoppingList = React.useCallback(async () => {
     try {
       const response = await groceryService.shoppingListService.getAll();
       setShoppingList(response);
-    } catch (error) {
-      console.error('Error fetching shopping list:', error);
+    } catch (err) {
+      console.error('Error fetching shopping list:', err);
       // Keep initial shopping list as fallback
     }
-  };
+  }, []);
 
   // Load data on mount
   useEffect(() => {
     fetchInventory().catch(() => {});
     fetchShoppingList().catch(() => {});
-  }, []);
+  }, [fetchInventory, fetchShoppingList]);
 
   // Fetch cart when auth state changes
   useEffect(() => {
     if (!auth?.loading) {
       fetchCart().catch(() => {});
     }
-  }, [auth?.user, auth?.loading]);
+  }, [auth?.user, auth?.loading, fetchCart]);
 
   // Inventory functions
   const addInventoryItem = async (item) => {

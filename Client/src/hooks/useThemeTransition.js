@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 export const useThemeTransition = () => {
 
   const animateThemeTransition = (event, callback) => {

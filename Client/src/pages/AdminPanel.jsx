@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import adminService from '../services/adminService';
@@ -15,9 +15,10 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [users, setUsers] = useState([]);
-  const [pendingApprovals, setPendingApprovals] = useState([]);
   const [activityLogs, setActivityLogs] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [inventory, setInventory] = useState([]);
   const [reports, setReports] = useState(null);
   const [sellerProducts, setSellerProducts] = useState([]);
@@ -56,20 +57,7 @@ const AdminPanel = () => {
   );
   // ────────────────────────────────────────────────────
 
-  useEffect(() => {
-    // Check if user is admin
-    if (!user || (!user.isAdmin && user.role !== 'admin')) {
-      navigate('/');
-      return;
-    }
-    loadData();
-  }, [user, navigate, activeTab]);
-
-  useEffect(() => {
-    if (activeTab === 'users') loadData();
-  }, [usersPage]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === 'dashboard') {
@@ -79,8 +67,7 @@ const AdminPanel = () => {
         try {
           const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
           setSellerProducts(productsData.products || []);
-        } catch (err) {
-          console.error('Error loading pending products for dashboard:', err);
+        } catch {
           setSellerProducts([]);
         }
       } else if (activeTab === 'users') {
@@ -94,23 +81,20 @@ const AdminPanel = () => {
         setUsersTotalCount(data.totalUsers || data.users.length);
       } else if (activeTab === 'approvals') {
         try {
-          const data = await adminService.getPendingApprovals();
-          setPendingApprovals(data.pendingUsers || []);
-        } catch (err) {
-          setPendingApprovals([]);
-        }
-        
-        try {
           const productsData = await sellerProductService.getAllProducts({ status: 'pending' });
           setSellerProducts(productsData.products || []);
-        } catch (err) {
+        } catch {
           setSellerProducts([]);
         }
       } else if (activeTab === 'activity') {
         const data = await adminService.getActivityLogs();
         setActivityLogs(data);
       } else if (activeTab === 'orders') {
-        const data = await adminService.getAllOrders({ status: 'delivered', all: true, limit: 1000 });
+        const params = { all: true, limit: 1000 };
+        if (orderStatusFilter !== 'all') {
+          params.status = orderStatusFilter;
+        }
+        const data = await adminService.getAllOrders(params);
         setOrders(data.orders || []);
       } else if (activeTab === 'inventory') {
         const data = await adminService.getInventoryData({ all: true });
@@ -124,7 +108,20 @@ const AdminPanel = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, filterStatus, searchQuery, orderStatusFilter]);
+
+  useEffect(() => {
+    // Check if user is admin
+    if (!user || (!user.isAdmin && user.role !== 'admin')) {
+      navigate('/');
+      return;
+    }
+    loadData();
+  }, [user, navigate, loadData]);
+
+  useEffect(() => {
+    if (activeTab === 'users') loadData();
+  }, [usersPage, activeTab, loadData]);
 
   const handleApproveUser = async (userId) => {
     try {

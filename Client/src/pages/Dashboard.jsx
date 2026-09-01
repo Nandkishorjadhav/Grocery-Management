@@ -25,12 +25,10 @@ const Dashboard = () => {
 
   const lowStockItems = getLowStockItems();
   const expiringSoonItems = getExpiringSoonItems();
-  const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const pendingShoppingItems = shoppingList.filter(item => !item.purchased).length;
   
   const showOnboarding = inventory.length === 0 && shoppingList.length === 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const itemData = {
       ...formData,
       quantity: Number(formData.quantity),
@@ -38,22 +36,26 @@ const Dashboard = () => {
       minStock: Number(formData.minStock),
     };
 
-    addInventoryItem(itemData);
-    setSuccessMessage(`✅ ${formData.name} added successfully!`);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      category: '',
-      quantity: '',
-      unit: 'pcs',
-      price: '',
-      minStock: '',
-      expiryDate: '',
-    });
-    setIsModalOpen(false);
-    
-    setTimeout(() => setSuccessMessage(''), 3000);
+    try {
+      await addInventoryItem(itemData);
+      setSuccessMessage(`✅ ${formData.name} added successfully!`);
+      
+      // Reset form
+      setFormData({
+        name: '',
+        category: '',
+        quantity: '',
+        unit: 'pcs',
+        price: '',
+        minStock: '',
+        expiryDate: '',
+      });
+      setIsModalOpen(false);
+      
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      alert('Failed to add product: ' + (err.message || 'Error'));
+    }
   };
 
   return (
@@ -101,29 +103,32 @@ const Dashboard = () => {
         >
           {lowStockItems.length > 0 ? (
             <div className="alert-items">
-              {lowStockItems.slice(0, 5).map((item, idx) => (
-                <div 
-                  key={item.id} 
-                  className="alert-item alert-warning"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="alert-item-content">
-                    <div className="alert-icon">
-                      !
+              {lowStockItems.slice(0, 5).map((item, idx) => {
+                const itemId = item._id || item.id || idx;
+                return (
+                  <div 
+                    key={itemId} 
+                    className="alert-item alert-warning"
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                  >
+                    <div className="alert-item-content">
+                      <div className="alert-icon">
+                        !
+                      </div>
+                      <div className="alert-item-info">
+                        <p className="alert-item-name">{item.name}</p>
+                        <p className="alert-item-category"><span>📂</span>{item.category}</p>
+                      </div>
                     </div>
-                    <div className="alert-item-info">
-                      <p className="alert-item-name">{item.name}</p>
-                      <p className="alert-item-category"><span>📂</span>{item.category}</p>
+                    <div className="alert-item-details">
+                      <p className="alert-badge alert-badge-warning">
+                        {item.quantity} {item.unit}
+                      </p>
+                      <p className="alert-item-meta">Min: {item.minStock}</p>
                     </div>
                   </div>
-                  <div className="alert-item-details">
-                    <p className="alert-badge alert-badge-warning">
-                      {item.quantity} {item.unit}
-                    </p>
-                    <p className="alert-item-meta">Min: {item.minStock}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="alert-empty">
@@ -146,29 +151,32 @@ const Dashboard = () => {
         >
           {expiringSoonItems.length > 0 ? (
             <div className="alert-items">
-              {expiringSoonItems.slice(0, 5).map((item, idx) => (
-                <div 
-                  key={item.id} 
-                  className="alert-item alert-danger"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="alert-item-content">
-                    <div className="alert-icon alert-icon-danger">
-                      ⏰
+              {expiringSoonItems.slice(0, 5).map((item, idx) => {
+                const itemId = item._id || item.id || idx;
+                return (
+                  <div 
+                    key={itemId} 
+                    className="alert-item alert-danger"
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                  >
+                    <div className="alert-item-content">
+                      <div className="alert-icon alert-icon-danger">
+                        ⏰
+                      </div>
+                      <div className="alert-item-info">
+                        <p className="alert-item-name">{item.name}</p>
+                        <p className="alert-item-category"><span>📂</span>{item.category}</p>
+                      </div>
                     </div>
-                    <div className="alert-item-info">
-                      <p className="alert-item-name">{item.name}</p>
-                      <p className="alert-item-category"><span>📂</span>{item.category}</p>
+                    <div className="alert-item-details">
+                      <p className="alert-badge alert-badge-danger">
+                        {new Date(item.expiryDate).toLocaleDateString()}
+                      </p>
+                      <p className="alert-item-meta">{item.quantity} {item.unit}</p>
                     </div>
                   </div>
-                  <div className="alert-item-details">
-                    <p className="alert-badge alert-badge-danger">
-                      {new Date(item.expiryDate).toLocaleDateString()}
-                    </p>
-                    <p className="alert-item-meta">{item.quantity} {item.unit}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="alert-empty">

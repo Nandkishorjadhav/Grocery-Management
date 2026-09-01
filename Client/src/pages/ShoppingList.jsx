@@ -47,19 +47,24 @@ const ShoppingList = () => {
     setEditingItem(null);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const itemData = {
       ...formData,
       quantity: Number(formData.quantity),
       estimatedPrice: formData.estimatedPrice ? Number(formData.estimatedPrice) : 0,
     };
 
-    if (editingItem) {
-      updateShoppingItem(editingItem.id, itemData);
-    } else {
-      addShoppingItem(itemData);
+    try {
+      if (editingItem) {
+        const itemId = editingItem._id || editingItem.id;
+        await updateShoppingItem(itemId, itemData);
+      } else {
+        await addShoppingItem(itemData);
+      }
+      handleCloseModal();
+    } catch (err) {
+      alert('Failed to save item: ' + (err.message || 'Error'));
     }
-    handleCloseModal();
   };
 
   const handleDelete = (id) => {
@@ -115,7 +120,7 @@ const ShoppingList = () => {
         <div className="stat-card">
           <div className="stat-info">
             <p className="stat-label">Est. Total</p>
-            <p className="stat-value">${totalEstimated.toFixed(2)}</p>
+            <p className="stat-value">₹{totalEstimated.toFixed(2)}</p>
           </div>
           <div className="stat-icon stat-icon-purple">💰</div>
         </div>
@@ -124,32 +129,35 @@ const ShoppingList = () => {
       {pendingItems.length > 0 && (
         <Card title={`Pending Items (${pendingItems.length})`} className="mb-6">
           <div className="shopping-list-grid">
-            {pendingItems.map((item) => (
-              <div key={item.id} className="shopping-item">
-                <input
-                  type="checkbox"
-                  className="shopping-checkbox"
-                  checked={item.purchased}
-                  onChange={() => togglePurchased(item.id)}
-                />
-                <div className="shopping-item-content">
-                  <div className="shopping-item-name">{item.name}</div>
-                  <div className="shopping-item-details">
-                    <span>📦 {item.quantity} {item.unit}</span>
-                    {item.estimatedPrice > 0 && <span>💵 ${item.estimatedPrice.toFixed(2)}</span>}
-                    {item.notes && <span>📝 {item.notes}</span>}
+            {pendingItems.map((item) => {
+              const itemId = item._id || item.id;
+              return (
+                <div key={itemId} className="shopping-item">
+                  <input
+                    type="checkbox"
+                    className="shopping-checkbox"
+                    checked={Boolean(item.purchased)}
+                    onChange={() => togglePurchased(itemId)}
+                  />
+                  <div className="shopping-item-content">
+                    <div className="shopping-item-name">{item.name}</div>
+                    <div className="shopping-item-details">
+                      <span>📦 {item.quantity} {item.unit}</span>
+                      {item.estimatedPrice > 0 && <span>💵 ₹{item.estimatedPrice.toFixed(2)}</span>}
+                      {item.notes && <span>📝 {item.notes}</span>}
+                    </div>
+                  </div>
+                  <div className="shopping-item-actions">
+                    <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
+                      ✏️
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(itemId)}>
+                      🗑️
+                    </Button>
                   </div>
                 </div>
-                <div className="shopping-item-actions">
-                  <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
-                    ✏️
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                    🗑️
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}
@@ -157,28 +165,31 @@ const ShoppingList = () => {
       {purchasedItems.length > 0 && (
         <Card title={`Purchased Items (${purchasedItems.length})`}>
           <div className="shopping-list-grid">
-            {purchasedItems.map((item) => (
-              <div key={item.id} className="shopping-item purchased">
-                <input
-                  type="checkbox"
-                  className="shopping-checkbox"
-                  checked={item.purchased}
-                  onChange={() => togglePurchased(item.id)}
-                />
-                <div className="shopping-item-content">
-                  <div className="shopping-item-name">{item.name}</div>
-                  <div className="shopping-item-details">
-                    <span>📦 {item.quantity} {item.unit}</span>
-                    {item.estimatedPrice > 0 && <span>💵 ${item.estimatedPrice.toFixed(2)}</span>}
+            {purchasedItems.map((item) => {
+              const itemId = item._id || item.id;
+              return (
+                <div key={itemId} className="shopping-item purchased">
+                  <input
+                    type="checkbox"
+                    className="shopping-checkbox"
+                    checked={Boolean(item.purchased)}
+                    onChange={() => togglePurchased(itemId)}
+                  />
+                  <div className="shopping-item-content">
+                    <div className="shopping-item-name">{item.name}</div>
+                    <div className="shopping-item-details">
+                      <span>📦 {item.quantity} {item.unit}</span>
+                      {item.estimatedPrice > 0 && <span>💵 ₹{item.estimatedPrice.toFixed(2)}</span>}
+                    </div>
+                  </div>
+                  <div className="shopping-item-actions">
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(itemId)}>
+                      🗑️
+                    </Button>
                   </div>
                 </div>
-                <div className="shopping-item-actions">
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                    🗑️
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}

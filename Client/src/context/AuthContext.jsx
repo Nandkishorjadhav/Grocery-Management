@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
             authService.clearAuth();
             setUser(null);
           }
-        } catch (error) {
+        } catch {
           authService.clearAuth();
           setUser(null);
         }

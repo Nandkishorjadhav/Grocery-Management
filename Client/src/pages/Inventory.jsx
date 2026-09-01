@@ -9,7 +9,7 @@ import Breadcrumb from '../components/common/Breadcrumb';
 import './Inventory.css';
 
 const Inventory = () => {
-  const { inventory, categories, addInventoryItem, updateInventoryItem, deleteInventoryItem, addCategory } = useGrocery();
+  const { inventory, categories, addInventoryItem, updateInventoryItem, deleteInventoryItem } = useGrocery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +37,7 @@ const Inventory = () => {
         unit: item.unit,
         price: item.price,
         minStock: item.minStock,
-        expiryDate: item.expiryDate,
+        expiryDate: item.expiryDate ? item.expiryDate.split('T')[0] : '',
       });
     } else {
       setEditingItem(null);
@@ -68,7 +68,7 @@ const Inventory = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const itemData = {
       ...formData,
       quantity: Number(formData.quantity),
@@ -76,25 +76,32 @@ const Inventory = () => {
       minStock: Number(formData.minStock),
     };
 
-    if (editingItem) {
-      updateInventoryItem(editingItem.id, itemData);
-      setSuccessMessage(`✅ ${formData.name} updated successfully!`);
-    } else {
-      addInventoryItem(itemData);
-      setSuccessMessage(`✅ ${formData.name} added to inventory!`);
+    try {
+      if (editingItem) {
+        const itemId = editingItem._id || editingItem.id;
+        await updateInventoryItem(itemId, itemData);
+        setSuccessMessage(`✅ ${formData.name} updated successfully!`);
+      } else {
+        await addInventoryItem(itemData);
+        setSuccessMessage(`✅ ${formData.name} added to inventory!`);
+      }
+      handleCloseModal();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      alert('Failed to save item: ' + (err.message || 'Error'));
     }
-    handleCloseModal();
-    
-    // Auto-hide success message after 3 seconds
-    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const handleDelete = (id) => {
-    const item = inventory.find(i => i.id === id);
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      deleteInventoryItem(id);
-      setSuccessMessage(`🗑️ ${item?.name || 'Item'} removed from inventory`);
-      setTimeout(() => setSuccessMessage(''), 3000);
+  const handleDelete = async (id) => {
+    const item = inventory.find(i => (i._id || i.id) === id);
+    if (window.confirm(`Are you sure you want to delete ${item?.name || 'this item'}?`)) {
+      try {
+        await deleteInventoryItem(id);
+        setSuccessMessage(`🗑️ ${item?.name || 'Item'} removed from inventory`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } catch (err) {
+        alert('Failed to delete item: ' + (err.message || 'Error'));
+      }
     }
   };
 
@@ -185,52 +192,55 @@ const Inventory = () => {
             </thead>
             <tbody>
               {filteredInventory.length > 0 ? (
-                filteredInventory.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="table-item-name">{item.name}</div>
-                    </td>
-                    <td>
-                      <span className="badge badge-primary">
-                        {item.category}
-                      </span>
-                    </td>
-                    <td>
-                      {item.quantity} {item.unit}
-                    </td>
-                    <td>
-                      ${item.price.toFixed(2)}
-                    </td>
-                    <td>
-                      {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td>
-                      {getStatus(item).lowStock && (
-                        <span className="badge badge-warning">
-                          Low Stock
+                filteredInventory.map((item) => {
+                  const itemId = item._id || item.id;
+                  return (
+                    <tr key={itemId}>
+                      <td>
+                        <div className="table-item-name">{item.name}</div>
+                      </td>
+                      <td>
+                        <span className="badge badge-primary">
+                          {item.category}
                         </span>
-                      )}
-                      {getStatus(item).expiringSoon && (
-                        <span className="badge badge-danger">
-                          Expiring Soon
-                        </span>
-                      )}
-                      {!getStatus(item).lowStock && !getStatus(item).expiringSoon && (
-                        <span className="badge badge-success">
-                          Good
-                        </span>
-                      )}
-                    </td>
-                    <td className="table-actions">
-                      <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
-                        ✏️
-                      </Button>
-                      <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                        🗑️
-                      </Button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        {item.quantity} {item.unit}
+                      </td>
+                      <td>
+                        ₹{Number(item.price || 0).toFixed(2)}
+                      </td>
+                      <td>
+                        {item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td>
+                        {getStatus(item).lowStock && (
+                          <span className="badge badge-warning">
+                            Low Stock
+                          </span>
+                        )}
+                        {getStatus(item).expiringSoon && (
+                          <span className="badge badge-danger">
+                            Expiring Soon
+                          </span>
+                        )}
+                        {!getStatus(item).lowStock && !getStatus(item).expiringSoon && (
+                          <span className="badge badge-success">
+                            Good
+                          </span>
+                        )}
+                      </td>
+                      <td className="table-actions">
+                        <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)}>
+                          ✏️
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(itemId)}>
+                          🗑️
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : null}
             </tbody>
           </table>
